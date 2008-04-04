@@ -17,9 +17,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import com.drey.aramarok.domain.Right;
-import com.drey.aramarok.domain.Role;
-import com.drey.aramarok.domain.User;
+import com.drey.aramarok.domain.model.Right;
+import com.drey.aramarok.domain.model.Role;
+import com.drey.aramarok.domain.model.User;
 import com.drey.aramarok.web.SynchronizationObject;
 import com.drey.aramarok.web.util.WebUtil;
 import com.drey.aramarok.web.util.WebUtilConstants;

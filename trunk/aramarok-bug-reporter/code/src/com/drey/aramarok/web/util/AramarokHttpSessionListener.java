@@ -5,7 +5,7 @@ import javax.servlet.http.HttpSessionListener;
 
 import org.apache.log4j.Logger;
 
-import com.drey.aramarok.domain.DomainFacade;
+import com.drey.aramarok.domain.service.DomainFacade;
 
 public class AramarokHttpSessionListener implements HttpSessionListener {
 	private static Logger log = Logger.getLogger(AramarokHttpSessionListener.class);

@@ -4,14 +4,14 @@ import javax.ejb.PostActivate;
 
 import org.apache.log4j.Logger;
 
-import com.drey.aramarok.domain.DomainFacade;
-import com.drey.aramarok.domain.User;
-import com.drey.aramarok.domain.UserStatus;
 import com.drey.aramarok.domain.exceptions.FatalDomainException;
 import com.drey.aramarok.domain.exceptions.login.DisabledAccountException;
 import com.drey.aramarok.domain.exceptions.login.InvalidPasswordException;
 import com.drey.aramarok.domain.exceptions.login.InvalidUserNameException;
 import com.drey.aramarok.domain.exceptions.login.LoginException;
+import com.drey.aramarok.domain.model.User;
+import com.drey.aramarok.domain.model.UserStatus;
+import com.drey.aramarok.domain.service.DomainFacade;
 import com.drey.aramarok.web.util.WebUtil;
 import com.drey.aramarok.web.util.WebUtilConstants;
 

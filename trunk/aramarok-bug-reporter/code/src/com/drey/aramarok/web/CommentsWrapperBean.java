@@ -2,7 +2,7 @@ package com.drey.aramarok.web;
 
 import java.text.SimpleDateFormat;
 
-import com.drey.aramarok.domain.Comment;
+import com.drey.aramarok.domain.model.Comment;
 
 public class CommentsWrapperBean {
 

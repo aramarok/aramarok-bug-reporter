@@ -11,10 +11,6 @@ import javax.faces.model.SelectItem;
 
 import org.apache.log4j.Logger;
 
-import com.drey.aramarok.domain.DomainFacade;
-import com.drey.aramarok.domain.Role;
-import com.drey.aramarok.domain.User;
-import com.drey.aramarok.domain.UserStatus;
 import com.drey.aramarok.domain.exceptions.ExternalSystemException;
 import com.drey.aramarok.domain.exceptions.FatalDomainException;
 import com.drey.aramarok.domain.exceptions.register.NoPasswordException;
@@ -22,6 +18,10 @@ import com.drey.aramarok.domain.exceptions.register.NoUserNameException;
 import com.drey.aramarok.domain.exceptions.register.RegisterException;
 import com.drey.aramarok.domain.exceptions.register.UserNameAlreadyExistsException;
 import com.drey.aramarok.domain.exceptions.register.UserNotFoundException;
+import com.drey.aramarok.domain.model.Role;
+import com.drey.aramarok.domain.model.User;
+import com.drey.aramarok.domain.model.UserStatus;
+import com.drey.aramarok.domain.service.DomainFacade;
 import com.drey.aramarok.web.util.WebUtil;
 
 /**

@@ -4,12 +4,12 @@ import java.util.Properties;
 
 import org.apache.log4j.Logger;
 
-import com.drey.aramarok.domain.DomainFacade;
 import com.drey.aramarok.domain.exceptions.FatalDomainException;
 import com.drey.aramarok.domain.exceptions.register.NoPasswordException;
 import com.drey.aramarok.domain.exceptions.register.NoUserNameException;
 import com.drey.aramarok.domain.exceptions.register.RegisterException;
 import com.drey.aramarok.domain.exceptions.register.UserNameAlreadyExistsException;
+import com.drey.aramarok.domain.service.DomainFacade;
 import com.drey.aramarok.web.util.WebUtil;
 import com.drey.aramarok.web.util.WebUtilConstants;
 

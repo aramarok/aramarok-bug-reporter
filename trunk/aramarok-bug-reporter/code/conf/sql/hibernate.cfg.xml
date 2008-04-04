@@ -22,23 +22,23 @@
         <!--mapping resource="Cat.hbm.xml"/-->
         <!--mapping resource="dis_forums.hbm.xml"/-->
         
-        <mapping package="com.drey.aramarok.domain"/>
-        <mapping class="com.drey.aramarok.domain.BugGeneralStatus"/>
-        <mapping class="com.drey.aramarok.domain.UserStatus"/>
-        <mapping class="com.drey.aramarok.domain.Right"/>
+        <mapping package="com.drey.aramarok.domain.model"/>
+        <mapping class="com.drey.aramarok.domain.model.BugGeneralStatus"/>
+        <mapping class="com.drey.aramarok.domain.model.UserStatus"/>
+        <mapping class="com.drey.aramarok.domain.model.Right"/>
         
-        <mapping class="com.drey.aramarok.domain.User"/>
-        <mapping class="com.drey.aramarok.domain.Role"/>
-        <mapping class="com.drey.aramarok.domain.Bug"/>        
-        <mapping class="com.drey.aramarok.domain.BugStatus"/>
-        <mapping class="com.drey.aramarok.domain.Comment"/>
-        <mapping class="com.drey.aramarok.domain.ComponentVersion"/>
-        <mapping class="com.drey.aramarok.domain.OperatingSystem"/>
-        <mapping class="com.drey.aramarok.domain.Platform"/>
-        <mapping class="com.drey.aramarok.domain.Priority"/>
-        <mapping class="com.drey.aramarok.domain.Product"/>
-        <mapping class="com.drey.aramarok.domain.ProductComponent"/>
-        <mapping class="com.drey.aramarok.domain.Severity"/>
+        <mapping class="com.drey.aramarok.domain.model.User"/>
+        <mapping class="com.drey.aramarok.domain.model.Role"/>
+        <mapping class="com.drey.aramarok.domain.model.Bug"/>        
+        <mapping class="com.drey.aramarok.domain.model.BugStatus"/>
+        <mapping class="com.drey.aramarok.domain.model.Comment"/>
+        <mapping class="com.drey.aramarok.domain.model.ComponentVersion"/>
+        <mapping class="com.drey.aramarok.domain.model.OperatingSystem"/>
+        <mapping class="com.drey.aramarok.domain.model.Platform"/>
+        <mapping class="com.drey.aramarok.domain.model.Priority"/>
+        <mapping class="com.drey.aramarok.domain.model.Product"/>
+        <mapping class="com.drey.aramarok.domain.model.ProductComponent"/>
+        <mapping class="com.drey.aramarok.domain.model.Severity"/>
         
     </session-factory>
 </hibernate-configuration>

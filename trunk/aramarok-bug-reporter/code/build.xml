@@ -187,6 +187,7 @@
     <copy todir="${dist}/data">
         <fileset dir="${build}">
             <include name="com/drey/aramarok/domain/*"/>
+        	<include name="com/drey/aramarok/domain/*/*"/>
         </fileset>
     </copy>
     <mkdir dir="${dist}/data/META-INF"/>
