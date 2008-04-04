@@ -1,0 +1,233 @@
+<?xml version='1.0' encoding='UTF-8'?>
+
+<!DOCTYPE web-app PUBLIC
+  "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+  "http://java.sun.com/dtd/web-app_2_3.dtd">
+
+<web-app>
+         
+	<display-name>AramaroK</display-name>
+	<description>Aramarok Description</description>
+
+	<!-- Facelets settings-->
+	<!-- Use Documents Saved as *.jsp -->	
+	<context-param>
+		<param-name>javax.faces.DEFAULT_SUFFIX</param-name>
+		<param-value>.jsp</param-value>
+	</context-param>
+
+	<!-- Special Debug Output for Development -->
+	<context-param>
+		<param-name>facelets.DEVELOPMENT</param-name>
+		<param-value>true</param-value>
+	</context-param>
+
+	<!-- Optional JSF-RI Parameters to Help Debug -->
+	<context-param>
+		<param-name>com.sun.faces.validateXml</param-name>
+		<param-value>false</param-value>
+	</context-param>
+	<context-param>
+		<param-name>com.sun.faces.verifyObjects</param-name>
+		<param-value>false</param-value>
+	</context-param>
+ 
+	<!-- My Faces Tomahawk extension for facelets settings -->
+	<context-param>
+		<param-name>facelets.LIBRARIES</param-name>
+		<param-value>/WEB-INF/tomahawk.taglib.xml</param-value>
+	</context-param>  
+	
+
+	<!-- MUST BE FIRST FILTER DEFINED -->
+	<!-- Authorization And Authentication Filter -->
+	<filter>
+		<filter-name>AuthorizationAndAuthentication</filter-name>
+		<filter-class>com.drey.aramarok.web.authorization.AuthenticationAndAuthorization</filter-class>
+	
+		<init-param>
+			<param-name>Development</param-name>
+			<param-value>false</param-value>
+			<description>
+				Development switch.
+			</description>
+		</init-param>
+		
+		<init-param>
+			<param-name>/home.jsf</param-name>
+			<param-value>NONE</param-value>
+			<description>
+				Home page.
+				Requires only authentication.
+			</description>
+		</init-param>
+		
+		<init-param>
+			<param-name>/register.jsf</param-name>
+			<param-value></param-value>
+			<description>
+				Does not require authentication.
+			</description>
+		</init-param>
+		
+		<init-param>
+			<param-name>/newBug.jsf</param-name>
+			<param-value>ENTER_NEW_BUG</param-value>
+			<description>
+				Report bug page.
+			</description>
+		</init-param>
+		<init-param>
+			<param-name>/newBugEnter.jsf</param-name>
+			<param-value>ENTER_NEW_BUG</param-value>
+			<description>
+				Report bug page.
+			</description>
+		</init-param>
+		<init-param>
+			<param-name>/newBugSuccessfullyEntered.jsf</param-name>
+			<param-value>ENTER_NEW_BUG</param-value>
+			<description>
+				Report bug page.
+			</description>
+		</init-param>
+		
+		<init-param>
+			<param-name>/searchBugs.jsf</param-name>
+			<param-value>SEARCH_BUGS</param-value>
+			<description>
+				Search bugs page.
+			</description>
+		</init-param>
+		<init-param>
+			<param-name>/viewBug.jsf</param-name>
+			<param-value>SEARCH_BUGS</param-value>
+			<description>
+				View a bug details.
+			</description>
+		</init-param>		
+		
+		<init-param>
+			<param-name>/myBugs.jsf</param-name>
+			<param-value>ENTER_NEW_BUG</param-value>
+			<description>
+				Show my bugs page.
+			</description>
+		</init-param>
+		
+		<init-param>
+			<param-name>/preferences.jsf</param-name>
+			<param-value>EDIT_PREFERENCES</param-value>
+			<description>
+				User preferences page.
+			</description>
+		</init-param>
+		
+		<init-param>
+			<param-name>/products.jsf</param-name>
+			<param-value>DEFINE_PRODUCTS</param-value>
+			<description>
+				Define products page.
+			</description>
+		</init-param>
+		
+		<init-param>
+			<param-name>/components.jsf</param-name>
+			<param-value>DEFINE_COMPONENTS</param-value>
+			<description>
+				Define components page.
+			</description>
+		</init-param>
+		
+		<init-param>
+			<param-name>/versions.jsf</param-name>
+			<param-value>DEFINE_VERSIONS</param-value>
+			<description>
+				Define versions page.
+			</description>
+		</init-param>
+		
+		<init-param>
+			<param-name>/sysOptions.jsf</param-name>
+			<param-value>DEFINE_ARAMAROK_OPTIONS</param-value>
+			<description>
+				Define aramarok options page.
+			</description>
+		</init-param>
+		
+		<init-param>
+			<param-name>/users.jsf</param-name>
+			<param-value>EDIT_OTHER_USERS</param-value>
+			<description>
+				Edit registered users in the application page.
+			</description>
+		</init-param>
+	</filter>
+	
+	<!-- Authorization And Authentication  Filter Mapping-->
+	<filter-mapping>
+		<filter-name>AuthorizationAndAuthentication</filter-name>
+		<servlet-name>Faces Servlet</servlet-name>
+	</filter-mapping>
+
+	<!-- My Faces settings-->
+		<!--
+			In your web.xml, map this filter to the path used for the JSF pages 
+			(most likely *.jsf) so the filter can update resource links on your JSF pages, 
+			and also map the filter to the /faces/myFacesExtensionResource/* path 
+			so it can serve page-independent resources like images, javascript files, and stylesheets. 
+		-->		
+	<filter>
+		<filter-name>MyFacesExtensionsFilter</filter-name>
+		<filter-class>org.apache.myfaces.webapp.filter.ExtensionsFilter</filter-class>
+		<init-param>
+			<param-name>maxFileSize</param-name>
+		    <param-value>20m</param-value>
+			<description>Set the size limit for uploaded files.
+					Format: 10 - 10 bytes
+							10k - 10 KB
+							10m - 10 MB
+							1g -  1 GB
+			</description>
+		</init-param>
+	</filter>
+
+	<!-- extension mapping for adding <script/>, <link/>, and other resource tags to JSF-pages  -->
+	<filter-mapping>
+		<filter-name>MyFacesExtensionsFilter</filter-name>
+		<!-- servlet-name must match the name of your javax.faces.webapp.FacesServlet entry -->
+		<servlet-name>Faces Servlet</servlet-name>
+	</filter-mapping>
+
+	<!-- extension mapping for serving page-independent resources (javascript, stylesheets, images, etc.)  -->
+	<filter-mapping>
+		<filter-name>MyFacesExtensionsFilter</filter-name>
+		<url-pattern>/faces/myFacesExtensionResource/*</url-pattern>
+	</filter-mapping>
+	
+	<listener>
+		<listener-class>org.apache.myfaces.webapp.StartupServletContextListener</listener-class> 
+	</listener>
+
+	<!-- Faces Servlet -->
+	<servlet>
+		<servlet-name>Faces Servlet</servlet-name>
+		<servlet-class>javax.faces.webapp.FacesServlet</servlet-class>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+
+	<!-- Faces Servlet Mapping -->
+	<servlet-mapping>
+		<servlet-name>Faces Servlet</servlet-name>
+		<url-pattern>*.jsf</url-pattern>
+	</servlet-mapping>
+
+	<welcome-file-list>
+		<welcome-file>index.jsp</welcome-file>
+	</welcome-file-list>			
+	
+	<listener>
+		<listener-class>com.drey.aramarok.web.util.AramarokHttpSessionListener</listener-class> 
+	</listener>
+
+</web-app> 

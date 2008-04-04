@@ -1,0 +1,221 @@
+<?xml version="1.0"?>
+<!DOCTYPE faces-config PUBLIC
+  "-//Sun Microsystems, Inc.//DTD JavaServer Faces Config 1.1//EN"
+  "http://java.sun.com/dtd/web-facesconfig_1_1.dtd">
+
+<faces-config>
+	<application>
+		
+		<locale-config>
+			<default-locale>ro</default-locale>
+		</locale-config>
+		
+	    <view-handler>com.sun.facelets.FaceletViewHandler</view-handler>    
+
+	</application>
+	
+	<managed-bean>
+		<managed-bean-name>LoginBean</managed-bean-name>
+		<managed-bean-class>com.drey.aramarok.web.LoginBean</managed-bean-class>
+		<managed-bean-scope>request</managed-bean-scope>
+	</managed-bean>
+	
+	<managed-bean>
+		<managed-bean-name>LayoutBean</managed-bean-name>
+		<managed-bean-class>com.drey.aramarok.web.LayoutBean</managed-bean-class>
+		<managed-bean-scope>request</managed-bean-scope>
+	</managed-bean>
+	
+	<managed-bean>
+		<managed-bean-name>LogoutBean</managed-bean-name>
+		<managed-bean-class>com.drey.aramarok.web.LogoutBean</managed-bean-class>
+		<managed-bean-scope>request</managed-bean-scope>
+	</managed-bean>
+	
+	<managed-bean>
+		<managed-bean-name>RightsBean</managed-bean-name>
+		<managed-bean-class>com.drey.aramarok.web.RightsBean</managed-bean-class>
+		<managed-bean-scope>request</managed-bean-scope>
+	</managed-bean>
+	
+	<managed-bean>
+		<managed-bean-name>RegisterBean</managed-bean-name>
+		<managed-bean-class>com.drey.aramarok.web.RegisterBean</managed-bean-class>
+		<managed-bean-scope>request</managed-bean-scope>
+	</managed-bean>
+	
+	<managed-bean>
+		<managed-bean-name>UsersBean</managed-bean-name>
+		<managed-bean-class>com.drey.aramarok.web.UsersBean</managed-bean-class>
+		<managed-bean-scope>session</managed-bean-scope>
+	</managed-bean>
+	
+	<managed-bean>
+		<managed-bean-name>ProductsBean</managed-bean-name>
+		<managed-bean-class>com.drey.aramarok.web.ProductsBean</managed-bean-class>
+		<managed-bean-scope>session</managed-bean-scope>
+	</managed-bean>
+	
+	<managed-bean>
+		<managed-bean-name>ComponentsBean</managed-bean-name>
+		<managed-bean-class>com.drey.aramarok.web.ComponentsBean</managed-bean-class>
+		<managed-bean-scope>session</managed-bean-scope>
+	</managed-bean>
+	
+	<managed-bean>
+		<managed-bean-name>VersionsBean</managed-bean-name>
+		<managed-bean-class>com.drey.aramarok.web.VersionsBean</managed-bean-class>
+		<managed-bean-scope>session</managed-bean-scope>
+	</managed-bean>
+	
+	<managed-bean>
+		<managed-bean-name>NewBugBean</managed-bean-name>
+		<managed-bean-class>com.drey.aramarok.web.NewBugBean</managed-bean-class>
+		<managed-bean-scope>request</managed-bean-scope>
+	</managed-bean>
+	
+	<managed-bean>
+		<managed-bean-name>NewBugEnterBean</managed-bean-name>
+		<managed-bean-class>com.drey.aramarok.web.NewBugEnterBean</managed-bean-class>
+		<managed-bean-scope>session</managed-bean-scope>
+	</managed-bean>
+	
+	<managed-bean>
+		<managed-bean-name>NewBugSuccessfullyEnteredBean</managed-bean-name>
+		<managed-bean-class>com.drey.aramarok.web.NewBugSuccessfullyEnteredBean</managed-bean-class>
+		<managed-bean-scope>request</managed-bean-scope>
+	</managed-bean>
+	
+	<managed-bean>
+		<managed-bean-name>ViewBugBean</managed-bean-name>
+		<managed-bean-class>com.drey.aramarok.web.ViewBugBean</managed-bean-class>
+		<managed-bean-scope>session</managed-bean-scope>
+	</managed-bean>
+	
+	<managed-bean>
+		<managed-bean-name>SearchBugsBean</managed-bean-name>
+		<managed-bean-class>com.drey.aramarok.web.SearchBugsBean</managed-bean-class>
+		<managed-bean-scope>session</managed-bean-scope>
+	</managed-bean>
+	
+	<managed-bean>
+		<managed-bean-name>PreferencesBean</managed-bean-name>
+		<managed-bean-class>com.drey.aramarok.web.PreferencesBean</managed-bean-class>
+		<managed-bean-scope>session</managed-bean-scope>
+	</managed-bean>
+
+
+	<navigation-rule>
+		<from-view-id>/login.jsp</from-view-id>
+		<navigation-case>
+			<from-action>#{LoginBean.login}</from-action>
+			<from-outcome>SUCCESS_LOGIN_OUTCOME</from-outcome>
+			<to-view-id>/home.jsp</to-view-id>
+			<redirect/>
+		</navigation-case>
+		<navigation-case>
+			<from-action>#{LoginBean.register}</from-action>
+			<from-outcome>REGISTER_NEW_ACCOUNT_OUTCOME</from-outcome>
+			<to-view-id>/register.jsp</to-view-id>
+			<redirect/>
+		</navigation-case>
+	</navigation-rule>
+	
+	<navigation-rule>
+		<from-view-id>/register.jsp</from-view-id>
+		<navigation-case>
+			<from-action>#{RegisterBean.registerUser}</from-action>
+			<from-outcome>SUCCESS_REGISTER_NEW_ACCOUNT_OUTCOME</from-outcome>
+			<to-view-id>/login.jsp</to-view-id>
+			<redirect/>
+		</navigation-case>
+	</navigation-rule>
+	
+	<navigation-rule>
+		<from-view-id>/*</from-view-id>
+		<navigation-case>
+			<from-outcome>ERROR_PAGE_OUTCOME</from-outcome>
+			<to-view-id>/error.jsp</to-view-id>
+			<redirect/>
+		</navigation-case>
+		<navigation-case>
+			<from-outcome>HOME_OUTCOME</from-outcome>
+			<to-view-id>/home.jsp</to-view-id>
+			<redirect/>
+		</navigation-case>
+		<navigation-case>
+			<from-outcome>NEW_BUG_OUTCOME</from-outcome>
+			<to-view-id>/newBug.jsp</to-view-id>
+			<redirect/>
+		</navigation-case>
+		<navigation-case>
+			<from-outcome>SEARCH_BUGS_OUTCOME</from-outcome>
+			<to-view-id>/searchBugs.jsp</to-view-id>
+			<redirect/>
+		</navigation-case>
+		<navigation-case>
+			<from-outcome>MY_BUGS_OUTCOME</from-outcome>
+			<to-view-id>/myBugs.jsp</to-view-id>
+			<redirect/>
+		</navigation-case>
+		<navigation-case>
+			<from-outcome>PREFERENCES_OUTCOME</from-outcome>
+			<to-view-id>/preferences.jsp</to-view-id>
+			<redirect/>
+		</navigation-case>
+		<navigation-case>
+			<from-outcome>PRODUCTS_OUTCOME</from-outcome>
+			<to-view-id>/products.jsp</to-view-id>
+			<redirect/>
+		</navigation-case>
+		<navigation-case>
+			<from-outcome>COMPONENTS_OUTCOME</from-outcome>
+			<to-view-id>/components.jsp</to-view-id>
+			<redirect/>
+		</navigation-case>
+		<navigation-case>
+			<from-outcome>VERSIONS_OUTCOME</from-outcome>
+			<to-view-id>/versions.jsp</to-view-id>
+			<redirect/>
+		</navigation-case>
+		<navigation-case>
+			<from-outcome>SYS_OPTIONS_OUTCOME</from-outcome>
+			<to-view-id>/sysOptions.jsp</to-view-id>
+			<redirect/>
+		</navigation-case>
+		<navigation-case>
+			<from-outcome>USERS_OUTCOME</from-outcome>
+			<to-view-id>/users.jsp</to-view-id>
+			<redirect/>
+		</navigation-case>
+		<navigation-case>
+			<from-outcome>LOGOUT_OUTCOME</from-outcome>
+			<to-view-id>/login.jsp</to-view-id>
+			<redirect/>
+		</navigation-case>
+		<navigation-case>
+			<from-outcome>VIEW_BUG_OUTCOME</from-outcome>
+			<to-view-id>/viewBug.jsp</to-view-id>
+			<redirect/>
+		</navigation-case>
+	</navigation-rule>
+	
+	<navigation-rule>
+		<from-view-id>/newBug.jsp</from-view-id>
+		<navigation-case>
+			<from-outcome>NEW_BUG_ENTER_OUTCOME</from-outcome>
+			<to-view-id>/newBugEnter.jsp</to-view-id>
+			<redirect/>
+		</navigation-case>
+	</navigation-rule>
+	
+	<navigation-rule>
+		<from-view-id>/newBugEnter.jsp</from-view-id>
+		<navigation-case>
+			<from-outcome>NEW_BUG_SUCCESSFULLY_ENTER_OUTCOME</from-outcome>
+			<to-view-id>/newBugSuccessfullyEntered.jsp</to-view-id>
+			<redirect/>
+		</navigation-case>
+	</navigation-rule>
+	
+</faces-config>

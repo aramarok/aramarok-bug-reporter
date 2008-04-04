@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE hibernate-configuration PUBLIC "-//Hibernate/Hibernate Configuration DTD//EN"
+        "http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd"> 
+<hibernate-configuration>
+    <session-factory>
+        <property name="connection.url">jdbc:mysql://localhost:3306/aramarok</property>
+        <property name="connection.driver_class">com.mysql.jdbc.Driver</property>
+        <property name="connection.username">aramarok</property>
+        <property name="connection.password">aramarok</property>
+        <property name="connection.pool_size">12</property>
+
+        <property name="show_sql">false</property>
+        <property name="dialect">org.hibernate.dialect.MySQLDialect</property>
+
+		<property name="transaction.flush_before_completion">true</property>
+  	    <property name="connection.release_mode">after_transaction</property>
+  	    <property name="transaction.manager_lookup_class">org.hibernate.transaction.JBossTransactionManagerLookup</property>
+  	    <property name="transaction.factory_class">org.hibernate.transaction.JTATransactionFactory</property>
+		<attribute name="Debug">false</attribute>
+
+        <!-- Mapping files -->
+        <!--mapping resource="Cat.hbm.xml"/-->
+        <!--mapping resource="dis_forums.hbm.xml"/-->
+        
+        <mapping package="com.drey.aramarok.domain"/>
+        <mapping class="com.drey.aramarok.domain.BugGeneralStatus"/>
+        <mapping class="com.drey.aramarok.domain.UserStatus"/>
+        <mapping class="com.drey.aramarok.domain.Right"/>
+        
+        <mapping class="com.drey.aramarok.domain.User"/>
+        <mapping class="com.drey.aramarok.domain.Role"/>
+        <mapping class="com.drey.aramarok.domain.Bug"/>        
+        <mapping class="com.drey.aramarok.domain.BugStatus"/>
+        <mapping class="com.drey.aramarok.domain.Comment"/>
+        <mapping class="com.drey.aramarok.domain.ComponentVersion"/>
+        <mapping class="com.drey.aramarok.domain.OperatingSystem"/>
+        <mapping class="com.drey.aramarok.domain.Platform"/>
+        <mapping class="com.drey.aramarok.domain.Priority"/>
+        <mapping class="com.drey.aramarok.domain.Product"/>
+        <mapping class="com.drey.aramarok.domain.ProductComponent"/>
+        <mapping class="com.drey.aramarok.domain.Severity"/>
+        
+    </session-factory>
+</hibernate-configuration>
