@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="data"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/Eclipse"/>
+	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.web.container"/>
+	<classpathentry kind="lib" path="lib/javaee.jar"/>
+	<classpathentry kind="lib" path="lib/junit-4.1.jar"/>
+	<classpathentry kind="lib" path="lib/log4j-1.2.11.jar"/>
+	<classpathentry kind="lib" path="lib/tools/antlr-2.7.6.jar"/>
+	<classpathentry kind="lib" path="lib/tools/c3p0-0.9.1.1.jar"/>
+	<classpathentry kind="lib" path="lib/tools/cglib.jar"/>
+	<classpathentry kind="lib" path="lib/tools/commons-collections.jar"/>
+	<classpathentry kind="lib" path="lib/tools/commons-logging.jar"/>
+	<classpathentry kind="lib" path="lib/tools/dom4j.jar"/>
+	<classpathentry kind="lib" path="lib/tools/freemarker.jar"/>
+	<classpathentry kind="lib" path="lib/tools/hibernate3.jar"/>
+	<classpathentry kind="lib" path="lib/tools/hibernate-annotations.jar"/>
+	<classpathentry kind="lib" path="lib/tools/hibernate-entitymanager.jar"/>
+	<classpathentry kind="lib" path="lib/tools/hibernate-tools.jar"/>
+	<classpathentry kind="lib" path="lib/tools/javassist.jar"/>
+	<classpathentry kind="lib" path="lib/tools/jboss-common.jar"/>
+	<classpathentry kind="lib" path="lib/tools/mysql-connector-java-5.0.4-bin.jar"/>
+	<classpathentry kind="output" path="build/classes"/>
+</classpath>

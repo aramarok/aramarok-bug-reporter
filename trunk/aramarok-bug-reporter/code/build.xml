@@ -1,0 +1,299 @@
+<project name="Aramarok" default="dist" basedir=".">
+
+<property name="conf" location="conf"/>
+<property name="src" location="src"/>
+<property name="build" location="build"/>
+<property name="dist" location="dist"/>
+<property name="web" location="web"/>
+<property name="data" location="data"/>
+
+<import file="scripts/drey.xml"/>
+
+<path id="project.lib">
+    <fileset dir="lib">
+        <include name="*.jar"/>
+    </fileset>
+    <fileset dir="web/WEB-INF/lib">
+        <include name="*.jar"/>
+    </fileset>
+</path>
+	
+<path id="tools.lib">
+    <fileset dir="lib/tools">
+        <include name="*.jar"/>
+    </fileset>
+</path>
+
+
+<target name="init">
+    <mkdir dir="${build}"/>
+</target>
+
+<target name="compile" depends="init">
+    <javac srcdir="${src}" destdir="${build}"
+            debug="true" debuglevel="lines,vars,source">
+        <classpath refid="project.lib"/>
+    </javac>
+</target>
+	
+	
+
+
+<!-- BUILD -->
+
+<target name="build-domain" depends="compile">
+    <mkdir dir="${dist}/domain"/>
+    <copy todir="${dist}/domain">
+        <fileset dir="${build}">
+            <include name="com/drey/aramarok/domain/*"/>
+            <include name="com/drey/aramarok/domain/*/*"/>
+            <include name="com/drey/aramarok/domain/*/*/*"/>
+        </fileset>
+    </copy>
+    <mkdir dir="${dist}/domain/META-INF"/>
+    <copy todir="${dist}/domain/META-INF">
+        <fileset dir="${conf}/dd">
+            <include name="*.xml"/>
+        	<exclude name="application.xml"/>
+        </fileset>
+    </copy>
+    <copy todir="${dist}/domain">
+        <fileset dir="${src}">
+            <include name="com/drey/aramarok/domain/*.properties"/>
+        </fileset>
+    </copy>    
+</target>
+
+
+<target name="build-web" depends="compile">
+    <mkdir dir="${dist}/web"/>
+    <copy todir="${dist}/web">
+        <fileset dir="${web}"/>
+    </copy>
+    <mkdir dir="${dist}/web/WEB-INF/classes"/>
+    <copy todir="${dist}/web/WEB-INF/classes">
+        <fileset dir="${build}">
+            <include name="com/drey/aramarok/web/**"/>
+        </fileset>
+    </copy>    
+    <copy todir="${dist}/web/WEB-INF/classes">
+        <fileset dir="${src}">
+            <include name="com/drey/aramarok/web/*.properties"/>
+            <include name="com/drey/aramarok/web/*.jrxml"/>
+        </fileset>
+    </copy>    
+</target>
+
+
+<target name="build" depends="build-domain, build-web">
+</target>
+
+
+<!-- DIST -->
+
+<target name="dist-domain" depends="build-domain">
+    <jar destfile="${dist}/aramarok.jar" basedir="${dist}/domain"/>
+</target>
+
+<target name="dist-web" depends="build-web">
+    <war destfile="${dist}/aramarok.war" basedir="${dist}/web" webxml="${dist}/web/WEB-INF/web.xml"/>
+</target>
+
+<target name="dist" depends="dist-domain, dist-web">
+	<ear destfile="${dist}/aramarok.ear" appxml="${conf}/dd/application.xml">
+	      <fileset dir="${dist}" includes="*.jar,*.war"/>
+    </ear>
+</target>
+
+
+<!-- DEPLOY -->
+
+<target name="deploy-web" depends="dist-web">
+    <copy todir="${jboss.home}/server/${jboss.server.conf}/deploy" file="${dist}/aramarok.war"/>
+</target>
+
+<target name="deploy-domain" depends="dist-domain">
+    <copy todir="${jboss.home}/server/${jboss.server.conf}/deploy" file="${dist}/aramarok.jar"/>
+</target>
+
+<target name="deploy" depends="dist">
+	<copy todir="${jboss.home}/server/${jboss.server.conf}/deploy" file="${dist}/aramarok.ear"/>
+</target>
+	
+<target name="restart-web" depends="deploy-web">
+	<touch file="${jboss.home}/server/${jboss.server.conf}/deploy/aramarok.war"/>
+</target>
+	
+<target name="restart-domain" depends="deploy-domain">
+	<touch file="${jboss.home}/server/${jboss.server.conf}/deploy/aramarok.jar"/>
+</target>
+	
+<target name="restart" depends="deploy">
+	<touch file="${jboss.home}/server/${jboss.server.conf}/deploy/aramarok.ear"/>
+</target>
+
+<!-- CLEAN -->
+<target name="clean">
+    <delete dir="${build}"/>
+    <delete dir="${dist}"/>
+</target>
+
+
+
+<!-- TOOLS -->
+<path id="toolslib">
+ <path location="lib/tools/hibernate-tools.jar" />
+ <path location="lib/tools/hibernate-annotations.jar" />
+ <path location="lib/tools/hibernate3.jar" />
+ <path location="lib/tools/freemarker.jar" />
+ <path location="lib/tools/mysql-connector-java-5.0.4-bin.jar" />
+ <path location="lib/tools/commons-logging.jar" />
+ <path location="lib/tools/commons-collections.jar" />
+ <path location="lib/tools/dom4j.jar" />
+ <path location="lib/javaee.jar" />
+ <path location="lib/log4j-1.2.11.jar" />
+</path>
+   
+<taskdef name="hibernatetool" 
+         classname="org.hibernate.tool.ant.HibernateToolTask" 
+         classpathref="toolslib" />
+
+<target name="schemaexport" depends="compile" 
+			description="Exports a generated schema to DB and file">
+			<hibernatetool destdir="${conf}/sql">
+				<classpath path="${build}"/>
+				<annotationconfiguration 
+					configurationfile="${conf}/sql/hibernate.cfg.xml"/>
+				<hbm2ddl
+					drop="true"
+					create="true"
+					export="false"
+					outputfilename="helloworld-ddl.sql"
+					delimiter=";"
+					format="true"/>
+			</hibernatetool>
+</target>
+	
+	
+<target name="compile.data" depends="compile">
+    <javac srcdir="${data}" destdir="${build}"
+            debug="true" debuglevel="lines,vars,source">
+        <classpath refid="project.lib"/>
+    </javac>
+</target>
+	
+<target name="build-data" depends="compile.data">
+	<mkdir dir="${dist}/data"/>
+    <copy todir="${dist}/data">
+        <fileset dir="${build}">
+            <include name="com/drey/aramarok/domain/*"/>
+        </fileset>
+    </copy>
+    <mkdir dir="${dist}/data/META-INF"/>
+    <copy todir="${dist}/data/META-INF">
+        <fileset dir="${data}/META-INF">
+            <include name="*.xml"/>
+        </fileset>
+    </copy>
+	<copy todir="${dist}/data">
+		<fileset dir="${data}/data/import"/>
+	</copy>
+</target>
+	
+<target name="import_data" depends="build-data">
+	<java dir="${dist}/data" classname="com.drey.aramarok.domain.DataImporter"
+		fork="true">
+		<classpath>
+			<pathelement path="${dist}/data"/>
+			<path refid="project.lib"/>
+			<path refid="tools.lib"/>
+		</classpath>
+	</java>
+
+</target>
+	
+<!-- fast jboss targets -->
+	
+<property name="exploded.ear" location="${jboss.home}/server/${jboss.server.conf}/deploy/aramarok.ear"/>
+<property name="exploded.jar" location="${exploded.ear}/aramarok.jar"/>
+<property name="exploded.war" location="${exploded.ear}/aramarok.war"/>
+	
+<target name="fast.compile" depends="fast.compile.domain, fast.compile.web"/>
+	
+<target name="fast.compile.domain">
+	<mkdir dir="${exploded.jar}"/>
+	<javac srcdir="${src}" destdir="${exploded.jar}"
+	            debug="true" debuglevel="lines,vars,source"
+			includes="com/drey/aramarok/domain/**,
+                                  com/drey/aramarok/extern/**,
+                                  com/drey/aramarok/domain/*/**,
+                                  com/drey/aramarok/domain/*/*/**">
+	        <classpath refid="project.lib"/>
+	</javac>
+</target>
+	
+<target name="fast.compile.web">
+	<mkdir dir="${exploded.war}/WEB-INF/classes"/>
+	<javac srcdir="${src}" destdir="${exploded.war}/WEB-INF/classes"
+	            debug="true" debuglevel="lines,vars,source"
+			includes="com/drey/aramarok/web/**"
+			excludes="com/drey/aramarok/domain/**,
+                                  com/drey/aramarok/extern/**,
+                                  com/drey/aramarok/domain/*/**,
+                                  com/drey/aramarok/domain/*/*/**">
+	        <classpath refid="project.lib"/>
+	</javac>
+	<delete>
+		<fileset dir="${exploded.war}/WEB-INF/classes"
+			includes="com/drey/aramarok/domain/**,
+                                  com/drey/aramarok/extern/**,
+                                  com/drey/aramarok/domain/*/**,
+                                  com/drey/aramarok/domain/*/*/**"/>
+	</delete>
+</target>	
+
+<target name="fast.dist.domain" depends="fast.compile.domain">
+    <mkdir dir="${exploded.jar}/META-INF"/>
+    <copy todir="${exploded.jar}/META-INF">
+        <fileset dir="${conf}/dd">
+            <include name="*.xml"/>
+        	<exclude name="application.xml"/>
+        </fileset>
+    </copy>
+    <copy todir="${exploded.jar}">
+        <fileset dir="${src}">
+            <include name="com/drey/aramarok/domain/*.properties"/>
+        </fileset>
+    </copy>    
+
+</target>
+	
+	
+<target name="fast.dist.web" depends="fast.compile.web">
+	    <mkdir dir="${exploded.war}"/>
+	    <copy todir="${exploded.war}">
+	        <fileset dir="${web}"/>
+	    </copy>
+	    <copy todir="${exploded.war}/WEB-INF/classes">
+	        <fileset dir="${src}">
+	            <include name="com/drey/aramarok/web/*.properties"/>
+	            <include name="com/drey/aramarok/web/*.jrxml"/>
+	        </fileset>
+	    </copy>    
+</target>
+	
+	
+<target name="fast.dist" depends="fast.dist.domain, fast.dist.web">
+	<mkdir dir="${exploded.ear}/META-INF"/>
+	<copy todir="${exploded.ear}/META-INF">
+		<fileset dir="${conf}/dd">
+			<include name="application.xml"/>
+		</fileset>
+	</copy>
+</target>
+	
+<target name="fast.restart" depends="fast.dist">
+	<touch file="${exploded.ear}/META-INF/application.xml"/>
+</target>		
+
+</project>

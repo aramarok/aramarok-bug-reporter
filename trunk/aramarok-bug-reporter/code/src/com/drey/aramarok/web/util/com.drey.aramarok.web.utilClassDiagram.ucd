@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<editmodel:ClassDiagramEditModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:editmodel="editmodel.xmi" xmlns:options="options.xmi" name="com.drey.aramarok.web.utilClassDiagram" foregroundRGB="255,255,255" id="{UMLID=_-697k8lfEdy235bgse9X1w,JavaID=com.drey.aramarok.web.util}" metadata="uml2-1.0" initialized="true" tag="1000" key="3230303730363239206172612F64726579">
+  <children xsi:type="editmodel:InterfaceEditModel" name="WebUtilConstants" location="50,50" size="294,555" id="{UMLID=_hIZOMMlgEdy235bgse9X1w,JavaID=com.drey.aramarok.web.util/WebUtilConstants}" runTimeClassModel="ProductToEnterNewBug,SEARCH_BUGS_OUTCOME,LOGOUT_OUTCOME,VIEW_BUG_OUTCOME,HOME_OUTCOME,NEW_BUG_ENTER_OUTCOME,ENTER_NEW_BUG_FOR_PRODUCT,VERSIONS_OUTCOME,DOMAIN_FACADE_LOOKUP_NAME,SUCCESS_REGISTER_NEW_ACCOUNT_OUTCOME,USERS_OUTCOME,MY_BUGS_OUTCOME,NEW_BUG_OUTCOME,SYS_OPTIONS_OUTCOME,REGISTER_NEW_ACCOUNT_OUTCOME,DOMAIN_FACADE,COMPONENTS_OUTCOME,SYNCRONIZATION_OBJECT,BUG_ID_SELECTED_FOR_VIEWING,PREFERENCES_OUTCOME,NEW_INSERED_BUG_ID,PRODUCTS_OUTCOME,USER,NEW_BUG_SUCCESSFULLY_ENTER_OUTCOME,ERROR_PAGE_OUTCOME,SUCCESS_LOGIN_OUTCOME,FAIL_LOGIN_OUTCOME,LOCALE">
+    <children xsi:type="editmodel:CompartmentEditModel" size="273,504">
+      <children xsi:type="editmodel:AttributeEditModel" name="SUCCESS_LOGIN_OUTCOME" id="{UMLID=_hJSmFclgEdy235bgse9X1w,JavaID=com.drey.aramarok.web.util/WebUtilConstants#SUCCESS_LOGIN_OUTCOME}"/>
+      <children xsi:type="editmodel:AttributeEditModel" name="FAIL_LOGIN_OUTCOME" id="{UMLID=_hJSmFslgEdy235bgse9X1w,JavaID=com.drey.aramarok.web.util/WebUtilConstants#FAIL_LOGIN_OUTCOME}"/>
+      <children xsi:type="editmodel:AttributeEditModel" name="LOGOUT_OUTCOME" id="{UMLID=_hI16I8lgEdy235bgse9X1w,JavaID=com.drey.aramarok.web.util/WebUtilConstants#LOGOUT_OUTCOME}"/>
+      <children xsi:type="editmodel:AttributeEditModel" name="REGISTER_NEW_ACCOUNT_OUTCOME" id="{UMLID=_hJJcIclgEdy235bgse9X1w,JavaID=com.drey.aramarok.web.util/WebUtilConstants#REGISTER_NEW_ACCOUNT_OUTCOME}"/>
+      <children xsi:type="editmodel:AttributeEditModel" name="SUCCESS_REGISTER_NEW_ACCOUNT_OUTCOME" id="{UMLID=_hI_rI8lgEdy235bgse9X1w,JavaID=com.drey.aramarok.web.util/WebUtilConstants#SUCCESS_REGISTER_NEW_ACCOUNT_OUTCOME}"/>
+      <children xsi:type="editmodel:AttributeEditModel" name="ERROR_PAGE_OUTCOME" id="{UMLID=_hJSmFMlgEdy235bgse9X1w,JavaID=com.drey.aramarok.web.util/WebUtilConstants#ERROR_PAGE_OUTCOME}"/>
+      <children xsi:type="editmodel:AttributeEditModel" name="HOME_OUTCOME" id="{UMLID=_hI16JMlgEdy235bgse9X1w,JavaID=com.drey.aramarok.web.util/WebUtilConstants#HOME_OUTCOME}"/>
+      <children xsi:type="editmodel:AttributeEditModel" name="NEW_BUG_OUTCOME" id="{UMLID=_hI_rJ8lgEdy235bgse9X1w,JavaID=com.drey.aramarok.web.util/WebUtilConstants#NEW_BUG_OUTCOME}"/>
+      <children xsi:type="editmodel:AttributeEditModel" name="NEW_BUG_ENTER_OUTCOME" id="{UMLID=_hI_rIMlgEdy235bgse9X1w,JavaID=com.drey.aramarok.web.util/WebUtilConstants#NEW_BUG_ENTER_OUTCOME}"/>
+      <children xsi:type="editmodel:AttributeEditModel" name="NEW_BUG_SUCCESSFULLY_ENTER_OUTCOME" id="{UMLID=_hJSmE8lgEdy235bgse9X1w,JavaID=com.drey.aramarok.web.util/WebUtilConstants#NEW_BUG_SUCCESSFULLY_ENTER_OUTCOME}"/>
+      <children xsi:type="editmodel:AttributeEditModel" name="VIEW_BUG_OUTCOME" id="{UMLID=_hI16IslgEdy235bgse9X1w,JavaID=com.drey.aramarok.web.util/WebUtilConstants#VIEW_BUG_OUTCOME}"/>
+      <children xsi:type="editmodel:AttributeEditModel" name="SEARCH_BUGS_OUTCOME" id="{UMLID=_hI16IMlgEdy235bgse9X1w,JavaID=com.drey.aramarok.web.util/WebUtilConstants#SEARCH_BUGS_OUTCOME}"/>
+      <children xsi:type="editmodel:AttributeEditModel" name="MY_BUGS_OUTCOME" id="{UMLID=_hI_rJslgEdy235bgse9X1w,JavaID=com.drey.aramarok.web.util/WebUtilConstants#MY_BUGS_OUTCOME}"/>
+      <children xsi:type="editmodel:AttributeEditModel" name="PREFERENCES_OUTCOME" id="{UMLID=_hJJcJslgEdy235bgse9X1w,JavaID=com.drey.aramarok.web.util/WebUtilConstants#PREFERENCES_OUTCOME}"/>
+      <children xsi:type="editmodel:AttributeEditModel" name="PRODUCTS_OUTCOME" id="{UMLID=_hJSmEclgEdy235bgse9X1w,JavaID=com.drey.aramarok.web.util/WebUtilConstants#PRODUCTS_OUTCOME}"/>
+      <children xsi:type="editmodel:AttributeEditModel" name="COMPONENTS_OUTCOME" id="{UMLID=_hJJcI8lgEdy235bgse9X1w,JavaID=com.drey.aramarok.web.util/WebUtilConstants#COMPONENTS_OUTCOME}"/>
+      <children xsi:type="editmodel:AttributeEditModel" name="VERSIONS_OUTCOME" id="{UMLID=_hI_rIslgEdy235bgse9X1w,JavaID=com.drey.aramarok.web.util/WebUtilConstants#VERSIONS_OUTCOME}"/>
+      <children xsi:type="editmodel:AttributeEditModel" name="SYS_OPTIONS_OUTCOME" id="{UMLID=_hJJcIMlgEdy235bgse9X1w,JavaID=com.drey.aramarok.web.util/WebUtilConstants#SYS_OPTIONS_OUTCOME}"/>
+      <children xsi:type="editmodel:AttributeEditModel" name="USERS_OUTCOME" id="{UMLID=_hI_rJclgEdy235bgse9X1w,JavaID=com.drey.aramarok.web.util/WebUtilConstants#USERS_OUTCOME}"/>
+      <children xsi:type="editmodel:AttributeEditModel" name="SYNCRONIZATION_OBJECT" id="{UMLID=_hJJcJMlgEdy235bgse9X1w,JavaID=com.drey.aramarok.web.util/WebUtilConstants#SYNCRONIZATION_OBJECT}"/>
+      <children xsi:type="editmodel:AttributeEditModel" name="DOMAIN_FACADE" id="{UMLID=_hJJcIslgEdy235bgse9X1w,JavaID=com.drey.aramarok.web.util/WebUtilConstants#DOMAIN_FACADE}"/>
+      <children xsi:type="editmodel:AttributeEditModel" name="DOMAIN_FACADE_LOOKUP_NAME" id="{UMLID=_hI_rJMlgEdy235bgse9X1w,JavaID=com.drey.aramarok.web.util/WebUtilConstants#DOMAIN_FACADE_LOOKUP_NAME}"/>
+      <children xsi:type="editmodel:AttributeEditModel" name="USER" id="{UMLID=_hJSmEslgEdy235bgse9X1w,JavaID=com.drey.aramarok.web.util/WebUtilConstants#USER}"/>
+      <children xsi:type="editmodel:AttributeEditModel" name="LOCALE" id="{UMLID=_hJSmF8lgEdy235bgse9X1w,JavaID=com.drey.aramarok.web.util/WebUtilConstants#LOCALE}"/>
+      <children xsi:type="editmodel:AttributeEditModel" name="ProductToEnterNewBug" id="{UMLID=_hI16IclgEdy235bgse9X1w,JavaID=com.drey.aramarok.web.util/WebUtilConstants#ProductToEnterNewBug}"/>
+      <children xsi:type="editmodel:AttributeEditModel" name="ENTER_NEW_BUG_FOR_PRODUCT" id="{UMLID=_hI_rIclgEdy235bgse9X1w,JavaID=com.drey.aramarok.web.util/WebUtilConstants#ENTER_NEW_BUG_FOR_PRODUCT}"/>
+      <children xsi:type="editmodel:AttributeEditModel" name="NEW_INSERED_BUG_ID" id="{UMLID=_hJSmEMlgEdy235bgse9X1w,JavaID=com.drey.aramarok.web.util/WebUtilConstants#NEW_INSERED_BUG_ID}"/>
+      <children xsi:type="editmodel:AttributeEditModel" name="BUG_ID_SELECTED_FOR_VIEWING" id="{UMLID=_hJJcJclgEdy235bgse9X1w,JavaID=com.drey.aramarok.web.util/WebUtilConstants#BUG_ID_SELECTED_FOR_VIEWING}"/>
+    </children>
+    <children xsi:type="editmodel:CompartmentEditModel"/>
+    <children xsi:type="editmodel:CompartmentEditModel"/>
+    <classifierPreferences xsi:type="editmodel:UMLClassDiagramClassifierPreference" showStereotype="true" attributeSorter="Natural" methodSorter="Natural" innerClassSorter="Natural" showPrivateAttributes="true" showProtectedAttributes="true" showPublicAttributes="true" showPackageAttributes="true" showStaticAttributes="true" showProtectedMethods="true" showPublicMethods="true" showPackageMethods="true" showPrivateMethods="true" showStaticMethods="true" showProtectedInnerClasses="true" showPublicInnerClasses="true" showPackageInnerClasses="true" showPrivateInnerClasses="true" showStaticInnerClasses="true" showMethods="true" showAttributes="true" showLiterals="true" ShowInnerEntity="true"/>
+  </children>
+  <children xsi:type="editmodel:ClassEditModel" name="WebUtil" location="394,50" size="202,263" stereotype="" id="{UMLID=_-7HskMlfEdy235bgse9X1w,JavaID=com.drey.aramarok.web.util/WebUtil}" runTimeClassModel="getLocale(),GetSynchronizationObject(Ljavax.servlet.http.HttpSession;),setUser(Lcom.drey.aramarok.domain.User;),getDomainFacade(),getUser(),invalidateSession(),getDomainFacade(Ljavax.servlet.http.HttpSession;),setUser(Lcom.drey.aramarok.domain.User;Ljavax.servlet.http.HttpSession;),getHttpSession(),log,getUser(Ljavax.servlet.http.HttpSession;),CreateSynchronizationObject(Ljavax.servlet.http.HttpSession;)">
+    <children xsi:type="editmodel:CompartmentEditModel" size="43,18">
+      <children xsi:type="editmodel:AttributeEditModel" name="log" id="{UMLID=_hKVu8MlgEdy235bgse9X1w,JavaID=com.drey.aramarok.web.util/WebUtil#log}"/>
+    </children>
+    <children xsi:type="editmodel:CompartmentEditModel" size="181,198">
+      <children xsi:type="editmodel:MethodEditModel" name="getHttpSession" id="{UMLID=_hKe44MlgEdy235bgse9X1w,JavaID=com.drey.aramarok.web.util/WebUtil#getHttpSession()}"/>
+      <children xsi:type="editmodel:MethodEditModel" name="getDomainFacade" id="{UMLID=_hLOfwMlgEdy235bgse9X1w,JavaID=com.drey.aramarok.web.util/WebUtil#getDomainFacade(Ljavax.servlet.http.HttpSession;)}"/>
+      <children xsi:type="editmodel:MethodEditModel" name="getDomainFacade" id="{UMLID=_hKe448lgEdy235bgse9X1w,JavaID=com.drey.aramarok.web.util/WebUtil#getDomainFacade()}"/>
+      <children xsi:type="editmodel:MethodEditModel" name="setUser" id="{UMLID=_hKxz08lgEdy235bgse9X1w,JavaID=com.drey.aramarok.web.util/WebUtil#setUser(Lcom.drey.aramarok.domain.User;Ljavax.servlet.http.HttpSession;)}"/>
+      <children xsi:type="editmodel:MethodEditModel" name="setUser" id="{UMLID=_hKop5clgEdy235bgse9X1w,JavaID=com.drey.aramarok.web.util/WebUtil#setUser(Lcom.drey.aramarok.domain.User;)}"/>
+      <children xsi:type="editmodel:MethodEditModel" name="getUser" id="{UMLID=_hK7k1clgEdy235bgse9X1w,JavaID=com.drey.aramarok.web.util/WebUtil#getUser(Ljavax.servlet.http.HttpSession;)}"/>
+      <children xsi:type="editmodel:MethodEditModel" name="getUser" id="{UMLID=_hKop4slgEdy235bgse9X1w,JavaID=com.drey.aramarok.web.util/WebUtil#getUser()}"/>
+      <children xsi:type="editmodel:MethodEditModel" name="getLocale" id="{UMLID=_hK7k0clgEdy235bgse9X1w,JavaID=com.drey.aramarok.web.util/WebUtil#getLocale()}"/>
+      <children xsi:type="editmodel:MethodEditModel" name="CreateSynchronizationObject" id="{UMLID=_hKe45slgEdy235bgse9X1w,JavaID=com.drey.aramarok.web.util/WebUtil#CreateSynchronizationObject(Ljavax.servlet.http.HttpSession;)}"/>
+      <children xsi:type="editmodel:MethodEditModel" name="GetSynchronizationObject" id="{UMLID=_hLFV08lgEdy235bgse9X1w,JavaID=com.drey.aramarok.web.util/WebUtil#GetSynchronizationObject(Ljavax.servlet.http.HttpSession;)}"/>
+      <children xsi:type="editmodel:MethodEditModel" name="invalidateSession" id="{UMLID=_hKxz0slgEdy235bgse9X1w,JavaID=com.drey.aramarok.web.util/WebUtil#invalidateSession()}"/>
+    </children>
+    <children xsi:type="editmodel:CompartmentEditModel"/>
+    <classifierPreferences xsi:type="editmodel:UMLClassDiagramClassifierPreference" showStereotype="true" attributeSorter="Natural" methodSorter="Natural" innerClassSorter="Natural" showPrivateAttributes="true" showProtectedAttributes="true" showPublicAttributes="true" showPackageAttributes="true" showStaticAttributes="true" showProtectedMethods="true" showPublicMethods="true" showPackageMethods="true" showPrivateMethods="true" showStaticMethods="true" showProtectedInnerClasses="true" showPublicInnerClasses="true" showPackageInnerClasses="true" showPrivateInnerClasses="true" showStaticInnerClasses="true" showMethods="true" showAttributes="true" showLiterals="true" ShowInnerEntity="true"/>
+  </children>
+  <children xsi:type="editmodel:ClassEditModel" name="AramarokHttpSessionListener" location="50,655" size="227,101" stereotype="" id="{UMLID=_hQmH8MlgEdy235bgse9X1w,JavaID=com.drey.aramarok.web.util/AramarokHttpSessionListener}" runTimeClassModel="sessionCreated(Ljavax.servlet.http.HttpSessionEvent;),sessionDestroyed(Ljavax.servlet.http.HttpSessionEvent;),log">
+    <children xsi:type="editmodel:CompartmentEditModel" size="43,18">
+      <children xsi:type="editmodel:AttributeEditModel" name="log" id="{UMLID=_hQvR4slgEdy235bgse9X1w,JavaID=com.drey.aramarok.web.util/AramarokHttpSessionListener#log}"/>
+    </children>
+    <children xsi:type="editmodel:CompartmentEditModel" size="128,36">
+      <children xsi:type="editmodel:MethodEditModel" name="sessionCreated" id="{UMLID=_hQvR48lgEdy235bgse9X1w,JavaID=com.drey.aramarok.web.util/AramarokHttpSessionListener#sessionCreated(Ljavax.servlet.http.HttpSessionEvent;)}" isAssociationMemeber="true"/>
+      <children xsi:type="editmodel:MethodEditModel" name="sessionDestroyed" id="{UMLID=_hQ5C48lgEdy235bgse9X1w,JavaID=com.drey.aramarok.web.util/AramarokHttpSessionListener#sessionDestroyed(Ljavax.servlet.http.HttpSessionEvent;)}" isAssociationMemeber="true"/>
+    </children>
+    <children xsi:type="editmodel:CompartmentEditModel"/>
+    <classifierPreferences xsi:type="editmodel:UMLClassDiagramClassifierPreference" showStereotype="true" attributeSorter="Natural" methodSorter="Natural" innerClassSorter="Natural" showPrivateAttributes="true" showProtectedAttributes="true" showPublicAttributes="true" showPackageAttributes="true" showStaticAttributes="true" showProtectedMethods="true" showPublicMethods="true" showPackageMethods="true" showPrivateMethods="true" showStaticMethods="true" showProtectedInnerClasses="true" showPublicInnerClasses="true" showPackageInnerClasses="true" showPrivateInnerClasses="true" showStaticInnerClasses="true" showMethods="true" showAttributes="true" showLiterals="true"/>
+  </children>
+  <diagramOptions xsi:type="options:ClassDiagramOptions" properties="wireOptions=7" autoName="false"/>
+  <boardSetting snapToGeometry="true" gridEnabled="true" gridSpacing="10,10" gridOrigin="0,0" rulerUnit="pixel">
+    <leftRuler/>
+    <topRuler/>
+  </boardSetting>
+  <classDiagramPreferences xsi:type="editmodel:UMLClassDiagramPreference" attributeSorter="Natural" methodSorter="Natural" showClassStereotype="true" showPackageStereotype="true" innerClassSorter="Natural" showPrivateAttributes="true" showProtectedAttributes="true" showPublicAttributes="true" showPackageAttributes="true" showStaticAttributes="true" showProtectedMethods="true" showPublicMethods="true" showPackageMethods="true" showPrivateMethods="true" showStaticMethods="true" showProtectedInnerClasses="true" showPublicInnerClasses="true" showPackageInnerClasses="true" showPrivateInnerClasses="true" showStaticInnerClasses="true" showInterfaceStereotype="true" showMethods="true" showAttributes="true" showLiterlas="true" showInnerEntity="true"/>
+</editmodel:ClassDiagramEditModel>

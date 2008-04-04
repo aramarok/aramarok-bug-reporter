@@ -1,0 +1,13 @@
+<jboss>
+	<enterprise-beans>
+		<session>
+			<ejb-name>DomainFacadeBean</ejb-name>
+			<jndi-name>java:/DomainFacadeRemote</jndi-name>
+			<local-jndi-name>java:/DomainFacade</local-jndi-name>			
+		</session>
+		<session>
+			<ejb-name>DomainServiceBean</ejb-name>
+			<local-jndi-name>java:/DomainService</local-jndi-name>
+		</session> 
+	</enterprise-beans>
+</jboss>

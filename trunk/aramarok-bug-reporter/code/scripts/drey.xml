@@ -1,0 +1,4 @@
+<project name="imported_properties">
+    <property name="jboss.home" location="C:\jboss-4.0.5.GA"/>
+    <property name="jboss.server.conf" value="default"/>
+</project>
