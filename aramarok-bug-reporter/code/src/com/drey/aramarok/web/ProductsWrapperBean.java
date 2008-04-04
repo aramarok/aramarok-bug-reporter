@@ -2,7 +2,7 @@ package com.drey.aramarok.web;
 
 import javax.servlet.http.HttpSession;
 
-import com.drey.aramarok.domain.Product;
+import com.drey.aramarok.domain.model.Product;
 import com.drey.aramarok.web.util.WebUtil;
 
 public class ProductsWrapperBean {

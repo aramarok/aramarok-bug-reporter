@@ -11,23 +11,23 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
 
-import com.drey.aramarok.domain.Bug;
-import com.drey.aramarok.domain.BugGeneralStatus;
-import com.drey.aramarok.domain.ComponentVersion;
-import com.drey.aramarok.domain.DomainFacade;
-import com.drey.aramarok.domain.OperatingSystem;
-import com.drey.aramarok.domain.Platform;
-import com.drey.aramarok.domain.Priority;
-import com.drey.aramarok.domain.Product;
-import com.drey.aramarok.domain.ProductComponent;
-import com.drey.aramarok.domain.Severity;
-import com.drey.aramarok.domain.User;
 import com.drey.aramarok.domain.exceptions.ExternalSystemException;
 import com.drey.aramarok.domain.exceptions.FatalDomainException;
 import com.drey.aramarok.domain.exceptions.bug.BugException;
 import com.drey.aramarok.domain.exceptions.bug.BugStatusChangeException;
 import com.drey.aramarok.domain.exceptions.user.UserException;
 import com.drey.aramarok.domain.exceptions.user.UserHasNoRightException;
+import com.drey.aramarok.domain.model.Bug;
+import com.drey.aramarok.domain.model.BugGeneralStatus;
+import com.drey.aramarok.domain.model.ComponentVersion;
+import com.drey.aramarok.domain.model.OperatingSystem;
+import com.drey.aramarok.domain.model.Platform;
+import com.drey.aramarok.domain.model.Priority;
+import com.drey.aramarok.domain.model.Product;
+import com.drey.aramarok.domain.model.ProductComponent;
+import com.drey.aramarok.domain.model.Severity;
+import com.drey.aramarok.domain.model.User;
+import com.drey.aramarok.domain.service.DomainFacade;
 import com.drey.aramarok.web.util.WebUtil;
 
 public class NewBugEnterBean {

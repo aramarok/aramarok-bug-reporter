@@ -1,0 +1,25 @@
+<persistence xmlns="http://java.sun.com/xml/ns/persistence"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_1_0.xsd"
+	version="1.0">	
+	<persistence-unit name="Aramarok" transaction-type="RESOURCE_LOCAL">		
+		<provider>org.hibernate.ejb.HibernatePersistence</provider>			
+  		<class>com.drey.aramarok.domain.model.Bug</class>
+  		<class>com.drey.aramarok.domain.model.Comment</class>
+  		<class>com.drey.aramarok.domain.model.ComponentVersion</class>
+  		<class>com.drey.aramarok.domain.model.OperatingSystem</class>
+  		<class>com.drey.aramarok.domain.model.Platform</class>
+  		<class>com.drey.aramarok.domain.model.Priority</class>
+  		<class>com.drey.aramarok.domain.model.Product</class>
+  		<class>com.drey.aramarok.domain.model.Right</class>
+  		<class>com.drey.aramarok.domain.model.Role</class>
+  		<class>com.drey.aramarok.domain.model.SavedSearch</class>
+  		<class>com.drey.aramarok.domain.model.Severity</class>
+  		<class>com.drey.aramarok.domain.model.User</class>
+				
+		<exclude-unlisted-classes>false</exclude-unlisted-classes>
+        <properties>
+			<property name="hibernate.show_sql" value="true"/>
+		</properties>        
+	</persistence-unit>
+</persistence>

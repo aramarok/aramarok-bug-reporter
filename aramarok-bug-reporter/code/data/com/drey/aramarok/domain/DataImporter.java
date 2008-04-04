@@ -1,10 +1,25 @@
 package com.drey.aramarok.domain;
 
-import java.io.*;
-import javax.persistence.*;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.util.EnumSet;
+import java.util.Set;
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
+import javax.persistence.NoResultException;
+import javax.persistence.Persistence;
+import javax.persistence.Query;
 
-import java.util.*;
+import com.drey.aramarok.domain.model.OperatingSystem;
+import com.drey.aramarok.domain.model.Platform;
+import com.drey.aramarok.domain.model.Priority;
+import com.drey.aramarok.domain.model.Right;
+import com.drey.aramarok.domain.model.Role;
+import com.drey.aramarok.domain.model.Severity;
+import com.drey.aramarok.domain.model.User;
+import com.drey.aramarok.domain.model.UserStatus;
 
 public class DataImporter {
 	

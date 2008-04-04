@@ -11,8 +11,8 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
 
-import com.drey.aramarok.domain.DomainFacade;
-import com.drey.aramarok.domain.User;
+import com.drey.aramarok.domain.model.User;
+import com.drey.aramarok.domain.service.DomainFacade;
 import com.drey.aramarok.web.SynchronizationObject;
 
 public class WebUtil implements WebUtilConstants{

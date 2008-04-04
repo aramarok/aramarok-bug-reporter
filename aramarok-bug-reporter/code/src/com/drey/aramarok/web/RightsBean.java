@@ -1,6 +1,6 @@
 package com.drey.aramarok.web;
 
-import com.drey.aramarok.domain.Right;
+import com.drey.aramarok.domain.model.Right;
 import com.drey.aramarok.web.util.WebUtil;
 
 public class RightsBean {

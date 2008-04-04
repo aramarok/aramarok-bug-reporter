@@ -9,18 +9,18 @@ import javax.faces.model.SelectItem;
 
 import org.apache.log4j.Logger;
 
-import com.drey.aramarok.domain.Bug;
-import com.drey.aramarok.domain.BugFilter;
-import com.drey.aramarok.domain.BugGeneralStatus;
-import com.drey.aramarok.domain.DomainFacade;
-import com.drey.aramarok.domain.OperatingSystem;
-import com.drey.aramarok.domain.Platform;
-import com.drey.aramarok.domain.Priority;
-import com.drey.aramarok.domain.SavedSearch;
-import com.drey.aramarok.domain.Severity;
-import com.drey.aramarok.domain.User;
 import com.drey.aramarok.domain.exceptions.ExternalSystemException;
 import com.drey.aramarok.domain.exceptions.register.UserNotFoundException;
+import com.drey.aramarok.domain.model.Bug;
+import com.drey.aramarok.domain.model.BugGeneralStatus;
+import com.drey.aramarok.domain.model.OperatingSystem;
+import com.drey.aramarok.domain.model.Platform;
+import com.drey.aramarok.domain.model.Priority;
+import com.drey.aramarok.domain.model.SavedSearch;
+import com.drey.aramarok.domain.model.Severity;
+import com.drey.aramarok.domain.model.User;
+import com.drey.aramarok.domain.service.BugFilter;
+import com.drey.aramarok.domain.service.DomainFacade;
 import com.drey.aramarok.web.util.WebUtil;
 
 public class SearchBugsBean {

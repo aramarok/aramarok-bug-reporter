@@ -11,9 +11,6 @@ import javax.faces.model.SelectItem;
 
 import org.apache.log4j.Logger;
 
-import com.drey.aramarok.domain.DomainFacade;
-import com.drey.aramarok.domain.Product;
-import com.drey.aramarok.domain.ProductComponent;
 import com.drey.aramarok.domain.exceptions.ExternalSystemException;
 import com.drey.aramarok.domain.exceptions.FatalDomainException;
 import com.drey.aramarok.domain.exceptions.component.ComponentException;
@@ -23,6 +20,9 @@ import com.drey.aramarok.domain.exceptions.product.NoProductNameSpecifiedExcepti
 import com.drey.aramarok.domain.exceptions.product.ProductException;
 import com.drey.aramarok.domain.exceptions.product.ProductNameAlreadyExistsException;
 import com.drey.aramarok.domain.exceptions.product.ProductNotFoundException;
+import com.drey.aramarok.domain.model.Product;
+import com.drey.aramarok.domain.model.ProductComponent;
+import com.drey.aramarok.domain.service.DomainFacade;
 import com.drey.aramarok.web.util.WebUtil;
 
 /**

@@ -4,7 +4,7 @@ import java.text.SimpleDateFormat;
 
 import javax.servlet.http.HttpSession;
 
-import com.drey.aramarok.domain.Bug;
+import com.drey.aramarok.domain.model.Bug;
 import com.drey.aramarok.web.util.WebUtil;
 
 public class BugsWrapperBean {

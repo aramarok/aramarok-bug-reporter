@@ -5,9 +5,9 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
-import com.drey.aramarok.domain.DomainFacade;
-import com.drey.aramarok.domain.Product;
 import com.drey.aramarok.domain.exceptions.ExternalSystemException;
+import com.drey.aramarok.domain.model.Product;
+import com.drey.aramarok.domain.service.DomainFacade;
 import com.drey.aramarok.web.util.WebUtil;
 
 public class NewBugBean {
