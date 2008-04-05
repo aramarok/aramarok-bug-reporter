@@ -9,5 +9,25 @@
 			<ejb-name>DomainServiceBean</ejb-name>
 			<local-jndi-name>java:/DomainService</local-jndi-name>
 		</session> 
+		<session>
+			<ejb-name>BugServiceBean</ejb-name>
+			<local-jndi-name>java:/BugServiceBean</local-jndi-name>
+		</session>
+		<session>
+			<ejb-name>ComponentVersionServiceBean</ejb-name>
+			<local-jndi-name>java:/ComponentVersionServiceBean</local-jndi-name>
+		</session>
+		<session>
+			<ejb-name>ProductComponentServiceBean</ejb-name>
+			<local-jndi-name>java:/ProductComponentServiceBean</local-jndi-name>
+		</session>
+		<session>
+			<ejb-name>ProductServiceBean</ejb-name>
+			<local-jndi-name>java:/ProductServiceBean</local-jndi-name>
+		</session>
+		<session>
+			<ejb-name>UserServiceBean</ejb-name>
+			<local-jndi-name>java:/UserServiceBean</local-jndi-name>
+		</session> 
 	</enterprise-beans>
 </jboss>
