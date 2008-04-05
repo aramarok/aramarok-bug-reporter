@@ -13,7 +13,7 @@ import org.apache.log4j.Logger;
 
 import com.drey.aramarok.domain.exceptions.ExternalSystemException;
 import com.drey.aramarok.domain.exceptions.FatalDomainException;
-import com.drey.aramarok.domain.exceptions.component.ComponentException;
+import com.drey.aramarok.domain.exceptions.component.ProductComponentException;
 import com.drey.aramarok.domain.exceptions.component.ComponentNameAlreadyExistsException;
 import com.drey.aramarok.domain.exceptions.component.NoComponentNameSpecifiedException;
 import com.drey.aramarok.domain.exceptions.product.NoProductNameSpecifiedException;
@@ -96,7 +96,7 @@ public class ProductsBean {
 				} catch (NoComponentNameSpecifiedException e) {
 					newProductComponentNameIsInvalid = true;
 					log.error("NoComponentNameSpecifiedException!");
-				} catch (ComponentException e) {
+				} catch (ProductComponentException e) {
 					newProductComponentNameIsInvalid = true;
 					log.error("ComponentException!");
 				} catch (FatalDomainException e) {

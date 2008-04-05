@@ -1,6 +1,6 @@
 package com.drey.aramarok.domain.exceptions.component;
 
-public class ComponentNameAlreadyExistsException extends ComponentException {
+public class ComponentNameAlreadyExistsException extends ProductComponentException {
 	private static final long serialVersionUID = 9087562;
 
 	public ComponentNameAlreadyExistsException() {

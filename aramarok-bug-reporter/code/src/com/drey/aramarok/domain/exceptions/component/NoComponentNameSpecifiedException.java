@@ -1,6 +1,6 @@
 package com.drey.aramarok.domain.exceptions.component;
 
-public class NoComponentNameSpecifiedException extends ComponentException {
+public class NoComponentNameSpecifiedException extends ProductComponentException {
 	private static final long serialVersionUID = 9087562;
 
 	public NoComponentNameSpecifiedException() {

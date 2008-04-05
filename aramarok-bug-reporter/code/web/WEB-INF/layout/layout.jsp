@@ -12,7 +12,7 @@
 	
 	<body> 
 	<f:view>
-	<f:loadBundle basename="com.drey.aramarok.web.aramarok" var="general"/>
+	<f:loadBundle basename="com.drey.aramarok.web.resources.aramarok" var="general"/>
 		<h:messages />
 		<h:form>
 		<table class="layout-div" align="center">

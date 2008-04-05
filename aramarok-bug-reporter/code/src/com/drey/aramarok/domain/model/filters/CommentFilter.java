@@ -1,4 +1,4 @@
-package com.drey.aramarok.domain.service;
+package com.drey.aramarok.domain.model.filters;
 
 import java.util.List;
 

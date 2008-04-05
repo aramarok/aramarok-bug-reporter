@@ -1,8 +1,11 @@
 package com.drey.aramarok.domain.service;
 
+/**
+ *  @author Tolnai.Andrei
+ */
+
 import java.io.Serializable;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -20,32 +23,16 @@ import javax.persistence.Query;
 import org.apache.log4j.Logger;
 
 import com.drey.aramarok.domain.exceptions.ExternalSystemException;
-import com.drey.aramarok.domain.exceptions.FatalDomainException;
 import com.drey.aramarok.domain.exceptions.bug.BugException;
 import com.drey.aramarok.domain.exceptions.bug.BugStatusChangeException;
-import com.drey.aramarok.domain.exceptions.component.ComponentException;
-import com.drey.aramarok.domain.exceptions.component.ComponentNameAlreadyExistsException;
-import com.drey.aramarok.domain.exceptions.component.ComponentNotFoundException;
-import com.drey.aramarok.domain.exceptions.component.NoComponentNameSpecifiedException;
-import com.drey.aramarok.domain.exceptions.login.DisabledAccountException;
-import com.drey.aramarok.domain.exceptions.login.InvalidPasswordException;
-import com.drey.aramarok.domain.exceptions.login.InvalidUserNameException;
+import com.drey.aramarok.domain.exceptions.component.ProductComponentException;
 import com.drey.aramarok.domain.exceptions.login.LoginException;
-import com.drey.aramarok.domain.exceptions.product.NoProductNameSpecifiedException;
 import com.drey.aramarok.domain.exceptions.product.ProductException;
-import com.drey.aramarok.domain.exceptions.product.ProductNameAlreadyExistsException;
-import com.drey.aramarok.domain.exceptions.product.ProductNotFoundException;
-import com.drey.aramarok.domain.exceptions.register.NoPasswordException;
-import com.drey.aramarok.domain.exceptions.register.NoUserNameException;
 import com.drey.aramarok.domain.exceptions.register.RegisterException;
-import com.drey.aramarok.domain.exceptions.register.UserNameAlreadyExistsException;
 import com.drey.aramarok.domain.exceptions.register.UserNotFoundException;
 import com.drey.aramarok.domain.exceptions.user.UserException;
 import com.drey.aramarok.domain.exceptions.user.UserHasNoRightException;
-import com.drey.aramarok.domain.exceptions.version.NoVersionNameSpecifiedException;
-import com.drey.aramarok.domain.exceptions.version.VersionException;
-import com.drey.aramarok.domain.exceptions.version.VersionNameAlreadyExistsException;
-import com.drey.aramarok.domain.exceptions.version.VersionNotFoundException;
+import com.drey.aramarok.domain.exceptions.version.ComponentVersionException;
 import com.drey.aramarok.domain.model.Bug;
 import com.drey.aramarok.domain.model.BugGeneralStatus;
 import com.drey.aramarok.domain.model.Comment;
@@ -60,7 +47,8 @@ import com.drey.aramarok.domain.model.Role;
 import com.drey.aramarok.domain.model.SavedSearch;
 import com.drey.aramarok.domain.model.Severity;
 import com.drey.aramarok.domain.model.User;
-import com.drey.aramarok.domain.model.UserStatus;
+import com.drey.aramarok.domain.model.filters.BugFilter;
+import com.drey.aramarok.domain.model.filters.CommentFilter;
 
 @Stateful
 @Local(DomainFacade.class)
@@ -83,68 +71,43 @@ public class DomainFacadeBean implements DomainFacade, Serializable {
 	@EJB
 	private DomainService domainService;
 	
+	@EJB
+	private UserService userService;
+	
+	@EJB
+	private BugService bugService;
+	
+	@EJB
+	private ProductService productService;
+	
+	@EJB
+	private ProductComponentService componentService;
+	
+	@EJB
+	private ComponentVersionService versionService;
+	
 	@Remove
 	public synchronized void stopSessionBean() {
 		aramarokLog.info("User logged off: " + user.getUserName());
 	}
 	
-	public synchronized User login(String username, String password) throws FatalDomainException, LoginException {
-		log.info("Trying to find user.");
-		
+	public synchronized User login(String username, String password) throws ExternalSystemException, LoginException {
 		try {
-			user = domainService.findUser(username);
-			if (user == null) {
-				throw new InvalidUserNameException("Invalid userName!");
-			}
-			if (user.getStatus() == null){
-				user.setStatus(UserStatus.ACTIVE);
-			}
-			if (user.getStatus() == UserStatus.DISABLED){
-				throw new DisabledAccountException("The account is disabled!");
-			}
-			if (user.getRole() == null){ //if no role was selected for the user, we assume the account is disabled 
-				throw new DisabledAccountException("The account is disabled!");
-			}
-			if (user.getPassword().compareTo(password) != 0){
-				throw new InvalidPasswordException("Password is invalid!");
-			}
-			
+			user = userService.login(username, password);
+			log.info("User found: " + user.getName());
+			aramarokLog.info("User logged in: " + user.getUserName());
 		} catch (PersistenceException ex) {
 			throw new ExternalSystemException(DB_ERROR_MSG, ex);
 		}
-		
-		log.info("User found: " + user.getName());
-		
-		aramarokLog.info("User logged in: " + user.getUserName());
-		/*
-		if (user != null){
-			user.preLoadRights();
-		}
-		*/
 		return user;
 	}
 	
 	public synchronized User getUser(String userName){
-		return domainService.findUser(userName);
+		return userService.findUser(userName);
 	}
 	
-	public synchronized void registerNewUser(String userName, String password, String emailAddress, String firstName, String lastName, String middleName) throws FatalDomainException, RegisterException {
-		log.info("Trying to register user name: " + userName);
+	public synchronized void registerNewUser(String userName, String password, String emailAddress, String firstName, String lastName, String middleName) throws ExternalSystemException, RegisterException {
 		try {
-			user = domainService.findUser(userName);
-			if (user != null) {
-				throw new UserNameAlreadyExistsException("User with specified user name already exists!");
-			}
-			if (userName.trim().compareTo("") == 0) {
-				throw new NoUserNameException("No user name was specified!");
-			}
-			if (password.trim().compareTo("") == 0) {
-				throw new NoPasswordException("No password was specified!");
-			}
-			
-			User newUser = new User(userName, UserStatus.ACTIVE, firstName, lastName, middleName, emailAddress, new Date());
-			newUser.setPassword(password);
-			
 			String roleName = "Guest";
 			List<Role> roleList = getAllRoles();
 			Role selectedRole = null;
@@ -152,10 +115,7 @@ public class DomainFacadeBean implements DomainFacade, Serializable {
 				if (r.getName().compareTo(roleName) == 0)
 					selectedRole = r;
 			}
-			
-			newUser.setRole(selectedRole);
-			
-			entityManager.persist(newUser);
+			userService.registerNewUser(userName, password, emailAddress, firstName, lastName, middleName, selectedRole);
 			aramarokLog.info("User name '" + userName + "' was registered.");
 		} catch (PersistenceException ex) {
 			throw new ExternalSystemException(DB_ERROR_MSG, ex);
@@ -163,76 +123,30 @@ public class DomainFacadeBean implements DomainFacade, Serializable {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public synchronized void modifyUser(Long idOfUser, User newUserData) throws FatalDomainException, RegisterException {
-		log.info("Trying to modify user with ID: " + idOfUser);
-		if (idOfUser != null) {
-			try {
-				User user = entityManager.find(User.class, idOfUser);
-				
-				if (user == null) {
-					throw new UserNotFoundException("User with id " + idOfUser.toString() + " does not exist in the DB!");
-				}
-				if (newUserData.getUserName().trim().compareTo("") == 0) {
-					throw new NoUserNameException("No user name was specified!");
-				}
-				if (newUserData.getPassword().trim().compareTo("") == 0) {
-					throw new NoPasswordException("No password was specified!");
-				}
-				
-				List<User> listOfUsers = (List<User>)entityManager.createNamedQuery("User.findUserByUserName").setParameter("userName", newUserData.getUserName()).getResultList();
-				if (listOfUsers.size() > 0 ) {
-					for (Iterator<User> i=listOfUsers.iterator(); i.hasNext();){
-						User cUser = i.next();
-						if (cUser.getId().compareTo(idOfUser) != 0 ){
-							throw new UserNameAlreadyExistsException("User with specified user name already exists!");
-						}
-					}
-				}
-				
-				user.setUserName(newUserData.getUserName());
-				user.setPassword(newUserData.getPassword());
-				user.setEmailAddress(newUserData.getEmailAddress());
-				user.setFirstName(newUserData.getFirstName());
-				user.setMiddleName(newUserData.getMiddleName());
-				user.setLastName(newUserData.getLastName());
-				user.setRole(newUserData.getRole());
-				user.setStatus(newUserData.getStatus());
-				
-				aramarokLog.info("User with user name '" + user.getUserName() + "' was modified.");
-			} catch (PersistenceException ex) {
-				throw new ExternalSystemException(DB_ERROR_MSG, ex);
-			}
-		} else {
-			throw new RegisterException("Specified ID was NULL.");
+	public synchronized void modifyUser(Long idOfUser, User newUserData, boolean modifyPassword) throws ExternalSystemException, RegisterException {
+		try {
+			userService.modifyUser(idOfUser, newUserData, modifyPassword);
+			aramarokLog.info("User with user name '" + newUserData.getUserName() + "' was modified.");
+		} catch (PersistenceException ex) {
+			throw new ExternalSystemException(DB_ERROR_MSG, ex);
 		}
 	}
 	
 	public synchronized Product getProduct(String productName){
-		return domainService.findProduct(productName);
+		return productService.findProduct(productName);
 	}
 	
-	public synchronized ProductComponent getComponent(String componentName){
-		return domainService.findProductComponent(componentName);
+	public synchronized ProductComponent getProductComponent(String productComponentName){
+		return componentService.findProductComponent(productComponentName);
 	}
 	
-	public synchronized ComponentVersion getVersion(String versionName){
-		return domainService.findComponentVersion(versionName);
+	public synchronized ComponentVersion getComponentVersion(String componentVersionName){
+		return versionService.findComponentVersion(componentVersionName);
 	}
 	
-	public synchronized void addNewProduct(String productName, String productDescription, Set<ProductComponent> productComponents) throws FatalDomainException, ProductException {
-		log.info("Trying to add a new product: " + productName + ".");
+	public synchronized void addNewProduct(String productName, String productDescription, Set<ProductComponent> productComponents) throws ExternalSystemException, ProductException {
 		try {
-			Product product = domainService.findProduct(productName);
-			if (product != null) {
-				throw new ProductNameAlreadyExistsException("Product with specified product name already exists!");
-			}
-			if (productName.trim().compareTo("") == 0) {
-				throw new NoProductNameSpecifiedException("No product name was specified!");
-			}
-			
-			Product newProduct = new Product(productName, productDescription, productComponents);
-			
-			entityManager.persist(newProduct);
+			productService.addNewProduct(productName, productDescription, productComponents);
 			aramarokLog.info("New product added: '" + productName + "'.");
 		} catch (PersistenceException ex) {
 			throw new ExternalSystemException(DB_ERROR_MSG, ex);
@@ -240,75 +154,47 @@ public class DomainFacadeBean implements DomainFacade, Serializable {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public synchronized void modifyProduct(Long idOfProduct, Product newProductData) throws FatalDomainException, ProductException {
-		log.info("Trying to modify product with ID: " + idOfProduct);
-		if (idOfProduct != null) {
-			try {
-				Product product = entityManager.find(Product.class, idOfProduct);
-				
-				if (product == null) {
-					throw new ProductNotFoundException("Product with id " + idOfProduct.toString() + " does not exist in the DB!");
-				}
-				if (product.getName().trim().compareTo("") == 0) {
-					throw new NoProductNameSpecifiedException("No product name was specified!");
-				}
-				
-				List<Product> listOfProducts = (List<Product>)entityManager.createNamedQuery("Product.findProductByProductName").setParameter("productName", newProductData.getName()).getResultList();
-				if (listOfProducts.size() > 0 ) {
-					for (Iterator<Product> i=listOfProducts.iterator(); i.hasNext();){
-						Product cProduct = i.next();
-						if (cProduct.getId().compareTo(idOfProduct) != 0 ){
-							throw new ProductNameAlreadyExistsException("Product with specified product name already exists!");
-						}
-					}
-				}
-				
-				product.setName(newProductData.getName());
-				product.setDescription(newProductData.getDescription());
-				product.setComponents(newProductData.getComponents());
-				aramarokLog.info("Product with name '" + product.getName() + "' was modified.");
-				// aramarokLog.info(domainService.currentDateAndTime() + " - Product with name '" + product.getName() + "' was modified."); 
-			} catch (PersistenceException ex) {
-				throw new ExternalSystemException(DB_ERROR_MSG, ex);
-			}
-		} else {
-			throw new ProductException("Specified ID was NULL.");
+	public synchronized void modifyProduct(Long idOfProduct, Product newProductData) throws ExternalSystemException, ProductException {
+		try {
+			productService.modifyProduct(idOfProduct, newProductData);
+			aramarokLog.info("Product with name '" + newProductData.getName() + "' was modified.");
+			// aramarokLog.info(domainService.currentDateAndTime() + " - Product with name '" + product.getName() + "' was modified."); 
+		} catch (PersistenceException ex) {
+			throw new ExternalSystemException(DB_ERROR_MSG, ex);
 		}
 	}
 	
-	public synchronized void addNewProductComponent(String componentName, String componentDescription, Product parentProduct, Set<ComponentVersion> componentVersions) throws FatalDomainException, ComponentException {
-		log.info("Trying to add a new component: " + componentName + ".");
+	public synchronized void addNewProductComponent(String productComponentName, String productComponentDescription, Product parentProduct, List<ComponentVersion> componentVersions) throws ExternalSystemException, ProductComponentException {
 		if (parentProduct != null) {
+			Product product = productService.findProduct(parentProduct.getName());
+			if (product == null){
+				log.error("The 'parentProduct' was not found in the DB!");
+				throw new ProductComponentException("The 'parentProduct' was not found in the DB!");
+			}
+			
+			ProductComponent newComponent = null;
 			try {
-				ProductComponent component = domainService.findProductComponent(componentName);
-				if (component != null) {
-					throw new ComponentNameAlreadyExistsException("Component with specified component name already exists!");
-				}
-				if (componentName.trim().compareTo("") == 0) {
-					throw new NoComponentNameSpecifiedException("No component name was specified!");
-				}
-				
-				ProductComponent newComponent = new ProductComponent(componentName, componentDescription, componentVersions);
-				
-				entityManager.persist(newComponent);
-				aramarokLog.info("New component added: '" + componentName + "'.");
-				
-				// here we add the new component to the specified product
-				Product product = domainService.findProduct(parentProduct.getName());
-				if (product != null){
-					product.addComponent(newComponent);
-				}
-				
+				newComponent = componentService.addNewProductComponent(productComponentName, productComponentDescription, componentVersions);
+				aramarokLog.info("New product component added: '" + productComponentName + "'.");
+			} catch (PersistenceException ex) {
+				throw new ExternalSystemException(DB_ERROR_MSG, ex);
+			}
+			
+			// here we add the new product component to the specified product
+			product.addComponent(newComponent);
+			try {
+				entityManager.flush();
+				//TODO: is this correct?
 			} catch (PersistenceException ex) {
 				throw new ExternalSystemException(DB_ERROR_MSG, ex);
 			}
 		} else {
 			log.error("The 'parentProduct' parrameter was NULL!");
-			throw new ComponentException("The 'parentProduct' parrameter was NULL!");
+			throw new ProductComponentException("The 'parentProduct' parrameter was NULL!");
 		}
 	}
 	
-	public synchronized Long commitBug(Bug bug) throws FatalDomainException, BugException, UserException {
+	public synchronized Long commitBug(Bug bug) throws ExternalSystemException, BugException, UserException {
 		log.info("Trying to commit a bug.");
 		if (bug == null)
 			throw new BugException();
@@ -415,7 +301,7 @@ public class DomainFacadeBean implements DomainFacade, Serializable {
 	}
 	
 	public synchronized Bug getBug(Long bugId){
-		return domainService.getBug(bugId);
+		return bugService.getBug(bugId);
 	}
 	
 	public synchronized List<Comment> getComments(CommentFilter commentFilter){
@@ -423,7 +309,7 @@ public class DomainFacadeBean implements DomainFacade, Serializable {
 	}
 	
 	public synchronized List<Bug> getBugs(BugFilter bugFilter){
-		return domainService.getBugs(bugFilter);
+		return bugService.getBugs(bugFilter);
 	}
 	
 	public synchronized Priority getPriority(String priorityName){
@@ -461,108 +347,51 @@ public class DomainFacadeBean implements DomainFacade, Serializable {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public synchronized void modifyComponent(Long idOfComponent, ProductComponent newComponentData) throws FatalDomainException, ComponentException {
-		log.info("Trying to modify component with ID: " + idOfComponent);
-		if (idOfComponent != null) {
-			try {
-				ProductComponent component = entityManager.find(ProductComponent.class, idOfComponent);
-				
-				if (component == null) {
-					throw new ComponentNotFoundException("Component with id " + idOfComponent.toString() + " does not exist in the DB!");
-				}
-				if (component.getName().trim().compareTo("") == 0) {
-					throw new NoComponentNameSpecifiedException("No component name was specified!");
-				}
-				
-				List<ProductComponent> listOfComponents = (List<ProductComponent>)entityManager.createNamedQuery("Component.findComponentByComponentName").setParameter("componentName", newComponentData.getName()).getResultList();
-				if (listOfComponents.size() > 0 ) {
-					for (Iterator<ProductComponent> i=listOfComponents.iterator(); i.hasNext();){
-						ProductComponent cProduct = i.next();
-						if (cProduct.getId().compareTo(idOfComponent) != 0 ){
-							throw new ComponentNameAlreadyExistsException("Component with specified component name already exists!");
-						}
-					}
-				}
-				
-				component.setName(newComponentData.getName());
-				component.setDescription(newComponentData.getDescription());
-				//component.setVersions(newComponentData.getVersions());
-				aramarokLog.info("Component with name '" + component.getName() + "' was modified.");
-				// aramarokLog.info(domainService.currentDateAndTime() + " - Product with name '" + product.getName() + "' was modified."); 
-			} catch (PersistenceException ex) {
-				throw new ExternalSystemException(DB_ERROR_MSG, ex);
-			}
-		} else {
-			throw new ComponentException("Specified ID was NULL.");
+	public synchronized void modifyProductComponent(Long idOfProductComponent, ProductComponent newProductComponentData) throws ExternalSystemException, ProductComponentException {
+		try {
+			componentService.modifyProductComponent(idOfProductComponent, newProductComponentData);
+			aramarokLog.info("Product component version with name '" + newProductComponentData.getName() + "' was modified.");
+		} catch (PersistenceException pe){
+			throw new ExternalSystemException(DB_ERROR_MSG, pe);
 		}
 	}
 	
 	@SuppressWarnings("unchecked")
-	public synchronized void modifyVersion(Long idOfVersion, ComponentVersion newVersionData) throws FatalDomainException, VersionException {
-		log.info("Trying to modify version with ID: " + idOfVersion);
-		if (idOfVersion != null) {
-			try {
-				ComponentVersion version = entityManager.find(ComponentVersion.class, idOfVersion);
-				
-				if (version == null) {
-					throw new VersionNotFoundException("Version with id " + idOfVersion.toString() + " does not exist in the DB!");
-				}
-				if (version.getName().trim().compareTo("") == 0) {
-					throw new NoVersionNameSpecifiedException("No version name was specified!");
-				}
-				
-				List<ComponentVersion> listOfVersions = (List<ComponentVersion>)entityManager.createNamedQuery("Version.findVersionsByVersionName").setParameter("versionName", newVersionData.getName()).getResultList();
-				if (listOfVersions.size() > 0 ) {
-					for (Iterator<ComponentVersion> i=listOfVersions.iterator(); i.hasNext();){
-						ComponentVersion cVersion = i.next();
-						if (cVersion.getId().compareTo(idOfVersion) != 0 ){
-							throw new VersionNameAlreadyExistsException("Version with specified version name already exists!");
-						}
-					}
-				}
-				
-				version.setName(newVersionData.getName());
-				version.setDescription(newVersionData.getDescription());
-				version.setUserAssigned(newVersionData.getUserAssigned());
-				aramarokLog.info("Version with name '" + version.getName() + "' was modified.");
-				// aramarokLog.info(domainService.currentDateAndTime() + " - Product with name '" + product.getName() + "' was modified."); 
-			} catch (PersistenceException ex) {
-				throw new ExternalSystemException(DB_ERROR_MSG, ex);
-			}
-		} else {
-			throw new VersionException("Specified ID was NULL.");
+	public synchronized void modifyComponentVersion(Long idOfComponentVersion, ComponentVersion newComponentVersionData) throws ExternalSystemException, ComponentVersionException {
+		try {
+			versionService.modifyComponentVersion(idOfComponentVersion, newComponentVersionData);
+			aramarokLog.info("Component version with name '" + newComponentVersionData.getName() + "' was modified.");
+		} catch (PersistenceException pe){
+			throw new ExternalSystemException(DB_ERROR_MSG, pe);
 		}
 	}
 	
-	public synchronized void addNewComponentVersion(String versionName, String versionDescription, ProductComponent parentComponent, User userAssignedTo) throws FatalDomainException, VersionException {
-		log.info("Trying to add a new version: " + versionName + ".");
-		if (parentComponent != null) {
+	public synchronized void addNewComponentVersion(String componentVersionName, String componentVersionDescription, ProductComponent parentProductComponent, User userAssignedTo) throws ExternalSystemException, ComponentVersionException {
+		if (parentProductComponent != null){
+			ProductComponent component = componentService.findProductComponent(parentProductComponent.getName());
+			if (component == null){
+				log.error("The 'parentProductComponent' was not found in the DB!");
+				throw new ComponentVersionException("The 'parentProductComponent' was not found in the DB!");
+			}
+			ComponentVersion newComponentVersion = null;
 			try {
-				ComponentVersion version = domainService.findComponentVersion(versionName);
-				if (version != null) {
-					throw new VersionNameAlreadyExistsException("Version with specified version name already exists!");
-				}
-				if (versionName.trim().compareTo("") == 0) {
-					throw new NoVersionNameSpecifiedException("No version name was specified!");
-				}
-				
-				ComponentVersion newVersion = new ComponentVersion(versionName, versionDescription, userAssignedTo);
-				
-				entityManager.persist(newVersion);
-				aramarokLog.info("New version added: '" + versionName + "'.");
-				
-				// here we add the new version to the specified component
-				ProductComponent component = domainService.findProductComponent(parentComponent.getName());
-				if (component != null){
-					component.addVersion(newVersion);
-				}
-				
-			} catch (PersistenceException ex) {
-				throw new ExternalSystemException(DB_ERROR_MSG, ex);
+				newComponentVersion = versionService.addNewComponentVersion(componentVersionName, componentVersionDescription, userAssignedTo);
+				aramarokLog.info("New component version added: '" + componentVersionName + "'.");
+			} catch (PersistenceException pe){
+				throw new ExternalSystemException(DB_ERROR_MSG, pe);
+			}
+			
+			// here we add the new version to the specified component
+			component.addVersion(newComponentVersion);
+			try {
+				entityManager.flush();
+				//TODO: is correct here?
+			} catch (PersistenceException pe){
+				throw new ExternalSystemException(DB_ERROR_MSG, pe);
 			}
 		} else {
-			log.error("The 'parentComponent' parrameter was NULL!");
-			throw new VersionException("The 'parentComponent' parrameter was NULL!");
+			log.error("The 'parentProductComponent' parrameter was NULL!");
+			throw new ComponentVersionException("The 'parentProductComponent' parrameter was NULL!");
 		}
 	}
 	
@@ -579,28 +408,23 @@ public class DomainFacadeBean implements DomainFacade, Serializable {
 	
 	@SuppressWarnings("unchecked")
 	public List<User> getAllUsers() throws ExternalSystemException{
-		log.info("Get all users.");
 		try {
-			Query query = entityManager.createNamedQuery("User.findAll");
-			return (List<User>) query.getResultList();
+			return userService.getAllUsers();
 		} catch (PersistenceException ex) {
 			throw new ExternalSystemException(DB_ERROR_MSG, ex);
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
 	public List<Product> getAllProducts() throws ExternalSystemException{
-		log.info("Get all products.");
-		try {
-			Query query = entityManager.createNamedQuery("Product.allProducts");
-			return (List<Product>) query.getResultList();
+		try{
+			return productService.getAllProducts();
 		} catch (PersistenceException ex) {
 			throw new ExternalSystemException(DB_ERROR_MSG, ex);
 		}
 	}
 	
 	@SuppressWarnings("unchecked")
-	public List<ProductComponent> getAllComponents() throws ExternalSystemException{
+	public List<ProductComponent> getAllProductComponents() throws ExternalSystemException{
 		log.info("Get all components.");
 		try {
 			Query query = entityManager.createNamedQuery("Component.allComponents");
@@ -611,11 +435,9 @@ public class DomainFacadeBean implements DomainFacade, Serializable {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public List<ComponentVersion> getAllVersions() throws ExternalSystemException{
-		log.info("Get all versions.");
-		try {
-			Query query = entityManager.createNamedQuery("Version.allVersions");
-			return (List<ComponentVersion>) query.getResultList();
+	public List<ComponentVersion> getAllComponentVersions() throws ExternalSystemException{
+		try{
+			return versionService.getAllComponentVersions();
 		} catch (PersistenceException ex) {
 			throw new ExternalSystemException(DB_ERROR_MSG, ex);
 		}

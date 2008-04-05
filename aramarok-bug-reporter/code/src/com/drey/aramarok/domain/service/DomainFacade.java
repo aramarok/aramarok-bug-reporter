@@ -1,18 +1,22 @@
 package com.drey.aramarok.domain.service;
 
+/**
+ *  @author Tolnai.Andrei
+ */
+
 import java.util.List;
 import java.util.Set;
 
 import com.drey.aramarok.domain.exceptions.ExternalSystemException;
 import com.drey.aramarok.domain.exceptions.FatalDomainException;
 import com.drey.aramarok.domain.exceptions.bug.BugException;
-import com.drey.aramarok.domain.exceptions.component.ComponentException;
+import com.drey.aramarok.domain.exceptions.component.ProductComponentException;
 import com.drey.aramarok.domain.exceptions.login.LoginException;
 import com.drey.aramarok.domain.exceptions.product.ProductException;
 import com.drey.aramarok.domain.exceptions.register.RegisterException;
 import com.drey.aramarok.domain.exceptions.register.UserNotFoundException;
 import com.drey.aramarok.domain.exceptions.user.UserException;
-import com.drey.aramarok.domain.exceptions.version.VersionException;
+import com.drey.aramarok.domain.exceptions.version.ComponentVersionException;
 import com.drey.aramarok.domain.model.Bug;
 import com.drey.aramarok.domain.model.Comment;
 import com.drey.aramarok.domain.model.ComponentVersion;
@@ -25,6 +29,8 @@ import com.drey.aramarok.domain.model.Role;
 import com.drey.aramarok.domain.model.SavedSearch;
 import com.drey.aramarok.domain.model.Severity;
 import com.drey.aramarok.domain.model.User;
+import com.drey.aramarok.domain.model.filters.BugFilter;
+import com.drey.aramarok.domain.model.filters.CommentFilter;
 
 public interface DomainFacade {
 	
@@ -45,7 +51,7 @@ public interface DomainFacade {
 	 * @param password
 	 * @return an instance of User, with roles & rights collections initialized.
 	 */
-	public User login(String userName, String password) throws FatalDomainException, LoginException;
+	public User login(String userName, String password) throws ExternalSystemException, LoginException;
 	
 	
 	/**
@@ -69,17 +75,18 @@ public interface DomainFacade {
 	 * @throws FatalDomainException
 	 * @throws RegisterException
 	 */
-	public void registerNewUser(String userName, String password, String emailAddress, String firstName, String lastName, String middleName) throws FatalDomainException, RegisterException;
+	public void registerNewUser(String userName, String password, String emailAddress, String firstName, String lastName, String middleName) throws ExternalSystemException, RegisterException;
 	
 	
 	/**
 	 * 
 	 * @param idOfUser
 	 * @param newUserData
+	 * @param modifyPassword
 	 * @throws FatalDomainException
 	 * @throws RegisterException
 	 */
-	public void modifyUser(Long idOfUser, User newUserData) throws FatalDomainException, RegisterException;
+	public void modifyUser(Long idOfUser, User newUserData, boolean modifyPassword) throws ExternalSystemException, RegisterException;
 	
 	
 	/**
@@ -146,47 +153,19 @@ public interface DomainFacade {
 	public Product getProduct(String productName);
 	
 	
-	/**
-	 * 
-	 * @param productName
-	 * @param productDescription
-	 * @param productComponents
-	 * @throws FatalDomainException
-	 * @throws ProductException
-	 */
-	public void addNewProduct(String productName, String productDescription, Set<ProductComponent> productComponents) throws FatalDomainException, ProductException;
+
+	public void addNewProduct(String productName, String productDescription, Set<ProductComponent> productComponents) throws ExternalSystemException, ProductException;
 	
 	
-	/**
-	 * 
-	 * @param idOfProduct
-	 * @param newProductData
-	 * @throws FatalDomainException
-	 * @throws ProductException
-	 */
-	public void modifyProduct(Long idOfProduct, Product newProductData) throws FatalDomainException, ProductException;
+
+	public void modifyProduct(Long idOfProduct, Product newProductData) throws ExternalSystemException, ProductException;
 	
 	
-	/**
-	 * 
-	 * @param componentName
-	 * @param componentDescription
-	 * @param parentProduct
-	 * @param componentVersions
-	 * @throws FatalDomainException
-	 * @throws ComponentException
-	 */
-	public void addNewProductComponent(String componentName, String componentDescription, Product parentProduct, Set<ComponentVersion> componentVersions) throws FatalDomainException, ComponentException;
+	
+	public void addNewProductComponent(String productComponentName, String productComponentDescription, Product parentProduct, List<ComponentVersion> componentVersions) throws ExternalSystemException, ProductComponentException;
 	
 	
-	/**
-	 * 
-	 * @param bug
-	 * @throws FatalDomainException
-	 * @throws BugException
-	 * @throws UserException
-	 */
-	public Long commitBug(Bug bug) throws FatalDomainException, BugException, UserException;
+	public Long commitBug(Bug bug) throws ExternalSystemException, BugException, UserException;
 	
 	
 	/**
@@ -255,36 +234,14 @@ public interface DomainFacade {
 	public void addASavedBugFilterToUser(Long idOfUser, SavedSearch savedSearch) throws UserNotFoundException, ExternalSystemException;
 	
 	
-	/**
-	 * 
-	 * @param versionName
-	 * @param versionDescription
-	 * @param parentComponent
-	 * @param userAssignedTo
-	 * @throws FatalDomainException
-	 * @throws VersionException
-	 */
-	public void addNewComponentVersion(String versionName, String versionDescription, ProductComponent parentComponent, User userAssignedTo) throws FatalDomainException, VersionException;
+
+	public void addNewComponentVersion(String componentVersionName, String componentVersionDescription, ProductComponent parentProductComponent, User userAssignedTo) throws ExternalSystemException, ComponentVersionException;
 
 	
-	/**
-	 * 
-	 * @param idOfVersion
-	 * @param newVersionData
-	 * @throws FatalDomainException
-	 * @throws VersionException
-	 */
-	public void modifyVersion(Long idOfVersion, ComponentVersion newVersionData) throws FatalDomainException, VersionException;
+	public void modifyComponentVersion(Long idOfComponentVersion, ComponentVersion newComponentVersionData) throws ExternalSystemException, ComponentVersionException;
 
 	
-	/**
-	 * 
-	 * @param idOfComponent
-	 * @param newComponentData
-	 * @throws FatalDomainException
-	 * @throws ComponentException
-	 */
-	public void modifyComponent(Long idOfComponent, ProductComponent newComponentData) throws FatalDomainException, ComponentException;
+	public void modifyProductComponent(Long idOfProductComponent, ProductComponent newProductComponentData) throws ExternalSystemException, ProductComponentException;
 	
 	
 	/**
@@ -292,7 +249,7 @@ public interface DomainFacade {
 	 * @param componentName
 	 * @return
 	 */
-	public ProductComponent getComponent(String componentName);
+	public ProductComponent getProductComponent(String componentName);
 	
 	
 	/**
@@ -300,7 +257,7 @@ public interface DomainFacade {
 	 * @param versionName
 	 * @return
 	 */
-	public ComponentVersion getVersion(String versionName);
+	public ComponentVersion getComponentVersion(String componentVersionName);
 	
 	
 	/**
@@ -308,7 +265,7 @@ public interface DomainFacade {
 	 * @return
 	 * @throws ExternalSystemException
 	 */
-	public List<ProductComponent> getAllComponents() throws ExternalSystemException;
+	public List<ProductComponent> getAllProductComponents() throws ExternalSystemException;
 	
 	
 	/**
@@ -316,5 +273,5 @@ public interface DomainFacade {
 	 * @return
 	 * @throws ExternalSystemException
 	 */
-	public List<ComponentVersion> getAllVersions() throws ExternalSystemException;
+	public List<ComponentVersion> getAllComponentVersions() throws ExternalSystemException;
 }

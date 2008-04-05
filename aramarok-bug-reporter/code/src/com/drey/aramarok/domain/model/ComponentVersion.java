@@ -17,8 +17,8 @@ import javax.persistence.Version;
 @Entity
 @Table(name = "VERSION")
 @NamedQueries( {
-		@NamedQuery(name = "Version.findVersionsByVersionName", query = "SELECT v from ComponentVersion as v WHERE v.name = :versionName"),
-		@NamedQuery(name = "Version.allVersions", query = "SELECT v from ComponentVersion as v ORDER BY v.id ASC")
+		@NamedQuery(name = "ComponentVersion.findVersionsByVersionName", query = "SELECT v from ComponentVersion as v WHERE v.name = :versionName"),
+		@NamedQuery(name = "ComponentVersion.allVersions", query = "SELECT v from ComponentVersion as v ORDER BY v.id ASC")
 		})
 public class ComponentVersion implements Serializable {
 	@Id

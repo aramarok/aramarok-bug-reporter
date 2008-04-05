@@ -1,0 +1,72 @@
+package com.drey.aramarok.domain.service;
+
+/**
+ * @author Tolnai.Andrei 
+ */
+
+import java.util.List;
+
+import javax.persistence.PersistenceException;
+
+import com.drey.aramarok.domain.exceptions.ExternalSystemException;
+import com.drey.aramarok.domain.exceptions.FatalDomainException;
+import com.drey.aramarok.domain.exceptions.login.LoginException;
+import com.drey.aramarok.domain.exceptions.register.RegisterException;
+import com.drey.aramarok.domain.model.Role;
+import com.drey.aramarok.domain.model.User;
+
+public interface UserService {
+
+	/**
+	 * 
+	 * @param userName
+	 * @return
+	 */
+	public User findUser(String userName);
+	
+	
+	/**
+	 * 
+	 * @return
+	 * @throws ExternalSystemException
+	 */
+	public List<User> getAllUsers() throws PersistenceException;
+	
+	
+	/**
+	 * 
+	 * @param username
+	 * @param password
+	 * @return
+	 * @throws FatalDomainException
+	 * @throws LoginException
+	 */
+	public User login(String username, String password) throws LoginException;
+	
+	
+	/**
+	 * 
+	 * @param userName
+	 * @param password
+	 * @param emailAddress
+	 * @param firstName
+	 * @param lastName
+	 * @param middleName
+	 * @param selectedRole
+	 * @throws FatalDomainException
+	 * @throws RegisterException
+	 */
+	public void registerNewUser(String userName, String password, String emailAddress, String firstName, String lastName, String middleName, Role selectedRole) throws PersistenceException, RegisterException ;
+	
+	
+	/**
+	 * 
+	 * @param idOfUser
+	 * @param newUserData
+	 * @param modifyPassword
+	 * @throws FatalDomainException
+	 * @throws RegisterException
+	 */
+	public void modifyUser(Long idOfUser, User newUserData, boolean modifyPassword) throws PersistenceException, RegisterException;
+
+}
