@@ -1,6 +1,6 @@
 package com.drey.aramarok.domain.exceptions.component;
 
-public class ComponentNotFoundException extends ComponentException {
+public class ComponentNotFoundException extends ProductComponentException {
 	private static final long serialVersionUID = 9087562;
 
 	public ComponentNotFoundException() {

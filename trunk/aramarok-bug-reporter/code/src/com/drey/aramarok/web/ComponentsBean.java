@@ -13,7 +13,7 @@ import org.apache.log4j.Logger;
 
 import com.drey.aramarok.domain.exceptions.ExternalSystemException;
 import com.drey.aramarok.domain.exceptions.FatalDomainException;
-import com.drey.aramarok.domain.exceptions.component.ComponentException;
+import com.drey.aramarok.domain.exceptions.component.ProductComponentException;
 import com.drey.aramarok.domain.exceptions.component.ComponentNotFoundException;
 import com.drey.aramarok.domain.exceptions.component.NoComponentNameSpecifiedException;
 import com.drey.aramarok.domain.exceptions.product.NoProductNameSpecifiedException;
@@ -137,7 +137,7 @@ public class ComponentsBean {
 					//editedProductObject.setVersions(versions);
 					
 					try {
-						facade.modifyComponent(editedProductObject.getId(), editedProductObject);
+						facade.modifyProductComponent(editedProductObject.getId(), editedProductObject);
 						reInitializeProductList();
 						editProduct = false;
 						loadSelectedProductsNameData();
@@ -145,7 +145,7 @@ public class ComponentsBean {
 						log.error("ComponentNotFoundException!");
 					} catch (NoComponentNameSpecifiedException e) {
 						log.error("NoComponentNameSpecifiedException!");
-					} catch (ComponentException e) {
+					} catch (ProductComponentException e) {
 						log.error("ComponentException!");
 					}
 				} catch (FatalDomainException e) {
@@ -189,7 +189,7 @@ public class ComponentsBean {
 	private void loadSelectedProductsNameData(){
 		if (productNameSelected != null){
 			DomainFacade facade = WebUtil.getDomainFacade();
-			editedProductObject = facade.getComponent(productNameSelected);
+			editedProductObject = facade.getProductComponent(productNameSelected);
 			if (editedProductObject != null){
 				name = editedProductObject.getName();
 				description = editedProductObject.getDescription();
@@ -221,7 +221,7 @@ public class ComponentsBean {
 		DomainFacade dom = WebUtil.getDomainFacade();
 		if (dom != null) {
 			try {
-				productNameList_in = dom.getAllComponents();
+				productNameList_in = dom.getAllProductComponents();
 			} catch (ExternalSystemException e) {
 				log.error("ExternalSystemException!");
 			}

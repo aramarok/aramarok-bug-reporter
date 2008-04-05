@@ -1,6 +1,6 @@
 package com.drey.aramarok.domain.exceptions.version;
 
-public class VersionNameAlreadyExistsException  extends VersionException {
+public class VersionNameAlreadyExistsException  extends ComponentVersionException {
 	private static final long serialVersionUID = 90875322;
 
 	public VersionNameAlreadyExistsException() {

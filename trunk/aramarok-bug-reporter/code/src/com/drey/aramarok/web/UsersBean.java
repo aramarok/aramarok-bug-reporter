@@ -129,9 +129,12 @@ public class UsersBean {
 			DomainFacade facade = WebUtil.getDomainFacade();
 			if (facade != null) {
 				try {
+					boolean passwordModified = false;
 					editedUserObject.setUserName(userName);
-					if (password.compareTo("")!=0) // else the password was not modified
+					if (password.compareTo("")!=0){ // else the password was not modified
 						editedUserObject.setPassword(password);
+						passwordModified = true;
+					}
 					editedUserObject.setEmailAddress(emailAddress);
 					editedUserObject.setFirstName(firstName);
 					editedUserObject.setMiddleName(middleName);
@@ -140,7 +143,7 @@ public class UsersBean {
 					editedUserObject.setStatus(UserStatus.getUserStatusByName(userStatusSelected));
 
 					try {
-						facade.modifyUser(editedUserObject.getId(), editedUserObject);
+						facade.modifyUser(editedUserObject.getId(), editedUserObject, passwordModified);
 						reInitializeUserList();
 						editUser = false;
 					} catch (UserNotFoundException e) {

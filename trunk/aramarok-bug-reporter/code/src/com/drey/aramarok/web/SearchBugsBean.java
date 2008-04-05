@@ -19,7 +19,7 @@ import com.drey.aramarok.domain.model.Priority;
 import com.drey.aramarok.domain.model.SavedSearch;
 import com.drey.aramarok.domain.model.Severity;
 import com.drey.aramarok.domain.model.User;
-import com.drey.aramarok.domain.service.BugFilter;
+import com.drey.aramarok.domain.model.filters.BugFilter;
 import com.drey.aramarok.domain.service.DomainFacade;
 import com.drey.aramarok.web.util.WebUtil;
 

@@ -2,6 +2,7 @@ package com.drey.aramarok.domain.model;
 
 import java.io.Serializable;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -25,8 +26,8 @@ import javax.persistence.Version;
 		uniqueConstraints={@UniqueConstraint(columnNames="NAME")}
 )
 @NamedQueries( {
-		@NamedQuery(name = "Component.findComponentByComponentName", query = "SELECT c from ProductComponent as c WHERE c.name = :componentName"),
-		@NamedQuery(name = "Component.allComponents", query = "SELECT c from ProductComponent as c ORDER BY c.id ASC")
+		@NamedQuery(name = "ProductComponent.findComponentByComponentName", query = "SELECT c from ProductComponent as c WHERE c.name = :componentName"),
+		@NamedQuery(name = "ProductComponent.allComponents", query = "SELECT c from ProductComponent as c ORDER BY c.id ASC")
 		})
 		
 public class ProductComponent implements Serializable {
@@ -62,7 +63,7 @@ public class ProductComponent implements Serializable {
 	public ProductComponent(){		
 	}
 	
-	public ProductComponent(String name, String description, Set<ComponentVersion> versions){
+	public ProductComponent(String name, String description, List<ComponentVersion> versions){
 		init(name, description, versions);
 	}
 	
@@ -70,10 +71,16 @@ public class ProductComponent implements Serializable {
 		init(name, description, null);
 	}
 	
-	private void init(String name, String description, Set<ComponentVersion> versions){
+	private void init(String name, String description, List<ComponentVersion> versions){
 		this.name = name;
 		this.description = description;
-		this.versions = versions;
+		Set<ComponentVersion> tmp = new HashSet<ComponentVersion>();
+		if (versions!= null && !versions.isEmpty()){
+			for (ComponentVersion cv: versions){
+				tmp.add(cv);
+			}
+		}
+		this.versions = tmp;
 	}
 
 	public void addVersion(ComponentVersion version){

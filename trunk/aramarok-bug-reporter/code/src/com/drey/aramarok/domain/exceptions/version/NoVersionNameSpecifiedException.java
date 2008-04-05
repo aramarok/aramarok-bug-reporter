@@ -1,6 +1,6 @@
 package com.drey.aramarok.domain.exceptions.version;
 
-public class NoVersionNameSpecifiedException extends VersionException {
+public class NoVersionNameSpecifiedException extends ComponentVersionException {
 	private static final long serialVersionUID = 903487562;
 
 	public NoVersionNameSpecifiedException() {
