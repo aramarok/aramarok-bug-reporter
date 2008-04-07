@@ -27,7 +27,6 @@ import javax.persistence.Version;
 		@NamedQuery(name = "Product.findProductByProductName", query = "SELECT prod from Product as prod WHERE prod.name = :productName"),
 		@NamedQuery(name = "Product.allProducts", query = "SELECT prod from Product as prod ORDER BY prod.id ASC")
 		})
-		
 public class Product implements Serializable {
 	@Id
 	@GeneratedValue
@@ -39,17 +38,23 @@ public class Product implements Serializable {
 	private static final long serialVersionUID = 0;
 
 	@Column(name = "NAME")
-	private String name = "";
+	private String name;
 	
 	@Column(name = "DESCRIPTION")
-	private String description = "";
+	private String description;
+	
+	@Column(name = "URL")
+	private String productURL;
+	
+	@Column(name = "CLOSE_FOR_BUG_ENTRY")
+	private boolean closeForBugEntry;
 	
 	@ManyToMany(cascade={CascadeType.ALL}, fetch=FetchType.EAGER)
 	@JoinTable(	name ="PRODUCT_COMPONENTS",
 				joinColumns = {@JoinColumn(name="prod_key", referencedColumnName="PRODUCT_ID", unique=false)},
 				inverseJoinColumns={@JoinColumn(name="comp_key", referencedColumnName="COMPONENT_ID", unique=false)}
 				)
-	private Set<ProductComponent> components;
+	private Set<ProductComponent> productComponents;
 	
 	public Product(){
 	}
@@ -65,13 +70,13 @@ public class Product implements Serializable {
 	private void init(String name, String description, Set<ProductComponent> components){
 		this.name = name;
 		this.description = description;
-		this.components = components;
+		this.productComponents = components;
 	}
 	
 	public void addComponent(ProductComponent component){
-		if (components == null)
-			components = new HashSet<ProductComponent>();
-		components.add(component);
+		if (productComponents == null)
+			productComponents = new HashSet<ProductComponent>();
+		productComponents.add(component);
 	}
 	
 	
@@ -100,11 +105,27 @@ public class Product implements Serializable {
 		this.description = description;
 	}
 
-	public Set<ProductComponent> getComponents() {
-		return components;
+	public Set<ProductComponent> getProductComponents() {
+		return productComponents;
 	}
 
-	public void setComponents(Set<ProductComponent> components) {
-		this.components = components;
+	public void setProductComponents(Set<ProductComponent> productComponents) {
+		this.productComponents = productComponents;
+	}
+
+	public String getProductURL() {
+		return productURL;
+	}
+
+	public void setProductURL(String productURL) {
+		this.productURL = productURL;
+	}
+
+	public boolean isCloseForBugEntry() {
+		return closeForBugEntry;
+	}
+
+	public void setCloseForBugEntry(boolean closeForBugEntry) {
+		this.closeForBugEntry = closeForBugEntry;
 	}
 }

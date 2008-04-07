@@ -1,5 +1,9 @@
 package com.drey.aramarok.domain.model;
 
+/**
+ * @author Tolnai.Andrei
+ */
+
 import java.io.Serializable;
 import java.util.Date;
 import java.util.HashSet;
@@ -20,8 +24,6 @@ import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
-
-
 @Entity
 @Table(name = "BUG")
 @NamedQueries( {
@@ -38,10 +40,10 @@ public class Bug implements Serializable {
 	private static final long serialVersionUID = 0;
 
 	@ManyToOne
-	@JoinColumn(name = "OWNER_ID")
+	@JoinColumn(name = "OWNER_ID", nullable=false)
 	private User owner;
 	
-	@Column(name = "OPEN_DATE")
+	@Column(name = "OPEN_DATE", nullable=false)
 	private Date openDate;
 	
 	@Column(name = "OBSERVED_DATE")
@@ -57,6 +59,13 @@ public class Bug implements Serializable {
 	@ManyToOne
 	@JoinColumn(name = "USER_ASSIGNED")
 	private User userAssignedTo;
+	
+	@ManyToMany(cascade={CascadeType.ALL}, fetch=FetchType.EAGER)
+	@JoinTable(	name ="BUG_CC",
+				joinColumns = {@JoinColumn(name="bug_key", referencedColumnName="BUG_ID", unique=false)},
+				inverseJoinColumns={@JoinColumn(name="cc_user_key", referencedColumnName="USER_ID", unique=false)}
+				)
+	private Set<User> ccUsers;
 	
 	@Column(name = "SUMMARY")
 	private String summary = "";
@@ -100,10 +109,20 @@ public class Bug implements Serializable {
 	@ManyToMany(cascade={CascadeType.ALL}, fetch=FetchType.EAGER)
 	@JoinTable(	name ="BUG_COMMENTS",
 				joinColumns = {@JoinColumn(name="bug_key", referencedColumnName="BUG_ID", unique=false)},
-				inverseJoinColumns={@JoinColumn(name="comm_key", referencedColumnName="COMMENT_ID", unique=false)}
+				inverseJoinColumns={@JoinColumn(name="comm_key", referencedColumnName="COMMENT_ID", unique=true)}
 				)
 	private Set<Comment> comments;
 
+	@ManyToMany(cascade={CascadeType.ALL}, fetch=FetchType.EAGER)
+	@JoinTable(	name ="BUG_HISTORIES",
+				joinColumns = {@JoinColumn(name="bug_key", referencedColumnName="BUG_ID", unique=false)},
+				inverseJoinColumns={@JoinColumn(name="bug_hist_key", referencedColumnName="BUG_HISTORY_ID", unique=true)}
+				)
+	private Set<BugHistory> bugHistory;
+	
+	@Column(name = "VOTES")
+	private int votes = 0;
+	
 	public Bug(){
 	}
 	
@@ -158,6 +177,32 @@ public class Bug implements Serializable {
 		if (comments == null)
 			comments = new HashSet<Comment>();
 		comments.add(comment);
+	}
+	
+	public void addBugHistory(BugHistory newBugHistory){
+		if (this.bugHistory == null)
+			this.bugHistory = new HashSet<BugHistory>();
+		this.bugHistory.add(newBugHistory);
+	}
+	
+	public void addUserToCC(User ccUser){
+		if (this.ccUsers == null)
+			this.ccUsers = new HashSet<User>();
+		this.ccUsers.add(ccUser);
+	}
+	
+	public void removeUserFromCC(User ccUser){
+		if (this.ccUsers != null && !this.ccUsers.isEmpty() && ccUser!= null && ccUser.getId()!=null){
+			for (User u: this.ccUsers){
+				if (ccUser.getId().compareTo(u.getId()) == 0){
+					this.ccUsers.remove(u);
+				}
+			}
+		}	
+	}
+	
+	public void addVote(){
+		this.votes ++;
 	}
 	
 	/* Getters/setter */
@@ -279,6 +324,30 @@ public class Bug implements Serializable {
 
 	public void setObservedDate(Date observedDate) {
 		this.observedDate = observedDate;
+	}
+
+	public Set<User> getCcUsers() {
+		return ccUsers;
+	}
+
+	public void setCcUsers(Set<User> ccUsers) {
+		this.ccUsers = ccUsers;
+	}
+
+	public Set<BugHistory> getBugHistory() {
+		return bugHistory;
+	}
+
+	public void setBugHistory(Set<BugHistory> bugHistory) {
+		this.bugHistory = bugHistory;
+	}
+
+	public int getVotes() {
+		return votes;
+	}
+
+	public void setVotes(int votes) {
+		this.votes = votes;
 	}
 
 	public User getUserAssignedTo() {

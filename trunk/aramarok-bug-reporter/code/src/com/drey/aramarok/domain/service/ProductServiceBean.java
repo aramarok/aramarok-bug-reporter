@@ -100,7 +100,7 @@ public class ProductServiceBean implements ProductService, Serializable{
 			
 			product.setName(newProductData.getName());
 			product.setDescription(newProductData.getDescription());
-			product.setComponents(newProductData.getComponents());
+			product.setProductComponents(newProductData.getProductComponents());
 			entityManager.flush();
 		} else {
 			throw new ProductException("Specified ID was NULL.");

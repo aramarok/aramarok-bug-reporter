@@ -323,8 +323,8 @@ public class ProductsBean {
 	@SuppressWarnings("unchecked")
 	private void initializeProductComponentList() {
 		List<ProductComponent> componentsT = new ArrayList<ProductComponent>(0);
-		if (editedProductObject.getComponents() != null) {
-			for (ProductComponent comp : editedProductObject.getComponents())
+		if (editedProductObject.getProductComponents() != null) {
+			for (ProductComponent comp : editedProductObject.getProductComponents())
 				componentsT.add(comp);
 		}
 		productComponents = returnSelectItemLinkedListFromAProductComponentList(componentsT, false);
