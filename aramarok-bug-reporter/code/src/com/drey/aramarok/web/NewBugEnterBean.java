@@ -246,8 +246,8 @@ public class NewBugEnterBean {
 	// initializes the product component lists, both of them
 	private void createProductComponentLists(){
 		if (productObject != null){
-			if (productObject.getComponents() != null){
-				productComponentList = new ArrayList<ProductComponent>(productObject.getComponents());
+			if (productObject.getProductComponents() != null){
+				productComponentList = new ArrayList<ProductComponent>(productObject.getProductComponents());
 				productComponentList_out = returnSelectItemLinkedListFromAProductComponentList(productComponentList, true);
 			} else {
 				productComponentList = null;
@@ -448,7 +448,7 @@ public class NewBugEnterBean {
 	private void initialize(){
 		reporterUserName = WebUtil.getUser().getUserName();
 		productName = productObject.getName();
-		for (ProductComponent pc: productObject.getComponents()){
+		for (ProductComponent pc: productObject.getProductComponents()){
 			if (pc.getName().compareTo(productComponent) == 0)
 				productComponentObject = pc;
 		}

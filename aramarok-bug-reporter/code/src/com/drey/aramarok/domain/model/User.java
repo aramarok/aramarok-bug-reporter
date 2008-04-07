@@ -1,5 +1,9 @@
 package com.drey.aramarok.domain.model;
 
+/**
+ * @author Tolnai.Andrei
+ */
+
 import java.io.Serializable;
 import java.util.Date;
 import java.util.HashSet;
@@ -21,7 +25,6 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
-
 @Entity
 @Table(name = "USER", 
 		uniqueConstraints={@UniqueConstraint(columnNames="USER_NAME")}
@@ -42,13 +45,13 @@ public class User implements Serializable {
 	@Column(name = "OBJ_VERSION")
 	private static final long serialVersionUID = 0;
 	
-	@Column(name = "USER_NAME")
-	private String userName = "";
+	@Column(name = "USER_NAME", unique=true, nullable=false)
+	private String userName;
 	
-	@Column(name = "PASSWORD")
+	@Column(name = "PASSWORD", nullable=false)
 	private String password = "";
 	
-	@Column(name = "STATUS")
+	@Column(name = "STATUS", nullable=false)
 	private UserStatus status = null;
 		
 	@Column(name = "FIRST_NAME")
@@ -60,11 +63,18 @@ public class User implements Serializable {
 	@Column(name = "MIDDLE_NAME")
 	private String middleName = "";
 
-	@Column(name = "EMAIL_ADDRESS")
+	@Column(name = "EMAIL_ADDRESS", nullable=false)
 	private String emailAddress = "";
 	
-	@Column(name = "REGISTER_DATE")
-	private Date registerDate = null;
+	@Column(name = "HIDE_EMAIL")
+	private boolean hideEmail = false;
+	
+	@Column(name = "HOME_PAGE")
+	private String homePage= "";
+	
+	
+	@Column(name = "REGISTER_DATE", nullable=false)
+	private Date registerDate;
 	/*
 	@ManyToMany(cascade={CascadeType.ALL}, fetch=FetchType.EAGER)
 	@JoinTable(name = "user_role",	joinColumns = @JoinColumn(name = "USER_ID"),
@@ -87,16 +97,21 @@ public class User implements Serializable {
 	}
 	
 	public User(String userName, UserStatus status, String firstName, String lastName, String middleName, String emailAddress, Date registerDate){
-		init(userName, status, firstName, lastName, middleName, emailAddress, registerDate);
+		init(userName, status, firstName, lastName, middleName, emailAddress, "", registerDate);
 	}
 	
-	private void init(String userName, UserStatus status, String firstName, String lastName, String middleName, String emailAddress, Date registerDate){
+	public User(String userName, UserStatus status, String firstName, String lastName, String middleName, String emailAddress, String homePage, Date registerDate){
+		init(userName, status, firstName, lastName, middleName, emailAddress, homePage, registerDate);
+	}
+	
+	private void init(String userName, UserStatus status, String firstName, String lastName, String middleName, String emailAddress, String homePage, Date registerDate){
 		this.userName = userName;
 		this.status = status;
 		this.firstName = firstName;
 		this.lastName = lastName;
 		this.middleName = middleName;
 		this.emailAddress = emailAddress;
+		this.homePage = homePage;
 		this.registerDate = registerDate;
 	}
 	
@@ -228,5 +243,21 @@ public class User implements Serializable {
 
 	public void setSavedSearches(Set<SavedSearch> savedSearches) {
 		this.savedSearches = savedSearches;
+	}
+
+	public boolean isHideEmail() {
+		return hideEmail;
+	}
+
+	public void setHideEmail(boolean hideEmail) {
+		this.hideEmail = hideEmail;
+	}
+
+	public String getHomePage() {
+		return homePage;
+	}
+
+	public void setHomePage(String homePage) {
+		this.homePage = homePage;
 	}
 }

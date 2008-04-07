@@ -129,7 +129,7 @@ public class ViewBugBean {
 			Bug bugToCommit = new Bug(
 				bug.getOwner(),
 				dateObserved,
-				bug.getUserAssignedTo(),
+				null,//bug.getUserAssignedTo(),
 				summary,
 				bug.getDescription(),
 				bugGeneralStatusList.get(bugStatusIndex),
@@ -241,7 +241,7 @@ public class ViewBugBean {
 			severity = bug.getSeverity().getName();
 			dateObserved = bug.getObservedDate();
 			bugState = bug.getStatus().name();
-			assignedTo = bug.getUserAssignedTo().getUserName();
+			//assignedTo = bug.getUserAssignedTo().getUserName();
 			summary = bug.getSummary();
 			description = bug.getDescription();
 		}

@@ -56,8 +56,8 @@ private Bug bug = null;
 	public String getReporter(){
 		return bug.getOwner().getUserName();
 	}
-	
+	/*
 	public String getAssignedTo(){
 		return bug.getUserAssignedTo().getUserName();
-	}
+	}*/
 }

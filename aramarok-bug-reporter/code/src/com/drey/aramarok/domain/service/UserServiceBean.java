@@ -124,6 +124,8 @@ public class UserServiceBean  implements UserService, Serializable {
 				user.setPassword(generateMD5Password(newUserData.getPassword()));
 			}
 			user.setEmailAddress(newUserData.getEmailAddress());
+			user.setHomePage(newUserData.getHomePage());
+			user.setHideEmail(newUserData.isHideEmail());
 			user.setFirstName(newUserData.getFirstName());
 			user.setMiddleName(newUserData.getMiddleName());
 			user.setLastName(newUserData.getLastName());
