@@ -23,7 +23,8 @@ import javax.persistence.Version;
 @NamedQueries( {
 		@NamedQuery(name = "Quip.allQuipsByAddedDate", query = "SELECT q from Quip as q ORDER BY q.addedDate ASC"),
 		@NamedQuery(name = "Quip.allQuipsByQuipText", query = "SELECT q from Quip as q ORDER BY q.quipText ASC"),
-		@NamedQuery(name = "Quip.byUserId", query = "SELECT q from Quip as q WHERE q.owner.id = :userId ORDER BY q.id ASC")
+		@NamedQuery(name = "Quip.byUserId", query = "SELECT q from Quip as q WHERE q.owner.id = :userId ORDER BY q.id ASC"),
+		@NamedQuery(name = "Quip.visibleAndApproved", query = "SELECT q from Quip as q WHERE q.visible = :visible AND q.approved = :approved ORDER BY q.id ASC")
 		})
 public class Quip implements Serializable {
 	@Id

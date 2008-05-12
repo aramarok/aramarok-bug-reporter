@@ -7,6 +7,7 @@ import javax.persistence.PersistenceException;
 import com.drey.aramarok.domain.exceptions.bug.BugException;
 import com.drey.aramarok.domain.exceptions.user.UserException;
 import com.drey.aramarok.domain.model.Bug;
+import com.drey.aramarok.domain.model.User;
 import com.drey.aramarok.domain.model.filters.BugFilter;
 
 public interface BugService {
@@ -15,6 +16,7 @@ public interface BugService {
 	
 	public List<Bug> getBugs(BugFilter bugFilter);
 	
-	public Long commitBug(Bug bug) throws PersistenceException, BugException, UserException;
+	public Long commitNewBug(Bug bug, User owner) throws PersistenceException, BugException;
 	
+	public Long commitBug(Bug bug, User logedInUser) throws PersistenceException, BugException, UserException;
 }

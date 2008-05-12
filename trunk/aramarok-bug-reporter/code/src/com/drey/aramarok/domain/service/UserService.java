@@ -12,7 +12,11 @@ import com.drey.aramarok.domain.exceptions.ExternalSystemException;
 import com.drey.aramarok.domain.exceptions.FatalDomainException;
 import com.drey.aramarok.domain.exceptions.login.LoginException;
 import com.drey.aramarok.domain.exceptions.register.RegisterException;
+import com.drey.aramarok.domain.exceptions.search.NoSearchNameException;
+import com.drey.aramarok.domain.exceptions.search.SearchException;
+import com.drey.aramarok.domain.exceptions.user.UserException;
 import com.drey.aramarok.domain.model.Role;
+import com.drey.aramarok.domain.model.SavedSearch;
 import com.drey.aramarok.domain.model.User;
 
 public interface UserService {
@@ -68,5 +72,29 @@ public interface UserService {
 	 * @throws RegisterException
 	 */
 	public void modifyUser(Long idOfUser, User newUserData, boolean modifyPassword) throws PersistenceException, RegisterException;
+	
+	
+	/**
+	 * 
+	 * @param search
+	 * @param user
+	 * @return
+	 * @throws PersistenceException
+	 * @throws UserException
+	 * @throws NoSearchNameException
+	 */
+	public boolean addASavedSearchToUser(SavedSearch search, User user) throws PersistenceException, UserException, NoSearchNameException;
+	
+	
+	/**
+	 * 
+	 * @param search
+	 * @param user
+	 * @return
+	 * @throws PersistenceException
+	 * @throws UserException
+	 * @throws SearchException
+	 */
+	public boolean removeASavedSearchFromUser(SavedSearch search, User user) throws PersistenceException, UserException, SearchException;
 
 }

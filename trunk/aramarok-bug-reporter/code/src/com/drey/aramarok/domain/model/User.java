@@ -11,6 +11,7 @@ import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -24,6 +25,7 @@ import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
+
 
 @Entity
 @Table(name = "USER", 
@@ -93,6 +95,9 @@ public class User implements Serializable {
 				)
 	private Set<SavedSearch> savedSearches = null;
 
+	@Embedded
+	private UserPreference userPreference = new UserPreference();
+	
 	public User(){		
 	}
 	
@@ -137,11 +142,24 @@ public class User implements Serializable {
 		return false;
 	}
 	
-	
 	public void addASearch(SavedSearch ss){
 		if (savedSearches == null)
 			savedSearches = new HashSet<SavedSearch>();
 		savedSearches.add(ss);
+	}
+	
+	public void removeASearch(SavedSearch s){
+		if (savedSearches != null && s!=null){
+			SavedSearch toRemove = null;
+			for (SavedSearch ss : savedSearches){
+				if (ss.getId().compareTo(s.getId())==0){
+					toRemove = ss;
+				}
+			}
+			if (toRemove!=null){
+				savedSearches.remove(toRemove);
+			}
+		}
 	}
 	
 	/* Getters/setter */
@@ -259,5 +277,13 @@ public class User implements Serializable {
 
 	public void setHomePage(String homePage) {
 		this.homePage = homePage;
+	}
+
+	public UserPreference getUserPreference() {
+		return userPreference;
+	}
+
+	public void setUserPreference(UserPreference userPreference) {
+		this.userPreference = userPreference;
 	}
 }
