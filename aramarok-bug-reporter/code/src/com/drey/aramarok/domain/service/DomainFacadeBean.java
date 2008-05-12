@@ -5,7 +5,6 @@ package com.drey.aramarok.domain.service;
  */
 
 import java.io.Serializable;
-import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -18,23 +17,22 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
 import javax.persistence.PersistenceException;
-import javax.persistence.Query;
 
 import org.apache.log4j.Logger;
 
 import com.drey.aramarok.domain.exceptions.ExternalSystemException;
 import com.drey.aramarok.domain.exceptions.bug.BugException;
-import com.drey.aramarok.domain.exceptions.bug.BugStatusChangeException;
 import com.drey.aramarok.domain.exceptions.component.ProductComponentException;
 import com.drey.aramarok.domain.exceptions.login.LoginException;
 import com.drey.aramarok.domain.exceptions.product.ProductException;
 import com.drey.aramarok.domain.exceptions.register.RegisterException;
 import com.drey.aramarok.domain.exceptions.register.UserNotFoundException;
+import com.drey.aramarok.domain.exceptions.search.NoSearchNameException;
+import com.drey.aramarok.domain.exceptions.search.SearchException;
 import com.drey.aramarok.domain.exceptions.user.UserException;
 import com.drey.aramarok.domain.exceptions.user.UserHasNoRightException;
 import com.drey.aramarok.domain.exceptions.version.ComponentVersionException;
 import com.drey.aramarok.domain.model.Bug;
-import com.drey.aramarok.domain.model.BugGeneralStatus;
 import com.drey.aramarok.domain.model.Comment;
 import com.drey.aramarok.domain.model.ComponentVersion;
 import com.drey.aramarok.domain.model.OperatingSystem;
@@ -196,108 +194,27 @@ public class DomainFacadeBean implements DomainFacade, Serializable {
 	
 	public synchronized Long commitBug(Bug bug) throws ExternalSystemException, BugException, UserException {
 		log.info("Trying to commit a bug.");
+		
 		if (bug == null)
 			throw new BugException();
 		
-		if (bug.getId() != null){ //means that a bug is being modified
-			try {
-				Bug bugDb = entityManager.find(Bug.class, bug.getId());
-				
-				if (bugDb == null)
-					throw new BugException();
-				
-				if (bugDb.getStatus() != bug.getStatus()){ //status changed
-					if (!user.hasRight(Right.CHANGE_BUG_STATUS)){
-						log.error("User does not have the 'CHANGE_BUG_STATUS' right");
-						throw new UserHasNoRightException();
-					}
-					
-					if (bugDb.getStatus() == BugGeneralStatus.NEW && bug.getStatus() == BugGeneralStatus.REOPENED){
-						log.error("Cannot change bug status form NEW to REOPENED");
-						throw new BugStatusChangeException();
-					}
-					
-					if (bugDb.getStatus() == BugGeneralStatus.ASSIGNED && bug.getStatus() == BugGeneralStatus.REOPENED){
-						log.error("Cannot change bug status form ASSIGNED to REOPENED");
-						throw new BugStatusChangeException();
-					}
-					
-					if ((bugDb.getStatus() == BugGeneralStatus.ASSIGNED ||
-							bugDb.getStatus() == BugGeneralStatus.FIXED ||
-							bugDb.getStatus() == BugGeneralStatus.INVALID ||
-							bugDb.getStatus() == BugGeneralStatus.WONTFIX ||
-							bugDb.getStatus() == BugGeneralStatus.LATER ||
-							bugDb.getStatus() == BugGeneralStatus.WORKSFORME ||
-							bugDb.getStatus() == BugGeneralStatus.REOPENED)
-							&& bug.getStatus() == BugGeneralStatus.NEW){
-						log.error("Cannot change bug status from ... to NEW");
-						throw new BugStatusChangeException();
-					}
-					
-					bugDb.setStatus(bug.getStatus());
+		try {
+			if (bug.getId() != null){ //means that a bug is being modified
+				Long bugId = bugService.commitBug(bug, this.user);
+				aramarokLog.info("Bug " + bugId + " was committed by user '" + this.user.getUserName() + "'.");
+				return bugId;
+			} else { //means that a new bug is being committed
+				if (!user.hasRight(Right.ENTER_NEW_BUG)){
+					log.error("User does not have the 'ENTER_NEW_BUG' right");
+					throw new UserHasNoRightException();
 				}
-				
-				if ( //bug edited
-						bugDb.getComponentVersion().getId().compareTo(bug.getComponentVersion().getId()) !=0 ||
-						bugDb.getOperatingSystem().getId().compareTo(bug.getOperatingSystem().getId()) !=0 ||
-						bugDb.getPlatform().getId().compareTo(bug.getPlatform().getId()) !=0 ||
-						bugDb.getPriority().getId().compareTo(bug.getPriority().getId()) !=0 ||
-						bugDb.getSeverity().getId().compareTo(bug.getSeverity().getId()) !=0 ||
-						bugDb.getObservedDate().compareTo(bug.getObservedDate()) != 0 ||
-						bugDb.getSummary().compareTo(bug.getSummary()) != 0 ||
-						bugDb.getDescription().compareTo(bug.getDescription()) != 0 ) {
-					if (!user.hasRight(Right.EDIT_BUG)){
-						log.error("User does not have the 'EDIT_BUG' right");
-						throw new UserHasNoRightException();
-					}
-					
-					bugDb.setProductComponent(bug.getProductComponent());
-					bugDb.setComponentVersion(bug.getComponentVersion());
-					bugDb.setOperatingSystem(bug.getOperatingSystem());
-					bugDb.setPlatform(bug.getPlatform());
-					bugDb.setPriority(bug.getPriority());
-					bugDb.setSeverity(bug.getSeverity());
-					bugDb.setObservedDate(bug.getObservedDate());
-					bugDb.setSummary(bug.getSummary());
-					bugDb.setDescription(bug.getDescription());
-				}
-				
-				if (bug.getComments() != null && bugDb.getComments() != null){
-					if (bugDb.getComments().size() < bug.getComments().size()){ //added comment
-						if (!user.hasRight(Right.ADD_BUG_COMMENT)){
-							log.error("User does not have the 'ADD_BUG_COMMENT' right");
-							throw new UserHasNoRightException();
-						}
-						for (Comment c: bug.getComments()){
-							if (c.getId() == null){
-								entityManager.persist(c);
-								Comment commFromDATABASE = (Comment)entityManager.createNamedQuery("Comment.findCommentByPostedDate").setParameter("datePosted", c.getDatePosted()).getSingleResult();
-								bugDb.addComment(commFromDATABASE);
-							}
-						}
-						//bugDb.setComments(bug.getComments());
-					}
-				}
-			} catch (PersistenceException ex) {
-				throw new ExternalSystemException(DB_ERROR_MSG, ex);
+				Long newBugId = bugService.commitNewBug(bug, this.user);
+				aramarokLog.info("New bug committed by user '" + this.user.getUserName() + "'.");
+				return newBugId;
 			}
-		} else { //means that a new bug is being commited
-			if (!user.hasRight(Right.ENTER_NEW_BUG)){
-				log.error("User does not have the 'ENTER_NEW_BUG' right");
-				throw new UserHasNoRightException();
-			}
-			bug.setOpenDate(new Date());
-			bug.setOwner(this.user);
-			
-			try{
-				entityManager.persist(bug);
-				log.info("Bug commited");
-				return bug.getId();
-			} catch (PersistenceException ex) {
-				throw new ExternalSystemException(DB_ERROR_MSG, ex);
-			}
+		} catch (PersistenceException ex) {
+			throw new ExternalSystemException(DB_ERROR_MSG, ex);
 		}
-		return null;
 	}
 	
 	public synchronized Bug getBug(Long bugId){
@@ -395,18 +312,14 @@ public class DomainFacadeBean implements DomainFacade, Serializable {
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
 	public List<Role> getAllRoles() throws ExternalSystemException{
-		log.info("Get all roles.");
 		try {
-			Query query = entityManager.createNamedQuery("Role.allRoles");
-			return (List<Role>) query.getResultList();
+			return domainService.getAllRoles();
 		} catch (PersistenceException ex) {
 			throw new ExternalSystemException(DB_ERROR_MSG, ex);
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
 	public List<User> getAllUsers() throws ExternalSystemException{
 		try {
 			return userService.getAllUsers();
@@ -423,18 +336,14 @@ public class DomainFacadeBean implements DomainFacade, Serializable {
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
 	public List<ProductComponent> getAllProductComponents() throws ExternalSystemException{
-		log.info("Get all components.");
 		try {
-			Query query = entityManager.createNamedQuery("Component.allComponents");
-			return (List<ProductComponent>) query.getResultList();
+			return componentService.getAllProductComponents();
 		} catch (PersistenceException ex) {
 			throw new ExternalSystemException(DB_ERROR_MSG, ex);
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
 	public List<ComponentVersion> getAllComponentVersions() throws ExternalSystemException{
 		try{
 			return versionService.getAllComponentVersions();
@@ -443,46 +352,49 @@ public class DomainFacadeBean implements DomainFacade, Serializable {
 		}
 	}
 	
-	
-	@SuppressWarnings("unchecked")
 	public List<OperatingSystem> getAllOperatingSystems() throws ExternalSystemException{
-		log.info("Get all operating systems.");
 		try {
-			Query query = entityManager.createNamedQuery("OperatingSystem.allOSs");
-			return (List<OperatingSystem>) query.getResultList();
+			return domainService.getAllOperatingSystems();
 		} catch (PersistenceException ex) {
 			throw new ExternalSystemException(DB_ERROR_MSG, ex);
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
 	public List<Platform> getAllPlatforms() throws ExternalSystemException{
-		log.info("Get all platforms.");
 		try {
-			Query query = entityManager.createNamedQuery("Platform.allPlatforms");
-			return (List<Platform>) query.getResultList();
+			return domainService.getAllPlatforms();
 		} catch (PersistenceException ex) {
 			throw new ExternalSystemException(DB_ERROR_MSG, ex);
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
 	public List<Priority> getAllPriorities() throws ExternalSystemException{
-		log.info("Get all priorities.");
 		try {
-			Query query = entityManager.createNamedQuery("Priority.allPriorities");
-			return (List<Priority>) query.getResultList();
+			return domainService.getAllPriorities();
 		} catch (PersistenceException ex) {
 			throw new ExternalSystemException(DB_ERROR_MSG, ex);
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
 	public List<Severity> getAllSeverities() throws ExternalSystemException{
-		log.info("Get all severities.");
 		try {
-			Query query = entityManager.createNamedQuery("Severity.allSeverities");
-			return (List<Severity>) query.getResultList();
+			return domainService.getAllSeverities();
+		} catch (PersistenceException ex) {
+			throw new ExternalSystemException(DB_ERROR_MSG, ex);
+		}
+	}
+	
+	public boolean addASavedSearch(SavedSearch search) throws ExternalSystemException, UserException, NoSearchNameException{
+		try {
+			return userService.addASavedSearchToUser(search, this.user);
+		} catch (PersistenceException ex) {
+			throw new ExternalSystemException(DB_ERROR_MSG, ex);
+		}
+	}
+	
+	public boolean removeASavedSearch(SavedSearch search)throws ExternalSystemException, UserException, SearchException{
+		try {
+			return userService.removeASavedSearchFromUser(search, this.user);
 		} catch (PersistenceException ex) {
 			throw new ExternalSystemException(DB_ERROR_MSG, ex);
 		}

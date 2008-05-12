@@ -31,7 +31,11 @@ import com.drey.aramarok.domain.exceptions.register.NoUserNameException;
 import com.drey.aramarok.domain.exceptions.register.RegisterException;
 import com.drey.aramarok.domain.exceptions.register.UserNameAlreadyExistsException;
 import com.drey.aramarok.domain.exceptions.register.UserNotFoundException;
+import com.drey.aramarok.domain.exceptions.search.NoSearchNameException;
+import com.drey.aramarok.domain.exceptions.search.SearchException;
+import com.drey.aramarok.domain.exceptions.user.UserException;
 import com.drey.aramarok.domain.model.Role;
+import com.drey.aramarok.domain.model.SavedSearch;
 import com.drey.aramarok.domain.model.User;
 import com.drey.aramarok.domain.model.UserStatus;
 
@@ -173,6 +177,49 @@ public class UserServiceBean  implements UserService, Serializable {
 		}
 		
 		return (new BigInteger(1, m.digest()).toString(16));
+	}
+	
+	public synchronized boolean addASavedSearchToUser(SavedSearch search, User user) throws PersistenceException, UserException, NoSearchNameException{
+		log.info("Trying to save a search for user " + user.getUserName());
+		boolean toReturn = false;
+		
+		if (search!=null && user!=null){
+			user = findUser(user.getUserName());
+			if (user == null){
+				throw new UserException();
+			}
+			if (search.getName()==null || search.getName().trim().compareTo("")==0){
+				throw new NoSearchNameException();
+			}
+			entityManager.persist(search);
+			entityManager.flush();
+			user.addASearch(search);
+			toReturn = true;
+		}
+		
+		return toReturn;
+	}
+	
+	public synchronized boolean removeASavedSearchFromUser(SavedSearch search, User user)throws PersistenceException, UserException, SearchException{
+		log.info("Trying to remove a saved search from user " + user.getUserName());
+		boolean toReturn = false;
+		
+		if (search!=null && user!=null){
+			user = findUser(user.getUserName());
+			if (user == null){
+				throw new UserException();
+			}
+			search = entityManager.find(SavedSearch.class, search.getId());
+			if (search == null){
+				throw new SearchException();
+			}
+			user.removeASearch(search);
+			entityManager.flush();
+			entityManager.remove(search);
+			toReturn = true;
+		}
+		
+		return toReturn;
 	}
 
 }

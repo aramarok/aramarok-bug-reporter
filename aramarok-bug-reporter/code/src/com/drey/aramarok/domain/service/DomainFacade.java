@@ -15,6 +15,8 @@ import com.drey.aramarok.domain.exceptions.login.LoginException;
 import com.drey.aramarok.domain.exceptions.product.ProductException;
 import com.drey.aramarok.domain.exceptions.register.RegisterException;
 import com.drey.aramarok.domain.exceptions.register.UserNotFoundException;
+import com.drey.aramarok.domain.exceptions.search.NoSearchNameException;
+import com.drey.aramarok.domain.exceptions.search.SearchException;
 import com.drey.aramarok.domain.exceptions.user.UserException;
 import com.drey.aramarok.domain.exceptions.version.ComponentVersionException;
 import com.drey.aramarok.domain.model.Bug;
@@ -274,4 +276,27 @@ public interface DomainFacade {
 	 * @throws ExternalSystemException
 	 */
 	public List<ComponentVersion> getAllComponentVersions() throws ExternalSystemException;
+	
+	
+	/**
+	 * 
+	 * @param search
+	 * @return
+	 * @throws ExternalSystemException
+	 * @throws UserException
+	 * @throws NoSearchNameException
+	 */
+	public boolean addASavedSearch(SavedSearch search) throws ExternalSystemException, UserException, NoSearchNameException;
+	
+	
+	/**
+	 * 
+	 * @param search
+	 * @return
+	 * @throws ExternalSystemException
+	 * @throws UserException
+	 * @throws SearchException
+	 */
+	public boolean removeASavedSearch(SavedSearch search)throws ExternalSystemException, UserException, SearchException;
+	
 }

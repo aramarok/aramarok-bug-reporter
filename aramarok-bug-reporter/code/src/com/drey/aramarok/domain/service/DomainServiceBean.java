@@ -24,6 +24,7 @@ import com.drey.aramarok.domain.model.Comment;
 import com.drey.aramarok.domain.model.OperatingSystem;
 import com.drey.aramarok.domain.model.Platform;
 import com.drey.aramarok.domain.model.Priority;
+import com.drey.aramarok.domain.model.Role;
 import com.drey.aramarok.domain.model.Severity;
 import com.drey.aramarok.domain.model.filters.CommentFilter;
 
@@ -134,5 +135,40 @@ public class DomainServiceBean implements DomainService, Serializable {
 		} catch (NoResultException e) {
 			return null; 
 		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	public List<Role> getAllRoles() throws PersistenceException{
+		log.info("Get all roles.");
+		Query query = entityManager.createNamedQuery("Role.allRoles");
+		return (List<Role>) query.getResultList();
+	}
+	
+	@SuppressWarnings("unchecked")
+	public List<OperatingSystem> getAllOperatingSystems() throws PersistenceException{
+		log.info("Get all operating systems.");
+		Query query = entityManager.createNamedQuery("OperatingSystem.allOSs");
+		return (List<OperatingSystem>) query.getResultList();
+	}
+	
+	@SuppressWarnings("unchecked")
+	public List<Platform> getAllPlatforms() throws PersistenceException{
+		log.info("Get all platforms.");
+		Query query = entityManager.createNamedQuery("Platform.allPlatforms");
+		return (List<Platform>) query.getResultList();
+	}
+	
+	@SuppressWarnings("unchecked")
+	public List<Priority> getAllPriorities() throws PersistenceException{
+		log.info("Get all priorities.");
+		Query query = entityManager.createNamedQuery("Priority.allPriorities");
+		return (List<Priority>) query.getResultList();
+	}
+	
+	@SuppressWarnings("unchecked")
+	public List<Severity> getAllSeverities() throws PersistenceException{
+		log.info("Get all severities.");
+		Query query = entityManager.createNamedQuery("Severity.allSeverities");
+		return (List<Severity>) query.getResultList();
 	}
 }
