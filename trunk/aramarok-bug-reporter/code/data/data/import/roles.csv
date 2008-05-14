@@ -9,6 +9,7 @@ SupremeAdmin,DEFINE_COMPONENTS
 SupremeAdmin,DEFINE_VERSIONS
 SupremeAdmin,DEFINE_ARAMAROK_OPTIONS
 SupremeAdmin,EDIT_OTHER_USERS
+SupremeAdmin,EDIT_BUGS
 Administrator,ENTER_NEW_BUG
 Administrator,SEARCH_BUGS
 Administrator,EDIT_PREFERENCES
@@ -23,6 +24,7 @@ Developer,SEARCH_BUGS
 Developer,EDIT_PREFERENCES
 Developer,CHANGE_BUG_STATUS
 Developer,ADD_BUG_COMMENT
+Developer,EDIT_BUG
 BugReporter,ENTER_NEW_BUG
 BugReporter,SEARCH_BUGS
 BugReporter,EDIT_PREFERENCES
