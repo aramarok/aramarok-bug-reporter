@@ -13,6 +13,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
@@ -25,6 +26,7 @@ import javax.persistence.Version;
 )
 @NamedQueries( {
 		@NamedQuery(name = "Product.findProductByProductName", query = "SELECT prod from Product as prod WHERE prod.name = :productName"),
+		@NamedQuery(name = "Product.findProductByProductId", query = "SELECT prod from Product as prod WHERE prod.id = :productId"),
 		@NamedQuery(name = "Product.allProducts", query = "SELECT prod from Product as prod ORDER BY prod.id ASC")
 		})
 public class Product implements Serializable {
@@ -37,7 +39,7 @@ public class Product implements Serializable {
 	@Column(name = "OBJ_VERSION")
 	private static final long serialVersionUID = 0;
 
-	@Column(name = "NAME")
+	@Column(name = "NAME", nullable=false)
 	private String name;
 	
 	@Column(name = "DESCRIPTION")
@@ -56,21 +58,32 @@ public class Product implements Serializable {
 				)
 	private Set<ProductComponent> productComponents;
 	
+	@ManyToOne
+	@JoinColumn(name = "USER_ASSIGNED")
+	private User userAssigned = null;
+	
 	public Product(){
 	}
 	
-	public Product(String name, String description, Set<ProductComponent> components){
-		init(name, description, components);
+	public Product(String name, String description, String productURL, boolean closeForBugEntry){
+		init(name, description, productURL, null, null, closeForBugEntry);
 	}
 	
-	public Product(String name, String description){
-		init(name, description, null);
+	public Product(String name, String description, String productURL, Set<ProductComponent> components, boolean closeForBugEntry){
+		init(name, description, productURL, components, null, closeForBugEntry);
 	}
 	
-	private void init(String name, String description, Set<ProductComponent> components){
+	public Product(String name, String description, String productURL, Set<ProductComponent> components, User userAssigned, boolean closeForBugEntry){
+		init(name, description, productURL, components, userAssigned, closeForBugEntry);
+	}
+	
+	private void init(String name, String description, String productURL, Set<ProductComponent> components, User userAssigned, boolean closeForBugEntry){
 		this.name = name;
 		this.description = description;
+		this.productURL = productURL;
 		this.productComponents = components;
+		this.userAssigned = userAssigned;
+		this.closeForBugEntry = closeForBugEntry;
 	}
 	
 	public void addComponent(ProductComponent component){
@@ -127,5 +140,13 @@ public class Product implements Serializable {
 
 	public void setCloseForBugEntry(boolean closeForBugEntry) {
 		this.closeForBugEntry = closeForBugEntry;
+	}
+
+	public User getUserAssigned() {
+		return userAssigned;
+	}
+
+	public void setUserAssigned(User userAssigned) {
+		this.userAssigned = userAssigned;
 	}
 }

@@ -11,6 +11,7 @@ import com.drey.aramarok.domain.model.User;
 
 
 public class BugFilter {
+	
 	private static final long serialVersionUID = 0;
 	
 	private List<Long> bugIdList = null;
