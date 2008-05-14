@@ -7,6 +7,7 @@ package com.drey.aramarok.domain.service;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.List;
 
 import javax.ejb.Local;
@@ -29,7 +30,9 @@ import com.drey.aramarok.domain.exceptions.bug.BugTitleException;
 import com.drey.aramarok.domain.exceptions.user.UserException;
 import com.drey.aramarok.domain.exceptions.user.UserHasNoRightException;
 import com.drey.aramarok.domain.model.Bug;
+import com.drey.aramarok.domain.model.BugAction;
 import com.drey.aramarok.domain.model.BugGeneralStatus;
+import com.drey.aramarok.domain.model.BugHistory;
 import com.drey.aramarok.domain.model.Comment;
 import com.drey.aramarok.domain.model.OperatingSystem;
 import com.drey.aramarok.domain.model.Platform;
@@ -51,7 +54,7 @@ public class BugServiceBean implements BugService, Serializable {
 
 	private  static Logger log = Logger.getLogger(BugServiceBean.class);
 
-	public Long commitNewBug(Bug bug, User owner) throws PersistenceException, BugException {
+	public synchronized Long commitNewBug(Bug bug, User owner) throws PersistenceException, BugException {
 		if (bug.getProduct() == null){
 			throw new BugProductException();
 		}
@@ -71,18 +74,25 @@ public class BugServiceBean implements BugService, Serializable {
 		bug.setOpenDate(new Date());
 		bug.setOwner(owner);
 		
+		EnumSet<BugAction> bugActions = EnumSet.noneOf(BugAction.class);
+		bugActions.add(BugAction.CREATE_NEW_BUG);
+		BugHistory bugHistory = new BugHistory(owner, bug.getOpenDate(), bugActions, BugGeneralStatus.NEW);
+		bug.addBugHistory(bugHistory);
+		
 		entityManager.persist(bug);
 		entityManager.flush();
 		
 		return bug.getId();
 	}
 	
-	public Long commitBug(Bug bug, User logedInUser) throws PersistenceException, BugException, UserException {
+	public synchronized Long commitBug(Bug bug, User logedInUser) throws PersistenceException, BugException, UserException {
 		
 		Bug bugDb = entityManager.find(Bug.class, bug.getId());
 		
 		if (bugDb == null)
 			throw new BugException();
+		
+		EnumSet<BugAction> bugActions = EnumSet.noneOf(BugAction.class);
 		
 		if (bugDb.getStatus() != bug.getStatus()){ //status changed
 			if (	!logedInUser.hasRight(Right.EDIT_BUGS) ||
@@ -155,10 +165,42 @@ public class BugServiceBean implements BugService, Serializable {
 			}
 			
 			bugDb.setStatus(bug.getStatus());
+			bugActions.add(BugAction.CHANGE_BUG_GENERAL_STATUS);
 			entityManager.flush();
 		}
 		
+		boolean addedToCC = false;
+		boolean removedFromCC = false;
+		
+		if ((bugDb.getCcUsers() != null && bugDb.getCcUsers().size()>0) && bug.getCcUsers() == null){
+			removedFromCC = true;
+		} else if (bugDb.getCcUsers() == null && (bug.getCcUsers()!=null && bug.getCcUsers().size()>0)){
+			addedToCC = true;
+		} else if (bugDb.getCcUsers() != null && bug.getCcUsers() != null){
+			List<User> l1 = new ArrayList<User>(bugDb.getCcUsers());
+			List<User> l2 = new ArrayList<User>(bug.getCcUsers());
+			if (!l1.equals(l2)){
+				if (l1.size()>l2.size()){
+					removedFromCC = true;
+				} else if (l1.size()<l2.size()){
+					addedToCC = true;
+				}
+			}
+		}
+		
+		/*
+		if (bugDb.getCcUsers()==null && (bug.getCcUsers()!=null && bug.getCcUsers().size()>0)){
+			ccWasEdited = true;
+		} else if (bugDb.getCcUsers()!=null && (bug.getCcUsers()!=null && bug.getCcUsers().size()>0) ){
+			ccWasEdited = true;
+		} else if ((bugDb.getCcUsers()!=null && ){
+			
+		}
+		*/
+		
 		if ( //bug edited
+				addedToCC || removedFromCC ||
+				bugDb.getProductComponent().getId().compareTo(bug.getProductComponent().getId()) !=0 ||
 				bugDb.getComponentVersion().getId().compareTo(bug.getComponentVersion().getId()) !=0 ||
 				bugDb.getOperatingSystem().getId().compareTo(bug.getOperatingSystem().getId()) !=0 ||
 				bugDb.getPlatform().getId().compareTo(bug.getPlatform().getId()) !=0 ||
@@ -189,15 +231,49 @@ public class BugServiceBean implements BugService, Serializable {
 				throw new BugDescriptionException();
 			}
 			
-			bugDb.setProductComponent(bug.getProductComponent());
-			bugDb.setComponentVersion(bug.getComponentVersion());
-			bugDb.setOperatingSystem(bug.getOperatingSystem());
-			bugDb.setPlatform(bug.getPlatform());
-			bugDb.setPriority(bug.getPriority());
-			bugDb.setSeverity(bug.getSeverity());
-			bugDb.setObservedDate(bug.getObservedDate());
-			bugDb.setSummary(bug.getSummary());
-			bugDb.setDescription(bug.getDescription());
+			bugDb.setCcUsers(bug.getCcUsers());
+			if (addedToCC){
+				bugActions.add(BugAction.ADD_USER_TO_CC);
+			} else if (removedFromCC){
+				bugActions.add(BugAction.REMOVE_USER_FROM_CC);
+			}
+			if (bugDb.getProductComponent().getId().compareTo(bug.getProductComponent().getId()) !=0){
+				bugDb.setProductComponent(bug.getProductComponent());
+				bugActions.add(BugAction.CHANGE_PRODUCT_COMPONENT);
+			}
+			if (bugDb.getComponentVersion().getId().compareTo(bug.getComponentVersion().getId()) !=0){
+				bugDb.setComponentVersion(bug.getComponentVersion());
+				bugActions.add(BugAction.CHANGE_COMPONENT_VERSION);
+			}
+			if (bugDb.getOperatingSystem().getId().compareTo(bug.getOperatingSystem().getId()) !=0){
+				bugDb.setOperatingSystem(bug.getOperatingSystem());
+				bugActions.add(BugAction.CHANGE_BUG_OPERATING_SYSTEM);
+			}
+			if (bugDb.getPlatform().getId().compareTo(bug.getPlatform().getId()) !=0){
+				bugDb.setPlatform(bug.getPlatform());
+				bugActions.add(BugAction.CHANGE_BUG_PLATFORM);
+			}
+			if (bugDb.getPriority().getId().compareTo(bug.getPriority().getId()) !=0){
+				bugDb.setPriority(bug.getPriority());
+				bugActions.add(BugAction.CHANGE_BUG_PRIORITY);
+			}
+			if (bugDb.getSeverity().getId().compareTo(bug.getSeverity().getId()) !=0){
+				bugDb.setSeverity(bug.getSeverity());
+				bugActions.add(BugAction.CHANGE_BUG_SEVERITY);
+			}
+			if (bugDb.getObservedDate().compareTo(bug.getObservedDate()) != 0){
+				bugDb.setObservedDate(bug.getObservedDate());
+				bugActions.add(BugAction.CHANGE_BUG_OBSERVED_DATE);
+			}
+			if (bugDb.getSummary().compareTo(bug.getSummary()) != 0){
+				bugDb.setSummary(bug.getSummary());
+				bugActions.add(BugAction.CHANGE_BUG_SUMMARY);
+			}
+			if (bugDb.getDescription().compareTo(bug.getDescription()) != 0){
+				bugDb.setDescription(bug.getDescription());
+				bugActions.add(BugAction.CHANGE_BUG_DESCRIPTION);
+			}
+			
 			entityManager.flush();
 		}
 		
@@ -223,15 +299,21 @@ public class BugServiceBean implements BugService, Serializable {
 						//Comment commFromDATABASE = (Comment)entityManager.createNamedQuery("Comment.findCommentByPostedDate").setParameter("datePosted", c.getDatePosted()).getSingleResult();
 						//bugDb.addComment(commFromDATABASE);
 						bugDb.addComment(c);
+						bugActions.add(BugAction.ADD_COMMENT_TO_BUG);
 					}
 				}
 			}
 		}
 		
+		BugHistory bugHistory = new BugHistory(logedInUser, new Date(), bugActions, bug.getStatus());
+		bug.addBugHistory(bugHistory);
+		
+		entityManager.flush();
+		
 		return bugDb.getId();
 	}
 
-	public Bug getBug(Long bugId) {
+	public synchronized Bug getBug(Long bugId) throws PersistenceException {
 		if (bugId != null){
 			log.info("Get bug with ID: " + bugId);
 			try {
@@ -243,9 +325,9 @@ public class BugServiceBean implements BugService, Serializable {
 		}
 		return null;
 	}
-
+	
 	@SuppressWarnings("unchecked")
-	public List<Bug> getBugs(BugFilter bugFilter) {
+	public synchronized List<Bug> getBugs(BugFilter bugFilter) throws PersistenceException {
 		log.info("Get bug request");
 		
 		List<Bug> results = new ArrayList<Bug>();
@@ -316,14 +398,42 @@ public class BugServiceBean implements BugService, Serializable {
 											break;
 					case OBSERVED_DATE_DESC:queryStr.append(" order by b.observedDate desc");
 											break;
-					case PRIORITY_ASC:	queryStr.append(" order by b.priority asc");
+					case PRIORITY_ASC:	queryStr.append(" order by b.priority.name asc");
 										break;
-					case PRIORITY_DESC: queryStr.append(" order by b.priority desc");
+					case PRIORITY_DESC: queryStr.append(" order by b.priority.name desc");
 										break;
 					case SUMMARY_ASC:	queryStr.append(" order by b.summary asc");
 										break;
 					case SUMMARY_DESC: 	queryStr.append(" order by b.summary desc");
 										break;
+					case OPEN_DATE_ASC: queryStr.append(" order by b.openDate asc");
+										break;
+					case OPEN_DATE_DESC:queryStr.append(" order by b.openDate desc");
+										break;
+					case OPERATING_SYSTEM_NAME_ASC:	queryStr.append(" order by b.operatingSystem.name asc");
+													break;
+					case OPERATING_SYSTEM_NAME_DESC:queryStr.append(" order by b.operatingSystem.name desc");
+													break;
+					case OWNER_USER_NAME_ASC:	queryStr.append(" order by b.owner.userName asc");
+												break;
+					case OWNER_USER_NAME_DESC:	queryStr.append(" order by b.owner.userName desc");
+												break;
+					case PLATFORM_NAME_ASC:	queryStr.append(" order by b.platform.name asc");
+											break;
+					case PLATFORM_NAME_DESC:queryStr.append(" order by b.platform.name desc");
+											break;
+					case SEVERITY_ASC:	queryStr.append(" order by b.severity.name asc");
+										break;
+					case SEVERITY_DESC:	queryStr.append(" order by b.severity.name desc");
+										break;
+					case STATUS_ASC:queryStr.append(" order by b.status asc");
+									break;
+					case STATUS_DESC:	queryStr.append(" order by b.status desc");
+										break;
+					case VOTES_ASC:	queryStr.append(" order by b.votes asc");
+									break;
+					case VOTES_DESC:queryStr.append(" order by b.votes desc");
+									break;
 					default: queryStr.append(" order by b.id asc");
 				}
 			}
@@ -370,9 +480,10 @@ public class BugServiceBean implements BugService, Serializable {
 			try {
 				results = query.getResultList();				
 			} catch (NoResultException ex) {
-				
+				results = new ArrayList<Bug>();
 			} catch(PersistenceException ex) {
 				log.error("PersistenceException", ex);
+				throw new PersistenceException();
 			}
 		}
 		return results;

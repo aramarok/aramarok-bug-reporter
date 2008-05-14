@@ -16,7 +16,11 @@ public interface ComponentVersionService {
 	
 	public ComponentVersion findComponentVersion(String componentVersionName);
 	
+	public ComponentVersion getComponentVersion(Long componentVersionId) throws PersistenceException;
+	
 	public List<ComponentVersion> getAllComponentVersions() throws PersistenceException;
+	
+	public User getUserAssignedForSubmittingBug(Long componentVersionId) throws PersistenceException;
 	
 	public ComponentVersion addNewComponentVersion(String componentVersionName, String componentVersionDescription, User userAssignedTo) throws PersistenceException, ComponentVersionException;
 	

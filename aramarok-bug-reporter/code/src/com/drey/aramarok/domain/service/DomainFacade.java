@@ -33,6 +33,7 @@ import com.drey.aramarok.domain.model.Severity;
 import com.drey.aramarok.domain.model.User;
 import com.drey.aramarok.domain.model.filters.BugFilter;
 import com.drey.aramarok.domain.model.filters.CommentFilter;
+import com.drey.aramarok.domain.model.filters.UserFilter;
 
 public interface DomainFacade {
 	
@@ -63,6 +64,16 @@ public interface DomainFacade {
 	 * @return
 	 */
 	public User getUser(String userName);
+	
+	
+	/**
+	 * Returns a list of users matching the properties set to the user filter
+	 * 
+	 * @param userFilter
+	 * @return
+	 * @throws ExternalSystemException 
+	 */
+	public List<User> getUsers(UserFilter userFilter) throws ExternalSystemException;
 	
 	
 	/**
@@ -151,16 +162,17 @@ public interface DomainFacade {
 	 * 
 	 * @param productName
 	 * @return
+	 * @throws ExternalSystemException
 	 */
-	public Product getProduct(String productName);
+	public Product getProduct(String productName) throws ExternalSystemException;
 	
 	
 
-	public void addNewProduct(String productName, String productDescription, Set<ProductComponent> productComponents) throws ExternalSystemException, ProductException;
+	public void addNewProduct(String productName, String productDescription, String productURL, boolean closeForBugEntry, User userAssigned, Set<ProductComponent> productComponents) throws ExternalSystemException, ProductException, UserException;
 	
 	
 
-	public void modifyProduct(Long idOfProduct, Product newProductData) throws ExternalSystemException, ProductException;
+	public void modifyProduct(Long idOfProduct, Product newProductData) throws ExternalSystemException, ProductException, UserException;
 	
 	
 	
@@ -174,8 +186,9 @@ public interface DomainFacade {
 	 * 
 	 * @param bugId
 	 * @return
+	 * @throws ExternalSystemException 
 	 */
-	public Bug getBug(Long bugId);
+	public Bug getBug(Long bugId) throws ExternalSystemException;
 	
 	
 	/**
@@ -190,8 +203,9 @@ public interface DomainFacade {
 	 * 
 	 * @param bugFilter
 	 * @return
+	 * @throws ExternalSystemException 
 	 */
-	public List<Bug> getBugs(BugFilter bugFilter);
+	public List<Bug> getBugs(BugFilter bugFilter) throws ExternalSystemException;
 	
 	
 	/**
@@ -250,16 +264,18 @@ public interface DomainFacade {
 	 * 
 	 * @param componentName
 	 * @return
+	 * @throws ExternalSystemException
 	 */
-	public ProductComponent getProductComponent(String componentName);
+	public ProductComponent getProductComponent(String componentName) throws ExternalSystemException;
 	
 	
 	/**
 	 * 
-	 * @param versionName
+	 * @param componentVersionName
 	 * @return
+	 * @throws ExternalSystemException
 	 */
-	public ComponentVersion getComponentVersion(String componentVersionName);
+	public ComponentVersion getComponentVersion(String componentVersionName) throws ExternalSystemException;
 	
 	
 	/**
@@ -298,5 +314,37 @@ public interface DomainFacade {
 	 * @throws SearchException
 	 */
 	public boolean removeASavedSearch(SavedSearch search)throws ExternalSystemException, UserException, SearchException;
+	
+	
+	/**
+	 * Returns the user witch will be assigned to the for the selected chain of version, component, product.
+	 * 
+	 * @param componentVersionId
+	 * @param productComponentId
+	 * @param productId
+	 * @return
+	 * @throws ExternalSystemException
+	 */
+	public User getUserAssignedForSubmittingBug(Long componentVersionId, Long productComponentId, Long productId) throws ExternalSystemException;
+	
+	
+	public Product getProduct(Long productId) throws ExternalSystemException;
+	
+	
+	public List<Product> getProductsForCommittingABug() throws ExternalSystemException;
+	
+	
+	public Product getProductForProductComponent(Long productComponentId) throws ExternalSystemException;
+	
+	
+	public ProductComponent getProductComponent(Long productComponentId) throws ExternalSystemException;
+	
+	
+	public ProductComponent getProductComponentForComponentVersion(Long componentVersionId) throws ExternalSystemException;
+	
+	
+	public ComponentVersion getComponentVersion(Long componentVersionId) throws ExternalSystemException;
+	
+	
 	
 }

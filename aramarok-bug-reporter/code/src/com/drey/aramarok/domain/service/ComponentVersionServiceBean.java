@@ -8,6 +8,7 @@ import java.io.Serializable;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.ejb.EJB;
 import javax.ejb.Local;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
@@ -23,6 +24,7 @@ import com.drey.aramarok.domain.exceptions.version.NoVersionNameSpecifiedExcepti
 import com.drey.aramarok.domain.exceptions.version.VersionNameAlreadyExistsException;
 import com.drey.aramarok.domain.exceptions.version.VersionNotFoundException;
 import com.drey.aramarok.domain.model.ComponentVersion;
+import com.drey.aramarok.domain.model.ProductComponent;
 import com.drey.aramarok.domain.model.User;
 
 @Stateless
@@ -34,6 +36,9 @@ public class ComponentVersionServiceBean implements ComponentVersionService, Ser
 	@PersistenceContext( name = "Aramarok")
 	private EntityManager entityManager;
 
+	@EJB
+	private ProductComponentService productComponentService;
+	
 	private static Logger log = Logger.getLogger(ComponentVersionServiceBean.class);
 	
 	public synchronized ComponentVersion findComponentVersion(String componentVersionName) {
@@ -46,6 +51,16 @@ public class ComponentVersionServiceBean implements ComponentVersionService, Ser
 		}
 	}
 
+	public synchronized ComponentVersion getComponentVersion(Long componentVersionId) throws PersistenceException {
+		log.info("Get component version by id: " + componentVersionId);
+		try {
+			ComponentVersion componentVersion = (ComponentVersion) entityManager.createNamedQuery("ComponentVersion.findVersionsByVersionId").setParameter("versionId", componentVersionId).getSingleResult();
+			return componentVersion;
+		} catch (NoResultException e) {
+			return null; 
+		}
+	}
+	
 	@SuppressWarnings("unchecked")
 	public synchronized List<ComponentVersion> getAllComponentVersions() throws PersistenceException {
 		log.info("Get all component versions.");
@@ -54,6 +69,26 @@ public class ComponentVersionServiceBean implements ComponentVersionService, Ser
 			return (List<ComponentVersion>) query.getResultList();
 		} catch (NoResultException e) {
 			return null; 
+		}
+	}
+	
+	public synchronized User getUserAssignedForSubmittingBug(Long componentVersionId) throws PersistenceException {
+		log.info("Get user assigned to component version with id:" + componentVersionId);
+		ComponentVersion componentVersion = getComponentVersion(componentVersionId);
+		
+		if (componentVersion!=null){
+			if (componentVersion.getUserAssigned()!=null){
+				return componentVersion.getUserAssigned();
+			} else {
+				ProductComponent productComponent = productComponentService.getProductComponentForComponentVersion(componentVersionId);
+				if (productComponent!=null){
+					return productComponentService.getUserAssignedForSubmittingBug(productComponent.getId());
+				} else {
+					return null;
+				}
+			}
+		} else {
+			return null;
 		}
 	}
 	

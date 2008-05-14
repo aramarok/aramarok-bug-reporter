@@ -18,6 +18,7 @@ import com.drey.aramarok.domain.exceptions.user.UserException;
 import com.drey.aramarok.domain.model.Role;
 import com.drey.aramarok.domain.model.SavedSearch;
 import com.drey.aramarok.domain.model.User;
+import com.drey.aramarok.domain.model.filters.UserFilter;
 
 public interface UserService {
 
@@ -96,5 +97,13 @@ public interface UserService {
 	 * @throws SearchException
 	 */
 	public boolean removeASavedSearchFromUser(SavedSearch search, User user) throws PersistenceException, UserException, SearchException;
+	
+	
+	/**
+	 * 
+	 * @param userFilter
+	 * @return
+	 */
+	public List<User> getUsers(UserFilter userFilter) throws PersistenceException;
 
 }
