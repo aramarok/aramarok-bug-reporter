@@ -12,9 +12,9 @@ import com.drey.aramarok.domain.model.filters.BugFilter;
 
 public interface BugService {
 	
-	public Bug getBug(Long bugId);
+	public Bug getBug(Long bugId) throws PersistenceException ;
 	
-	public List<Bug> getBugs(BugFilter bugFilter);
+	public List<Bug> getBugs(BugFilter bugFilter) throws PersistenceException ;
 	
 	public Long commitNewBug(Bug bug, User owner) throws PersistenceException, BugException;
 	

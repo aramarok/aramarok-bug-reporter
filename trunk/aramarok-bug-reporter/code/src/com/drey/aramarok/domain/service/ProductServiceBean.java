@@ -5,6 +5,7 @@ package com.drey.aramarok.domain.service;
  */
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -23,8 +24,10 @@ import com.drey.aramarok.domain.exceptions.product.NoProductNameSpecifiedExcepti
 import com.drey.aramarok.domain.exceptions.product.ProductException;
 import com.drey.aramarok.domain.exceptions.product.ProductNameAlreadyExistsException;
 import com.drey.aramarok.domain.exceptions.product.ProductNotFoundException;
+import com.drey.aramarok.domain.model.ComponentVersion;
 import com.drey.aramarok.domain.model.Product;
 import com.drey.aramarok.domain.model.ProductComponent;
+import com.drey.aramarok.domain.model.User;
 
 
 @Stateless
@@ -36,9 +39,9 @@ public class ProductServiceBean implements ProductService, Serializable{
 	@PersistenceContext( name = "Aramarok")
 	private EntityManager entityManager;
 
-	private  static Logger log = Logger.getLogger(ProductServiceBean.class);
+	private static Logger log = Logger.getLogger(ProductServiceBean.class);
 
-	public synchronized Product findProduct(String productName) {
+	public synchronized Product findProduct(String productName) throws PersistenceException {
 		log.info("Find product name: " + productName);
 		try {
 			Product product = (Product) entityManager.createNamedQuery("Product.findProductByProductName").setParameter("productName", productName).getSingleResult();
@@ -46,6 +49,34 @@ public class ProductServiceBean implements ProductService, Serializable{
 		} catch (NoResultException e) {
 			return null; 
 		}
+	}
+	
+	public synchronized Product getProduct(Long productId) throws PersistenceException {
+		log.info("Get product by id: " + productId);
+		try {
+			Product product = (Product) entityManager.createNamedQuery("Product.findProductByProductId").setParameter("productId", productId).getSingleResult();
+			return product;
+		} catch (NoResultException e) {
+			return null; 
+		}
+	}
+	
+	public synchronized Product getProductForProductComponent(Long productComponentId) throws PersistenceException {
+		log.info("Find product for product component with id: " + productComponentId);
+		List<Product> allProducts = getAllProducts();
+		
+		if (allProducts!=null){
+			for (Product p: allProducts){
+				if (p.getProductComponents()!=null){
+					for (ProductComponent pc : p.getProductComponents()){
+						if (pc.getId().compareTo(productComponentId)==0){
+							return p;
+						}
+					}
+				}
+			}
+		}
+		return null;
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -59,8 +90,64 @@ public class ProductServiceBean implements ProductService, Serializable{
 		}
 	}
 	
-	public synchronized void addNewProduct(String productName, String productDescription, Set<ProductComponent> productComponents) throws PersistenceException, ProductException {
-		log.info("Trying to add a new product: " + productName + ".");
+	/**
+	 * Returns a list with the product for witch the users can report bugs.
+	 * 
+	 * For a product can be reported a bug only if that product has a user assigned to it,
+	 * or any of it's components has at least one user assigned to it or if the components versions 
+	 * has at least one user assigned to it.
+	 * 
+	 * @return
+	 * @throws PersistenceException
+	 */
+	public synchronized List<Product> getProductsForCommittingABug() throws PersistenceException{
+		List<Product> results = new ArrayList<Product>();
+		List<Product> allProducts = getAllProducts();
+		
+		for (Product p : allProducts){
+			if (p.getUserAssigned()!=null){
+				results.add(p);
+			} else {
+				if (p.getProductComponents()!=null){
+					boolean aPcHasAUserAssigned = false;
+					for (ProductComponent pc: p.getProductComponents()){
+						if (aPcHasAUserAssigned==false){
+							if (pc.getUserAssigned()!=null){
+								results.add(p);
+							} else {
+								if (pc.getVersions()!=null){
+									boolean aCvHasAUserAssigned = false;
+									for (ComponentVersion cv: pc.getVersions()){
+										if (aCvHasAUserAssigned==false){
+											if (cv.getUserAssigned()!=null){
+												results.add(p);
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+			
+		return results;
+	}
+	
+	public synchronized User getUserAssignedToProduct(Long productId) throws PersistenceException{
+		log.info("Get user assigned to product with id:" + productId);
+		Product product = getProduct(productId);
+		
+		if (product!=null){
+			return product.getUserAssigned();
+		} else {
+			return null;
+		}
+	}
+	
+	public synchronized void addNewProduct(String productName, String productDescription, String productURL, boolean closeForBugEntry, User userAssigned, Set<ProductComponent> productComponents) throws PersistenceException, ProductException {
+		log.info("Trying to add a new product: " + productName + "...");
 		Product product = findProduct(productName);
 		if (product != null) {
 			throw new ProductNameAlreadyExistsException("Product with specified product name already exists!");
@@ -69,7 +156,7 @@ public class ProductServiceBean implements ProductService, Serializable{
 			throw new NoProductNameSpecifiedException("No product name was specified!");
 		}
 		
-		Product newProduct = new Product(productName, productDescription, productComponents);
+		Product newProduct = new Product(productName, productDescription, productURL, productComponents, userAssigned, closeForBugEntry);
 		
 		entityManager.persist(newProduct);
 		entityManager.flush();
@@ -84,12 +171,12 @@ public class ProductServiceBean implements ProductService, Serializable{
 			if (product == null) {
 				throw new ProductNotFoundException("Product with id " + idOfProduct.toString() + " does not exist in the DB!");
 			}
-			if (product.getName().trim().compareTo("") == 0) {
+			if (newProductData.getName()==null || (newProductData.getName()!=null && newProductData.getName().trim().compareTo("") == 0)) {
 				throw new NoProductNameSpecifiedException("No product name was specified!");
 			}
 			
 			List<Product> listOfProducts = (List<Product>)entityManager.createNamedQuery("Product.findProductByProductName").setParameter("productName", newProductData.getName()).getResultList();
-			if (listOfProducts.size() > 0 ) {
+			if (listOfProducts!=null && listOfProducts.size() > 0 ) {
 				for (Iterator<Product> i=listOfProducts.iterator(); i.hasNext();){
 					Product cProduct = i.next();
 					if (cProduct.getId().compareTo(idOfProduct) != 0 ){
@@ -100,6 +187,9 @@ public class ProductServiceBean implements ProductService, Serializable{
 			
 			product.setName(newProductData.getName());
 			product.setDescription(newProductData.getDescription());
+			product.setProductURL(newProductData.getProductURL());
+			product.setUserAssigned(newProductData.getUserAssigned());
+			product.setCloseForBugEntry(newProductData.isCloseForBugEntry());
 			product.setProductComponents(newProductData.getProductComponents());
 			entityManager.flush();
 		} else {

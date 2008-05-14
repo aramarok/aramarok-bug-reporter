@@ -8,6 +8,7 @@ import java.io.Serializable;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.ejb.EJB;
 import javax.ejb.Local;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
@@ -23,7 +24,9 @@ import com.drey.aramarok.domain.exceptions.component.ComponentNotFoundException;
 import com.drey.aramarok.domain.exceptions.component.NoComponentNameSpecifiedException;
 import com.drey.aramarok.domain.exceptions.component.ProductComponentException;
 import com.drey.aramarok.domain.model.ComponentVersion;
+import com.drey.aramarok.domain.model.Product;
 import com.drey.aramarok.domain.model.ProductComponent;
+import com.drey.aramarok.domain.model.User;
 
 
 @Stateless
@@ -35,9 +38,12 @@ public class ProductComponentServiceBean implements ProductComponentService, Ser
 	@PersistenceContext( name = "Aramarok")
 	private EntityManager entityManager;
 
+	@EJB
+	private ProductService productService;
+	
 	private static Logger log = Logger.getLogger(ProductComponentServiceBean.class);
 
-	public ProductComponent findProductComponent(String productComponentName) {
+	public synchronized ProductComponent findProductComponent(String productComponentName) throws PersistenceException{
 		log.info("Find product component name: " + productComponentName);
 		try {
 			ProductComponent productComponent = (ProductComponent) entityManager.createNamedQuery("ProductComponent.findComponentByComponentName").setParameter("componentName", productComponentName).getSingleResult();
@@ -47,8 +53,18 @@ public class ProductComponentServiceBean implements ProductComponentService, Ser
 		}
 	}
 	
+	public synchronized ProductComponent getProductComponent(Long productComponentId) throws PersistenceException {
+		log.info("Get product component by id: " + productComponentId);
+		try {
+			ProductComponent productComponent = (ProductComponent) entityManager.createNamedQuery("ProductComponent.findComponentByComponentId").setParameter("componentId", productComponentId).getSingleResult();
+			return productComponent;
+		} catch (NoResultException e) {
+			return null; 
+		}
+	}
+	
 	@SuppressWarnings("unchecked")
-	public List<ProductComponent> getAllProductComponents() throws PersistenceException {
+	public synchronized List<ProductComponent> getAllProductComponents() throws PersistenceException {
 		log.info("Get all product components.");
 		try {
 			Query query = entityManager.createNamedQuery("ProductComponent.allComponents");
@@ -58,7 +74,45 @@ public class ProductComponentServiceBean implements ProductComponentService, Ser
 		}
 	}
 	
-	public ProductComponent addNewProductComponent(String productComponentName, String productComponentDescription, List<ComponentVersion> componentVersions) throws PersistenceException, ProductComponentException {
+	public synchronized ProductComponent getProductComponentForComponentVersion(Long componentVersionId) throws PersistenceException {
+		log.info("Find product component for component version with id: " + componentVersionId);
+		List<ProductComponent> allProductComponets = getAllProductComponents();
+		
+		if (allProductComponets!=null){
+			for (ProductComponent pc: allProductComponets){
+				if (pc.getVersions()!=null){
+					for (ComponentVersion cv : pc.getVersions()){
+						if (cv.getId().compareTo(componentVersionId)==0){
+							return pc;
+						}
+					}
+				}
+			}
+		}
+		return null;
+	}
+	
+	public synchronized User getUserAssignedForSubmittingBug(Long productComponentId) throws PersistenceException{
+		log.info("Get user assigned to product component with id:" + productComponentId);
+		ProductComponent productComponent = getProductComponent(productComponentId);
+		
+		if (productComponent!=null){
+			if (productComponent.getUserAssigned()!=null){
+				return productComponent.getUserAssigned();
+			} else {
+				Product product = productService.getProductForProductComponent(productComponentId);
+				if (product!=null){
+					return product.getUserAssigned();
+				} else {
+					return null;
+				}
+			}
+		} else {
+			return null;
+		}
+	}
+	
+	public synchronized ProductComponent addNewProductComponent(String productComponentName, String productComponentDescription, List<ComponentVersion> componentVersions) throws PersistenceException, ProductComponentException {
 		log.info("Trying to add a new product component: " + productComponentName + ".");
 		ProductComponent component = findProductComponent(productComponentName);
 		if (component != null) {
@@ -75,7 +129,7 @@ public class ProductComponentServiceBean implements ProductComponentService, Ser
 	}
 
 	@SuppressWarnings("unchecked")
-	public void modifyProductComponent(Long idOfProductComponent, ProductComponent newProductComponentData) throws PersistenceException, ProductComponentException {
+	public synchronized void modifyProductComponent(Long idOfProductComponent, ProductComponent newProductComponentData) throws PersistenceException, ProductComponentException {
 		log.info("Trying to modify product component with ID: " + idOfProductComponent);
 		if (idOfProductComponent != null) {
 			ProductComponent component = entityManager.find(ProductComponent.class, idOfProductComponent);

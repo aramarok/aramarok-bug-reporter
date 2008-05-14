@@ -8,6 +8,7 @@ import java.io.Serializable;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -34,10 +35,12 @@ import com.drey.aramarok.domain.exceptions.register.UserNotFoundException;
 import com.drey.aramarok.domain.exceptions.search.NoSearchNameException;
 import com.drey.aramarok.domain.exceptions.search.SearchException;
 import com.drey.aramarok.domain.exceptions.user.UserException;
+import com.drey.aramarok.domain.model.Right;
 import com.drey.aramarok.domain.model.Role;
 import com.drey.aramarok.domain.model.SavedSearch;
 import com.drey.aramarok.domain.model.User;
 import com.drey.aramarok.domain.model.UserStatus;
+import com.drey.aramarok.domain.model.filters.UserFilter;
 
 @Stateless
 @Local(UserService.class)
@@ -222,4 +225,110 @@ public class UserServiceBean  implements UserService, Serializable {
 		return toReturn;
 	}
 
+	@SuppressWarnings("unchecked")
+	public synchronized List<User> getUsers(UserFilter userFilter) throws PersistenceException{
+		log.info("Get users request");
+		
+		List<User> results = new ArrayList<User>();
+		Query query;
+		
+		String and = " AND ";
+		StringBuffer queryStr = new StringBuffer("SELECT u from User u ");
+		boolean and_needed = false;
+		
+		if (userFilter != null){
+			queryStr.append(" WHERE ");
+			final List<Long> userIdList = userFilter.getUserIdList();
+			if (userIdList != null){
+				if (and_needed) queryStr.append(and);
+				queryStr.append("u.id IN (:userIdList)");
+				and_needed = true;
+			}
+			final List<UserStatus> userStatusList = userFilter.getUserStatusList();
+			if (userStatusList != null){
+				if (and_needed) queryStr.append(and);
+				queryStr.append("u.status IN (:userStatusList)");
+				and_needed = true;
+			}
+			final List<String> userNameList = userFilter.getUserNameList();
+			if (userNameList != null){
+				if (and_needed) queryStr.append(and);
+				queryStr.append("u.userName IN (:userNameList)");
+				and_needed = true;
+			}
+			final List<Right> rightList = userFilter.getRightList();
+									
+			if (userFilter.getSortingMode() != null){
+				switch (userFilter.getSortingMode()) {
+					case ID_ASC:queryStr.append(" order by u.id asc");
+								break;
+					case ID_DESC:	queryStr.append(" order by u.id desc");
+									break;
+					case USER_NAME_ASC:	queryStr.append(" order by u.userName asc");
+										break;
+					case USER_NAME_DESC:queryStr.append(" order by u.userName desc");
+										break;
+					case FIRST_NAME_ASC:queryStr.append(" order by u.firstName asc");
+										break;
+					case FIRST_NAME_DESC: queryStr.append(" order by u.firstName desc");
+										break;
+					case LAST_NAME_ASC:	queryStr.append(" order by u.lastName asc");
+										break;
+					case LAST_NAME_DESC:queryStr.append(" order by u.lastName desc");
+										break;
+					case REGISTER_DATE_ASC: queryStr.append(" order by u.registerDate asc");
+											break;
+					case REGISTER_DATE_DESC:queryStr.append(" order by u.registerDate desc");
+											break;
+					default: queryStr.append(" order by b.id asc");
+				}
+			}
+		
+			log.info(queryStr.toString());
+			query = entityManager.createQuery(queryStr.toString());
+						
+			if (query != null){
+				if (userIdList != null){
+					query.setParameter("userIdList", userIdList);
+				}
+				if (userStatusList != null){
+					query.setParameter("userStatusList", userStatusList);
+				}
+				if (userNameList != null){
+					query.setParameter("userNameList", userNameList);
+				}
+				try {
+					results = query.getResultList();
+					List<User> results2 = new ArrayList<User>();
+					if (rightList!=null){
+						for (User u: results){
+							for (Right r: rightList){
+								if (u.hasRight(r)){
+									results2.add(u);
+								}
+							}
+						}
+					}
+					results = results2;
+				} catch (NoResultException ex) {
+					
+				} catch(PersistenceException ex) {
+					log.error("PersistenceException", ex);
+					throw new PersistenceException();
+				}
+			}
+		} else {
+			log.info(queryStr.toString());
+			query = entityManager.createQuery(queryStr.toString());
+			try {
+				results = query.getResultList();				
+			} catch (NoResultException ex) {
+				
+			} catch(PersistenceException ex) {
+				log.error("PersistenceException", ex);
+				throw new PersistenceException();
+			}
+		}
+		return results;
+	}
 }

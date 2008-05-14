@@ -47,6 +47,7 @@ import com.drey.aramarok.domain.model.Severity;
 import com.drey.aramarok.domain.model.User;
 import com.drey.aramarok.domain.model.filters.BugFilter;
 import com.drey.aramarok.domain.model.filters.CommentFilter;
+import com.drey.aramarok.domain.model.filters.UserFilter;
 
 @Stateful
 @Local(DomainFacade.class)
@@ -91,7 +92,7 @@ public class DomainFacadeBean implements DomainFacade, Serializable {
 	
 	public synchronized User login(String username, String password) throws ExternalSystemException, LoginException {
 		try {
-			user = userService.login(username, password);
+			this.user = userService.login(username, password);
 			log.info("User found: " + user.getName());
 			aramarokLog.info("User logged in: " + user.getUserName());
 		} catch (PersistenceException ex) {
@@ -102,6 +103,14 @@ public class DomainFacadeBean implements DomainFacade, Serializable {
 	
 	public synchronized User getUser(String userName){
 		return userService.findUser(userName);
+	}
+	
+	public synchronized List<User> getUsers(UserFilter userFilter) throws ExternalSystemException{
+		try {
+			return userService.getUsers(userFilter);
+		} catch (PersistenceException ex) {
+			throw new ExternalSystemException(DB_ERROR_MSG, ex);
+		}
 	}
 	
 	public synchronized void registerNewUser(String userName, String password, String emailAddress, String firstName, String lastName, String middleName) throws ExternalSystemException, RegisterException {
@@ -130,35 +139,57 @@ public class DomainFacadeBean implements DomainFacade, Serializable {
 		}
 	}
 	
-	public synchronized Product getProduct(String productName){
-		return productService.findProduct(productName);
-	}
-	
-	public synchronized ProductComponent getProductComponent(String productComponentName){
-		return componentService.findProductComponent(productComponentName);
-	}
-	
-	public synchronized ComponentVersion getComponentVersion(String componentVersionName){
-		return versionService.findComponentVersion(componentVersionName);
-	}
-	
-	public synchronized void addNewProduct(String productName, String productDescription, Set<ProductComponent> productComponents) throws ExternalSystemException, ProductException {
+	public synchronized Product getProduct(String productName)throws ExternalSystemException{
 		try {
-			productService.addNewProduct(productName, productDescription, productComponents);
-			aramarokLog.info("New product added: '" + productName + "'.");
+			return productService.findProduct(productName);
 		} catch (PersistenceException ex) {
 			throw new ExternalSystemException(DB_ERROR_MSG, ex);
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
-	public synchronized void modifyProduct(Long idOfProduct, Product newProductData) throws ExternalSystemException, ProductException {
-		try {
-			productService.modifyProduct(idOfProduct, newProductData);
-			aramarokLog.info("Product with name '" + newProductData.getName() + "' was modified.");
-			// aramarokLog.info(domainService.currentDateAndTime() + " - Product with name '" + product.getName() + "' was modified."); 
+	public synchronized ProductComponent getProductComponent(String productComponentName)throws ExternalSystemException{
+		try{
+			return componentService.findProductComponent(productComponentName);
 		} catch (PersistenceException ex) {
 			throw new ExternalSystemException(DB_ERROR_MSG, ex);
+		}
+	}
+	
+	public synchronized ComponentVersion getComponentVersion(String componentVersionName)throws ExternalSystemException{
+		try{
+			return versionService.findComponentVersion(componentVersionName);
+		} catch (PersistenceException ex) {
+			throw new ExternalSystemException(DB_ERROR_MSG, ex);
+		}
+	}
+
+	public synchronized void addNewProduct(String productName, String productDescription, String productURL, boolean closeForBugEntry, User userAssigned, Set<ProductComponent> productComponents) throws ExternalSystemException, ProductException, UserException{
+		if (this.user.hasRight(Right.DEFINE_PRODUCTS)){
+			try {
+				productService.addNewProduct(productName, productDescription, productURL, closeForBugEntry, userAssigned, productComponents);
+				aramarokLog.info("New product added: '" + productName + "'.");
+			} catch (PersistenceException ex) {
+				throw new ExternalSystemException(DB_ERROR_MSG, ex);
+			}
+		} else {
+			log.error("User cannot add a new product. Does not have DEFINE_PRODUCTS right.");
+			throw new UserHasNoRightException();
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	public synchronized void modifyProduct(Long idOfProduct, Product newProductData) throws ExternalSystemException, ProductException, UserException {
+		if (this.user.hasRight(Right.DEFINE_PRODUCTS)){
+			try {
+				productService.modifyProduct(idOfProduct, newProductData);
+				aramarokLog.info("Product with id '" + newProductData.getId() + "' was modified.");
+				// aramarokLog.info(domainService.currentDateAndTime() + " - Product with name '" + product.getName() + "' was modified."); 
+			} catch (PersistenceException ex) {
+				throw new ExternalSystemException(DB_ERROR_MSG, ex);
+			}
+		} else {
+			log.error("User cannot modify an exiting product. Does not have DEFINE_PRODUCTS right.");
+			throw new UserHasNoRightException();
 		}
 	}
 	
@@ -217,16 +248,24 @@ public class DomainFacadeBean implements DomainFacade, Serializable {
 		}
 	}
 	
-	public synchronized Bug getBug(Long bugId){
-		return bugService.getBug(bugId);
+	public synchronized Bug getBug(Long bugId) throws ExternalSystemException {
+		try {
+			return bugService.getBug(bugId);
+		} catch (PersistenceException pe){
+			throw new ExternalSystemException(DB_ERROR_MSG, pe);
+		}
 	}
 	
 	public synchronized List<Comment> getComments(CommentFilter commentFilter){
 		return domainService.getComments(commentFilter);
 	}
 	
-	public synchronized List<Bug> getBugs(BugFilter bugFilter){
-		return bugService.getBugs(bugFilter);
+	public synchronized List<Bug> getBugs(BugFilter bugFilter) throws ExternalSystemException {
+		try {
+			return bugService.getBugs(bugFilter);
+		} catch (PersistenceException pe){
+			throw new ExternalSystemException(DB_ERROR_MSG, pe);
+		}
 	}
 	
 	public synchronized Priority getPriority(String priorityName){
@@ -398,6 +437,59 @@ public class DomainFacadeBean implements DomainFacade, Serializable {
 		} catch (PersistenceException ex) {
 			throw new ExternalSystemException(DB_ERROR_MSG, ex);
 		}
+	}
+
+	public ComponentVersion getComponentVersion(Long componentVersionId) throws ExternalSystemException {
+		try {
+			return versionService.getComponentVersion(componentVersionId);
+		} catch (PersistenceException ex) {
+			throw new ExternalSystemException(DB_ERROR_MSG, ex);
+		}
+	}
+
+	public Product getProduct(Long productId) throws ExternalSystemException {
+		try {
+			return productService.getProduct(productId);
+		} catch (PersistenceException ex) {
+			throw new ExternalSystemException(DB_ERROR_MSG, ex);
+		}
+	}
+
+	public ProductComponent getProductComponent(Long productComponentId) throws ExternalSystemException {
+		try {
+			return componentService.getProductComponent(productComponentId);
+		} catch (PersistenceException ex) {
+			throw new ExternalSystemException(DB_ERROR_MSG, ex);
+		}
+	}
+
+	public ProductComponent getProductComponentForComponentVersion(Long componentVersionId) throws ExternalSystemException {
+		try {
+			return componentService.getProductComponentForComponentVersion(componentVersionId);
+		} catch (PersistenceException ex) {
+			throw new ExternalSystemException(DB_ERROR_MSG, ex);
+		}
+	}
+
+	public Product getProductForProductComponent(Long productComponentId) throws ExternalSystemException {
+		try {
+			return productService.getProductForProductComponent(productComponentId);
+		} catch (PersistenceException ex) {
+			throw new ExternalSystemException(DB_ERROR_MSG, ex);
+		}
+	}
+
+	public List<Product> getProductsForCommittingABug() throws ExternalSystemException {
+		try {
+			return productService.getProductsForCommittingABug();
+		} catch (PersistenceException ex) {
+			throw new ExternalSystemException(DB_ERROR_MSG, ex);
+		}
+	}
+
+	public User getUserAssignedForSubmittingBug(Long componentVersionId,Long productComponentId, Long productId) throws ExternalSystemException {
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 }
