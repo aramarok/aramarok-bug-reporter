@@ -18,6 +18,7 @@ import javax.persistence.Version;
 @Table(name = "VERSION")
 @NamedQueries( {
 		@NamedQuery(name = "ComponentVersion.findVersionsByVersionName", query = "SELECT v from ComponentVersion as v WHERE v.name = :versionName"),
+		@NamedQuery(name = "ComponentVersion.findVersionsByVersionId", query = "SELECT v from ComponentVersion as v WHERE v.id = :versionId"),
 		@NamedQuery(name = "ComponentVersion.allVersions", query = "SELECT v from ComponentVersion as v ORDER BY v.id ASC")
 		})
 public class ComponentVersion implements Serializable {
@@ -30,7 +31,7 @@ public class ComponentVersion implements Serializable {
 	@Column(name = "OBJ_VERSION")
 	private static final long serialVersionUID = 0;
 
-	@Column(name = "NAME")
+	@Column(name = "NAME", nullable=false)
 	private String name = "";
 	
 	@Column(name = "DESCRIPTION")
@@ -45,9 +46,14 @@ public class ComponentVersion implements Serializable {
 	*/
 	@ManyToOne
 	@JoinColumn(name = "USER_ASSIGNED")
-	private User userAssigned;
+	private User userAssigned = null;
 
 	public ComponentVersion(){		
+	}
+	
+	public ComponentVersion(String name, String description){
+		this.name = name;
+		this.description = description;
 	}
 	
 	public ComponentVersion(String name, String description, User userAssigned){

@@ -14,6 +14,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
@@ -27,6 +28,7 @@ import javax.persistence.Version;
 )
 @NamedQueries( {
 		@NamedQuery(name = "ProductComponent.findComponentByComponentName", query = "SELECT c from ProductComponent as c WHERE c.name = :componentName"),
+		@NamedQuery(name = "ProductComponent.findComponentByComponentId", query = "SELECT c from ProductComponent as c WHERE c.id = :componentId"),
 		@NamedQuery(name = "ProductComponent.allComponents", query = "SELECT c from ProductComponent as c ORDER BY c.id ASC")
 		})
 		
@@ -40,7 +42,7 @@ public class ProductComponent implements Serializable {
 	@Column(name = "OBJ_VERSION")
 	private static final long serialVersionUID = 0;
 
-	@Column(name = "NAME")
+	@Column(name = "NAME", nullable=false)
 	private String name = "";
 	
 	@Column(name = "DESCRIPTION")
@@ -53,6 +55,10 @@ public class ProductComponent implements Serializable {
 				)
 	private Set<User> usersAssigned;
 */	
+	@ManyToOne
+	@JoinColumn(name = "USER_ASSIGNED")
+	private User userAssigned = null;
+	
 	@ManyToMany(cascade={CascadeType.ALL}, fetch=FetchType.EAGER)
 	@JoinTable(	name ="COMPONENT_VERSIONS",
 				joinColumns = {@JoinColumn(name="comp_key", referencedColumnName="COMPONENT_ID", unique=false)},
@@ -63,12 +69,12 @@ public class ProductComponent implements Serializable {
 	public ProductComponent(){		
 	}
 	
-	public ProductComponent(String name, String description, List<ComponentVersion> versions){
-		init(name, description, versions);
-	}
-	
 	public ProductComponent(String name, String description){
 		init(name, description, null);
+	}
+	
+	public ProductComponent(String name, String description, List<ComponentVersion> versions){
+		init(name, description, versions);
 	}
 	
 	private void init(String name, String description, List<ComponentVersion> versions){
@@ -120,5 +126,13 @@ public class ProductComponent implements Serializable {
 
 	public void setVersions(Set<ComponentVersion> versions) {
 		this.versions = versions;
+	}
+
+	public User getUserAssigned() {
+		return userAssigned;
+	}
+
+	public void setUserAssigned(User userAssigned) {
+		this.userAssigned = userAssigned;
 	}
 }
