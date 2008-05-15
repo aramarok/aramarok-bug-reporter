@@ -13,8 +13,23 @@ public class UserPreference implements Serializable {
 	@Column(name = "OBJ_VERSION")
 	private static final long serialVersionUID = 012364;
 
+	@Column(name = "HIDE_EMAIL")
+	private boolean hideEmail = false;
+	
 	public UserPreference(){
 		
+	}
+
+	
+	
+	
+	// Getters and setters
+	public boolean isHideEmail() {
+		return hideEmail;
+	}
+
+	public void setHideEmail(boolean hideEmail) {
+		this.hideEmail = hideEmail;
 	}
 	
 }

@@ -69,17 +69,18 @@ public class ProductComponent implements Serializable {
 	public ProductComponent(){		
 	}
 	
-	public ProductComponent(String name, String description){
-		init(name, description, null);
+	public ProductComponent(String name, String description, User userAssigned){
+		init(name, description, null, userAssigned);
 	}
 	
-	public ProductComponent(String name, String description, List<ComponentVersion> versions){
-		init(name, description, versions);
+	public ProductComponent(String name, String description, List<ComponentVersion> versions, User userAssigned){
+		init(name, description, versions, userAssigned);
 	}
 	
-	private void init(String name, String description, List<ComponentVersion> versions){
+	private void init(String name, String description, List<ComponentVersion> versions, User userAssigned){
 		this.name = name;
 		this.description = description;
+		this.userAssigned = userAssigned;
 		Set<ComponentVersion> tmp = new HashSet<ComponentVersion>();
 		if (versions!= null && !versions.isEmpty()){
 			for (ComponentVersion cv: versions){

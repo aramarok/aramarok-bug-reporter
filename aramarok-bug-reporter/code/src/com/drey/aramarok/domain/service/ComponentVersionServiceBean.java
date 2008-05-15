@@ -118,7 +118,7 @@ public class ComponentVersionServiceBean implements ComponentVersionService, Ser
 			if (version == null) {
 				throw new VersionNotFoundException("Component version with id " + idOfComponentVersion.toString() + " does not exist in the DB!");
 			}
-			if (version.getName().trim().compareTo("") == 0) {
+			if (newComponentVersionData.getName().trim().compareTo("") == 0) {
 				throw new NoVersionNameSpecifiedException("No component version name was specified!");
 			}
 			
@@ -126,7 +126,7 @@ public class ComponentVersionServiceBean implements ComponentVersionService, Ser
 			try {
 				listOfVersions = (List<ComponentVersion>)entityManager.createNamedQuery("ComponentVersion.findVersionsByVersionName").setParameter("versionName", newComponentVersionData.getName()).getResultList();
 			} catch (NoResultException nre){
-				
+				listOfVersions = null;
 			}
 			if (listOfVersions!=null && listOfVersions.size() > 0 ) {
 				for (Iterator<ComponentVersion> i=listOfVersions.iterator(); i.hasNext();){

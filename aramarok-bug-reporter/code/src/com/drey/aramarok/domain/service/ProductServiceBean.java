@@ -8,7 +8,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import javax.ejb.Local;
 import javax.ejb.Stateless;
@@ -146,7 +145,7 @@ public class ProductServiceBean implements ProductService, Serializable{
 		}
 	}
 	
-	public synchronized void addNewProduct(String productName, String productDescription, String productURL, boolean closeForBugEntry, User userAssigned, Set<ProductComponent> productComponents) throws PersistenceException, ProductException {
+	public synchronized void addNewProduct(String productName, String productDescription, String productURL, boolean closeForBugEntry, User userAssigned , List<ProductComponent> productComponents) throws PersistenceException, ProductException {
 		log.info("Trying to add a new product: " + productName + "...");
 		Product product = findProduct(productName);
 		if (product != null) {
@@ -156,7 +155,7 @@ public class ProductServiceBean implements ProductService, Serializable{
 			throw new NoProductNameSpecifiedException("No product name was specified!");
 		}
 		
-		Product newProduct = new Product(productName, productDescription, productURL, productComponents, userAssigned, closeForBugEntry);
+		Product newProduct = new Product(productName, productDescription, productURL, userAssigned, productComponents, closeForBugEntry);
 		
 		entityManager.persist(newProduct);
 		entityManager.flush();
@@ -175,7 +174,12 @@ public class ProductServiceBean implements ProductService, Serializable{
 				throw new NoProductNameSpecifiedException("No product name was specified!");
 			}
 			
-			List<Product> listOfProducts = (List<Product>)entityManager.createNamedQuery("Product.findProductByProductName").setParameter("productName", newProductData.getName()).getResultList();
+			List<Product> listOfProducts = null;
+			try {
+				listOfProducts = (List<Product>)entityManager.createNamedQuery("Product.findProductByProductName").setParameter("productName", newProductData.getName()).getResultList();
+			} catch (NoResultException nre){
+				listOfProducts = null;
+			}
 			if (listOfProducts!=null && listOfProducts.size() > 0 ) {
 				for (Iterator<Product> i=listOfProducts.iterator(); i.hasNext();){
 					Product cProduct = i.next();

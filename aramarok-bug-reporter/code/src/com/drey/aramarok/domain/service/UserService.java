@@ -18,10 +18,20 @@ import com.drey.aramarok.domain.exceptions.user.UserException;
 import com.drey.aramarok.domain.model.Role;
 import com.drey.aramarok.domain.model.SavedSearch;
 import com.drey.aramarok.domain.model.User;
+import com.drey.aramarok.domain.model.UserPreference;
 import com.drey.aramarok.domain.model.filters.UserFilter;
 
 public interface UserService {
 
+	/**
+	 * 
+	 * @param userId
+	 * @return
+	 * @throws PersistenceException
+	 */
+	public User getUser(Long userId) throws PersistenceException;
+	
+	
 	/**
 	 * 
 	 * @param userName
@@ -71,8 +81,9 @@ public interface UserService {
 	 * @param modifyPassword
 	 * @throws FatalDomainException
 	 * @throws RegisterException
+	 * @throws UserException 
 	 */
-	public void modifyUser(Long idOfUser, User newUserData, boolean modifyPassword) throws PersistenceException, RegisterException;
+	public void modifyUser(Long idOfUser, User newUserData, boolean modifyPassword) throws PersistenceException, RegisterException, UserException;
 	
 	
 	/**
@@ -105,5 +116,15 @@ public interface UserService {
 	 * @return
 	 */
 	public List<User> getUsers(UserFilter userFilter) throws PersistenceException;
+	
+	
+	/**
+	 * 
+	 * @param idOfUser
+	 * @param newUserPreference
+	 * @throws PersistenceException
+	 * @throws UserException
+	 */
+	public void modifyUserPreference(Long idOfUser, UserPreference newUserPreference)throws PersistenceException, UserException;
 
 }

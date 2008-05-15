@@ -6,7 +6,6 @@ package com.drey.aramarok.domain.service;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.Set;
 
 import javax.ejb.EJB;
 import javax.ejb.Local;
@@ -25,6 +24,7 @@ import com.drey.aramarok.domain.exceptions.bug.BugException;
 import com.drey.aramarok.domain.exceptions.component.ProductComponentException;
 import com.drey.aramarok.domain.exceptions.login.LoginException;
 import com.drey.aramarok.domain.exceptions.product.ProductException;
+import com.drey.aramarok.domain.exceptions.quip.QuipException;
 import com.drey.aramarok.domain.exceptions.register.RegisterException;
 import com.drey.aramarok.domain.exceptions.register.UserNotFoundException;
 import com.drey.aramarok.domain.exceptions.search.NoSearchNameException;
@@ -40,11 +40,13 @@ import com.drey.aramarok.domain.model.Platform;
 import com.drey.aramarok.domain.model.Priority;
 import com.drey.aramarok.domain.model.Product;
 import com.drey.aramarok.domain.model.ProductComponent;
+import com.drey.aramarok.domain.model.Quip;
 import com.drey.aramarok.domain.model.Right;
 import com.drey.aramarok.domain.model.Role;
 import com.drey.aramarok.domain.model.SavedSearch;
 import com.drey.aramarok.domain.model.Severity;
 import com.drey.aramarok.domain.model.User;
+import com.drey.aramarok.domain.model.UserPreference;
 import com.drey.aramarok.domain.model.filters.BugFilter;
 import com.drey.aramarok.domain.model.filters.CommentFilter;
 import com.drey.aramarok.domain.model.filters.UserFilter;
@@ -130,10 +132,19 @@ public class DomainFacadeBean implements DomainFacade, Serializable {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public synchronized void modifyUser(Long idOfUser, User newUserData, boolean modifyPassword) throws ExternalSystemException, RegisterException {
+	public synchronized void modifyUser(Long idOfUser, User newUserData, boolean modifyPassword) throws ExternalSystemException, RegisterException, UserException {
 		try {
 			userService.modifyUser(idOfUser, newUserData, modifyPassword);
 			aramarokLog.info("User with user name '" + newUserData.getUserName() + "' was modified.");
+		} catch (PersistenceException ex) {
+			throw new ExternalSystemException(DB_ERROR_MSG, ex);
+		}
+	}
+	
+	public synchronized void modifyUserPreference(Long idOfUser, UserPreference newUserPreference)throws ExternalSystemException, UserException{
+		try {
+			userService.modifyUserPreference(idOfUser, newUserPreference);
+			aramarokLog.info("User preference of user with id '" + idOfUser + "' was modified.");
 		} catch (PersistenceException ex) {
 			throw new ExternalSystemException(DB_ERROR_MSG, ex);
 		}
@@ -163,7 +174,7 @@ public class DomainFacadeBean implements DomainFacade, Serializable {
 		}
 	}
 
-	public synchronized void addNewProduct(String productName, String productDescription, String productURL, boolean closeForBugEntry, User userAssigned, Set<ProductComponent> productComponents) throws ExternalSystemException, ProductException, UserException{
+	public synchronized void addNewProduct(String productName, String productDescription, String productURL, boolean closeForBugEntry, User userAssigned, List<ProductComponent> productComponents) throws ExternalSystemException, ProductException, UserException{
 		if (this.user.hasRight(Right.DEFINE_PRODUCTS)){
 			try {
 				productService.addNewProduct(productName, productDescription, productURL, closeForBugEntry, userAssigned, productComponents);
@@ -182,7 +193,7 @@ public class DomainFacadeBean implements DomainFacade, Serializable {
 		if (this.user.hasRight(Right.DEFINE_PRODUCTS)){
 			try {
 				productService.modifyProduct(idOfProduct, newProductData);
-				aramarokLog.info("Product with id '" + newProductData.getId() + "' was modified.");
+				aramarokLog.info("Product with id '" + idOfProduct + "' was modified.");
 				// aramarokLog.info(domainService.currentDateAndTime() + " - Product with name '" + product.getName() + "' was modified."); 
 			} catch (PersistenceException ex) {
 				throw new ExternalSystemException(DB_ERROR_MSG, ex);
@@ -193,33 +204,107 @@ public class DomainFacadeBean implements DomainFacade, Serializable {
 		}
 	}
 	
-	public synchronized void addNewProductComponent(String productComponentName, String productComponentDescription, Product parentProduct, List<ComponentVersion> componentVersions) throws ExternalSystemException, ProductComponentException {
-		if (parentProduct != null) {
-			Product product = productService.findProduct(parentProduct.getName());
-			if (product == null){
-				log.error("The 'parentProduct' was not found in the DB!");
-				throw new ProductComponentException("The 'parentProduct' was not found in the DB!");
-			}
-			
-			ProductComponent newComponent = null;
+	public synchronized void addNewProductComponent(String productComponentName, String productComponentDescription, User userAssigned, /*Product parentProduct,*/ List<ComponentVersion> componentVersions) throws ExternalSystemException, ProductComponentException, UserHasNoRightException {
+		if (this.user.hasRight(Right.DEFINE_COMPONENTS)){
+			/*if (parentProduct != null) {
+				Product product = productService.findProduct(parentProduct.getName());
+				if (product == null){
+					log.error("The 'parentProduct' was not found in the DB!");
+					throw new ProductComponentException("The 'parentProduct' was not found in the DB!");
+				}
+				
+				ProductComponent newComponent = null;*/
 			try {
-				newComponent = componentService.addNewProductComponent(productComponentName, productComponentDescription, componentVersions);
+				componentService.addNewProductComponent(productComponentName, productComponentDescription, userAssigned, componentVersions);
 				aramarokLog.info("New product component added: '" + productComponentName + "'.");
 			} catch (PersistenceException ex) {
 				throw new ExternalSystemException(DB_ERROR_MSG, ex);
 			}
-			
-			// here we add the new product component to the specified product
-			product.addComponent(newComponent);
+				
+				/*
+				// here we add the new product component to the specified product
+				product.addComponent(newComponent);
+				try {
+					entityManager.flush();
+					//TODO: is this correct?
+				} catch (PersistenceException ex) {
+					throw new ExternalSystemException(DB_ERROR_MSG, ex);
+				}
+			} else {
+				log.error("The 'parentProduct' parrameter was NULL!");
+				throw new ProductComponentException("The 'parentProduct' parrameter was NULL!");
+			}*/
+		} else {
+			log.error("User cannot add a new product component. Does not have DEFINE_COMPONENTS right.");
+			throw new UserHasNoRightException();
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	public synchronized void modifyProductComponent(Long idOfProductComponent, ProductComponent newProductComponentData) throws ExternalSystemException, ProductComponentException, UserHasNoRightException {
+		if (this.user.hasRight(Right.DEFINE_COMPONENTS)){
 			try {
-				entityManager.flush();
-				//TODO: is this correct?
+				componentService.modifyProductComponent(idOfProductComponent, newProductComponentData);
+				aramarokLog.info("Product component with id '" + idOfProductComponent + "' was modified.");
+			} catch (PersistenceException pe){
+				throw new ExternalSystemException(DB_ERROR_MSG, pe);
+			}
+		} else {
+			log.error("User cannot modify an exiting product component. Does not have DEFINE_COMPONENTS right.");
+			throw new UserHasNoRightException();
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	public synchronized void modifyComponentVersion(Long idOfComponentVersion, ComponentVersion newComponentVersionData) throws ExternalSystemException, ComponentVersionException, UserHasNoRightException {
+		if (this.user.hasRight(Right.DEFINE_VERSIONS)){
+			try {
+				versionService.modifyComponentVersion(idOfComponentVersion, newComponentVersionData);
+				aramarokLog.info("Component version with id '" + idOfComponentVersion + "' was modified.");
+			} catch (PersistenceException pe){
+				throw new ExternalSystemException(DB_ERROR_MSG, pe);
+			}
+		} else {
+			log.error("User cannot modify an exiting component version. Does not have DEFINE_VERSIONS right.");
+			throw new UserHasNoRightException();
+		}
+	}
+	
+	public synchronized void addNewComponentVersion(String componentVersionName, String componentVersionDescription, /*ProductComponent parentProductComponent,*/ User userAssignedTo) throws ExternalSystemException, ComponentVersionException ,UserHasNoRightException {
+		if (this.user.hasRight(Right.DEFINE_VERSIONS)){
+		/*
+		if (parentProductComponent != null){
+			ProductComponent component = componentService.findProductComponent(parentProductComponent.getName());
+			if (component == null){
+				log.error("The 'parentProductComponent' was not found in the DB!");
+				throw new ComponentVersionException("The 'parentProductComponent' was not found in the DB!");
+			}
+			ComponentVersion newComponentVersion = null;
+		*/
+			
+			try {
+				versionService.addNewComponentVersion(componentVersionName, componentVersionDescription, userAssignedTo);
+				aramarokLog.info("New component version added: '" + componentVersionName + "'.");
 			} catch (PersistenceException ex) {
 				throw new ExternalSystemException(DB_ERROR_MSG, ex);
 			}
+		/*	
+			// here we add the new version to the specified component
+			component.addVersion(newComponentVersion);
+			try {
+				entityManager.flush();
+				//TODO: is correct here?
+			} catch (PersistenceException pe){
+				throw new ExternalSystemException(DB_ERROR_MSG, pe);
+			}
 		} else {
-			log.error("The 'parentProduct' parrameter was NULL!");
-			throw new ProductComponentException("The 'parentProduct' parrameter was NULL!");
+			log.error("The 'parentProductComponent' parrameter was NULL!");
+			throw new ComponentVersionException("The 'parentProductComponent' parrameter was NULL!");
+		}
+		*/
+		} else {
+			log.error("User cannot add a new component version. Does not have DEFINE_VERSIONS right.");
+			throw new UserHasNoRightException();
 		}
 	}
 	
@@ -256,16 +341,16 @@ public class DomainFacadeBean implements DomainFacade, Serializable {
 		}
 	}
 	
-	public synchronized List<Comment> getComments(CommentFilter commentFilter){
-		return domainService.getComments(commentFilter);
-	}
-	
 	public synchronized List<Bug> getBugs(BugFilter bugFilter) throws ExternalSystemException {
 		try {
 			return bugService.getBugs(bugFilter);
 		} catch (PersistenceException pe){
 			throw new ExternalSystemException(DB_ERROR_MSG, pe);
 		}
+	}
+	
+	public synchronized List<Comment> getComments(CommentFilter commentFilter){
+		return domainService.getComments(commentFilter);
 	}
 	
 	public synchronized Priority getPriority(String priorityName){
@@ -300,55 +385,6 @@ public class DomainFacadeBean implements DomainFacade, Serializable {
 				throw new ExternalSystemException(DB_ERROR_MSG, ex);
 			}
 		} 
-	}
-	
-	@SuppressWarnings("unchecked")
-	public synchronized void modifyProductComponent(Long idOfProductComponent, ProductComponent newProductComponentData) throws ExternalSystemException, ProductComponentException {
-		try {
-			componentService.modifyProductComponent(idOfProductComponent, newProductComponentData);
-			aramarokLog.info("Product component version with name '" + newProductComponentData.getName() + "' was modified.");
-		} catch (PersistenceException pe){
-			throw new ExternalSystemException(DB_ERROR_MSG, pe);
-		}
-	}
-	
-	@SuppressWarnings("unchecked")
-	public synchronized void modifyComponentVersion(Long idOfComponentVersion, ComponentVersion newComponentVersionData) throws ExternalSystemException, ComponentVersionException {
-		try {
-			versionService.modifyComponentVersion(idOfComponentVersion, newComponentVersionData);
-			aramarokLog.info("Component version with name '" + newComponentVersionData.getName() + "' was modified.");
-		} catch (PersistenceException pe){
-			throw new ExternalSystemException(DB_ERROR_MSG, pe);
-		}
-	}
-	
-	public synchronized void addNewComponentVersion(String componentVersionName, String componentVersionDescription, ProductComponent parentProductComponent, User userAssignedTo) throws ExternalSystemException, ComponentVersionException {
-		if (parentProductComponent != null){
-			ProductComponent component = componentService.findProductComponent(parentProductComponent.getName());
-			if (component == null){
-				log.error("The 'parentProductComponent' was not found in the DB!");
-				throw new ComponentVersionException("The 'parentProductComponent' was not found in the DB!");
-			}
-			ComponentVersion newComponentVersion = null;
-			try {
-				newComponentVersion = versionService.addNewComponentVersion(componentVersionName, componentVersionDescription, userAssignedTo);
-				aramarokLog.info("New component version added: '" + componentVersionName + "'.");
-			} catch (PersistenceException pe){
-				throw new ExternalSystemException(DB_ERROR_MSG, pe);
-			}
-			
-			// here we add the new version to the specified component
-			component.addVersion(newComponentVersion);
-			try {
-				entityManager.flush();
-				//TODO: is correct here?
-			} catch (PersistenceException pe){
-				throw new ExternalSystemException(DB_ERROR_MSG, pe);
-			}
-		} else {
-			log.error("The 'parentProductComponent' parrameter was NULL!");
-			throw new ComponentVersionException("The 'parentProductComponent' parrameter was NULL!");
-		}
 	}
 	
 	public List<Role> getAllRoles() throws ExternalSystemException{
@@ -487,9 +523,66 @@ public class DomainFacadeBean implements DomainFacade, Serializable {
 		}
 	}
 
-	public User getUserAssignedForSubmittingBug(Long componentVersionId,Long productComponentId, Long productId) throws ExternalSystemException {
-		// TODO Auto-generated method stub
+	public User getUserAssignedForSubmittingBug(Long componentVersionId, Long productComponentId, Long productId) throws ExternalSystemException {
+		if (componentVersionId!=null){
+			return versionService.getUserAssignedForSubmittingBug(componentVersionId);
+		}
+		if (productComponentId!=null){
+			return componentService.getUserAssignedForSubmittingBug(productComponentId);
+		}
+		if (productId!=null){
+			return productService.getUserAssignedToProduct(productId);
+		}
 		return null;
 	}
 	
+	public Quip getQuip(Long quipId) throws ExternalSystemException {
+		try {
+			return domainService.getQuip(quipId);
+		} catch (PersistenceException ex) {
+			throw new ExternalSystemException(DB_ERROR_MSG, ex);
+		}
+	}
+	
+	public void addQuip(String quipText) throws ExternalSystemException, QuipException {
+		try {
+			domainService.addQuip(quipText, this.user);
+		} catch (PersistenceException ex) {
+			throw new ExternalSystemException(DB_ERROR_MSG, ex);
+		}
+	}
+	
+	public void editQuip(Long quipId, String newQuipText, boolean visible) throws ExternalSystemException, UserHasNoRightException{
+		if (this.user.hasRight(Right.EDIT_QUIPS)){
+			try {
+				domainService.editQuip(quipId, newQuipText, visible);
+			} catch (PersistenceException ex) {
+				throw new ExternalSystemException(DB_ERROR_MSG, ex);
+			}
+		} else {
+			log.error("User cannot edit quips. Does not have EDIT_QUIPS right.");
+			throw new UserHasNoRightException();
+		}
+	}
+	
+	public void approveQuip(Long quipId) throws ExternalSystemException, UserHasNoRightException{
+		if (this.user.hasRight(Right.EDIT_QUIPS)){
+			try {
+				domainService.approveQuip(quipId);
+			} catch (PersistenceException ex) {
+				throw new ExternalSystemException(DB_ERROR_MSG, ex);
+			}
+		} else {
+			log.error("User cannot approve quips. Does not have EDIT_QUIPS right.");
+			throw new UserHasNoRightException();
+		}
+	}
+	
+	public void voteComment(Long commentId) throws ExternalSystemException {
+		try {
+			domainService.voteComment(commentId, this.user);
+		} catch (PersistenceException ex) {
+			throw new ExternalSystemException(DB_ERROR_MSG, ex);
+		}
+	}
 }

@@ -67,13 +67,9 @@ public class User implements Serializable {
 
 	@Column(name = "EMAIL_ADDRESS", nullable=false)
 	private String emailAddress = "";
-	
-	@Column(name = "HIDE_EMAIL")
-	private boolean hideEmail = false;
-	
+		
 	@Column(name = "HOME_PAGE")
 	private String homePage= "";
-	
 	
 	@Column(name = "REGISTER_DATE", nullable=false)
 	private Date registerDate;
@@ -94,6 +90,13 @@ public class User implements Serializable {
 				inverseJoinColumns={@JoinColumn(name="search_key", referencedColumnName="SAVED_SEARCH_ID", unique=false)}
 				)
 	private Set<SavedSearch> savedSearches = null;
+	
+	@ManyToMany(cascade={CascadeType.ALL}, fetch=FetchType.EAGER)
+	@JoinTable(	name ="USER_VOTED_COMMENTS",
+				joinColumns = {@JoinColumn(name="user_key", referencedColumnName="USER_ID", unique=false)},
+				inverseJoinColumns={@JoinColumn(name="comment_key", referencedColumnName="COMMENT_ID", unique=false)}
+				)
+	private Set<Comment> votedComments = null;
 
 	@Embedded
 	private UserPreference userPreference = new UserPreference();
@@ -160,6 +163,12 @@ public class User implements Serializable {
 				savedSearches.remove(toRemove);
 			}
 		}
+	}
+	
+	public void voteComment(Comment commentVoted){
+		if (votedComments == null)
+			votedComments = new HashSet<Comment>();
+		votedComments.add(commentVoted);
 	}
 	
 	/* Getters/setter */
@@ -263,14 +272,6 @@ public class User implements Serializable {
 		this.savedSearches = savedSearches;
 	}
 
-	public boolean isHideEmail() {
-		return hideEmail;
-	}
-
-	public void setHideEmail(boolean hideEmail) {
-		this.hideEmail = hideEmail;
-	}
-
 	public String getHomePage() {
 		return homePage;
 	}
@@ -285,5 +286,13 @@ public class User implements Serializable {
 
 	public void setUserPreference(UserPreference userPreference) {
 		this.userPreference = userPreference;
+	}
+
+	public Set<Comment> getVotedComments() {
+		return votedComments;
+	}
+
+	public void setVotedComments(Set<Comment> votedComments) {
+		this.votedComments = votedComments;
 	}
 }

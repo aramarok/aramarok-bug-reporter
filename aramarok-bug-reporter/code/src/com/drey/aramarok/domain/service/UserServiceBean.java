@@ -39,6 +39,7 @@ import com.drey.aramarok.domain.model.Right;
 import com.drey.aramarok.domain.model.Role;
 import com.drey.aramarok.domain.model.SavedSearch;
 import com.drey.aramarok.domain.model.User;
+import com.drey.aramarok.domain.model.UserPreference;
 import com.drey.aramarok.domain.model.UserStatus;
 import com.drey.aramarok.domain.model.filters.UserFilter;
 
@@ -52,6 +53,15 @@ public class UserServiceBean  implements UserService, Serializable {
 	private EntityManager entityManager;
 
 	private static Logger log = Logger.getLogger(UserServiceBean.class);
+	
+	public synchronized User getUser(Long userId) throws PersistenceException {
+		log.info("Get user with id:" + userId);
+		try {
+			return entityManager.find(User.class, userId);
+		} catch (NoResultException e) {
+			return null; 
+		}
+	}
 	
 	public synchronized User findUser(String userName) {
 		log.info("Find userName: " + userName);
@@ -101,7 +111,7 @@ public class UserServiceBean  implements UserService, Serializable {
 	}
 
 	@SuppressWarnings("unchecked")
-	public synchronized void modifyUser(Long idOfUser, User newUserData, boolean modifyPassword) throws PersistenceException, RegisterException {
+	public synchronized void modifyUser(Long idOfUser, User newUserData, boolean modifyPassword) throws PersistenceException, UserException, RegisterException {
 		log.info("Trying to modify user with ID: " + idOfUser);
 		if (idOfUser != null) {
 			User user = entityManager.find(User.class, idOfUser);
@@ -132,7 +142,6 @@ public class UserServiceBean  implements UserService, Serializable {
 			}
 			user.setEmailAddress(newUserData.getEmailAddress());
 			user.setHomePage(newUserData.getHomePage());
-			user.setHideEmail(newUserData.isHideEmail());
 			user.setFirstName(newUserData.getFirstName());
 			user.setMiddleName(newUserData.getMiddleName());
 			user.setLastName(newUserData.getLastName());
@@ -140,10 +149,25 @@ public class UserServiceBean  implements UserService, Serializable {
 			user.setStatus(newUserData.getStatus());
 			entityManager.flush();
 		} else {
-			throw new RegisterException("Specified ID was NULL.");
+			throw new UserException("Specified ID was NULL.");
 		}
 	}
 
+	public synchronized void modifyUserPreference(Long idOfUser, UserPreference newUserPreference)throws PersistenceException, UserException {
+		log.info("Trying to modify users preference of user with id: " + idOfUser);
+		if (idOfUser != null) {
+			User user = getUser(idOfUser);
+			if (user!=null){
+				user.setUserPreference(newUserPreference);
+				entityManager.flush();
+			} else {
+				throw new UserException("User with specified ID was not found in the DB.");
+			}
+		} else {
+			throw new UserException("Specified ID was NULL.");
+		}
+	}
+	
 	public synchronized void registerNewUser(String userName, String password, String emailAddress, String firstName, String lastName, String middleName, Role selectedRole) throws PersistenceException, RegisterException {
 		log.info("Trying to register user name: " + userName);
 		User user = findUser(userName);
