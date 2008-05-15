@@ -5,7 +5,6 @@ package com.drey.aramarok.domain.service;
  */
 
 import java.util.List;
-import java.util.Set;
 
 import com.drey.aramarok.domain.exceptions.ExternalSystemException;
 import com.drey.aramarok.domain.exceptions.FatalDomainException;
@@ -13,11 +12,13 @@ import com.drey.aramarok.domain.exceptions.bug.BugException;
 import com.drey.aramarok.domain.exceptions.component.ProductComponentException;
 import com.drey.aramarok.domain.exceptions.login.LoginException;
 import com.drey.aramarok.domain.exceptions.product.ProductException;
+import com.drey.aramarok.domain.exceptions.quip.QuipException;
 import com.drey.aramarok.domain.exceptions.register.RegisterException;
 import com.drey.aramarok.domain.exceptions.register.UserNotFoundException;
 import com.drey.aramarok.domain.exceptions.search.NoSearchNameException;
 import com.drey.aramarok.domain.exceptions.search.SearchException;
 import com.drey.aramarok.domain.exceptions.user.UserException;
+import com.drey.aramarok.domain.exceptions.user.UserHasNoRightException;
 import com.drey.aramarok.domain.exceptions.version.ComponentVersionException;
 import com.drey.aramarok.domain.model.Bug;
 import com.drey.aramarok.domain.model.Comment;
@@ -27,10 +28,12 @@ import com.drey.aramarok.domain.model.Platform;
 import com.drey.aramarok.domain.model.Priority;
 import com.drey.aramarok.domain.model.Product;
 import com.drey.aramarok.domain.model.ProductComponent;
+import com.drey.aramarok.domain.model.Quip;
 import com.drey.aramarok.domain.model.Role;
 import com.drey.aramarok.domain.model.SavedSearch;
 import com.drey.aramarok.domain.model.Severity;
 import com.drey.aramarok.domain.model.User;
+import com.drey.aramarok.domain.model.UserPreference;
 import com.drey.aramarok.domain.model.filters.BugFilter;
 import com.drey.aramarok.domain.model.filters.CommentFilter;
 import com.drey.aramarok.domain.model.filters.UserFilter;
@@ -98,8 +101,19 @@ public interface DomainFacade {
 	 * @param modifyPassword
 	 * @throws FatalDomainException
 	 * @throws RegisterException
+	 * @throws UserException 
 	 */
-	public void modifyUser(Long idOfUser, User newUserData, boolean modifyPassword) throws ExternalSystemException, RegisterException;
+	public void modifyUser(Long idOfUser, User newUserData, boolean modifyPassword) throws ExternalSystemException, RegisterException, UserException;
+	
+	
+	/**
+	 * 
+	 * @param idOfUser
+	 * @param newUserPreference
+	 * @throws ExternalSystemException
+	 * @throws UserException
+	 */
+	public void modifyUserPreference(Long idOfUser, UserPreference newUserPreference)throws ExternalSystemException, UserException;
 	
 	
 	/**
@@ -168,7 +182,7 @@ public interface DomainFacade {
 	
 	
 
-	public void addNewProduct(String productName, String productDescription, String productURL, boolean closeForBugEntry, User userAssigned, Set<ProductComponent> productComponents) throws ExternalSystemException, ProductException, UserException;
+	public void addNewProduct(String productName, String productDescription, String productURL, boolean closeForBugEntry, User userAssigned, List<ProductComponent> productComponents) throws ExternalSystemException, ProductException, UserException;
 	
 	
 
@@ -176,7 +190,7 @@ public interface DomainFacade {
 	
 	
 	
-	public void addNewProductComponent(String productComponentName, String productComponentDescription, Product parentProduct, List<ComponentVersion> componentVersions) throws ExternalSystemException, ProductComponentException;
+	public void addNewProductComponent(String productComponentName, String productComponentDescription, User userAssigned, /*Product parentProduct,*/ List<ComponentVersion> componentVersions) throws ExternalSystemException, ProductComponentException, UserHasNoRightException;
 	
 	
 	public Long commitBug(Bug bug) throws ExternalSystemException, BugException, UserException;
@@ -250,14 +264,13 @@ public interface DomainFacade {
 	public void addASavedBugFilterToUser(Long idOfUser, SavedSearch savedSearch) throws UserNotFoundException, ExternalSystemException;
 	
 	
-
-	public void addNewComponentVersion(String componentVersionName, String componentVersionDescription, ProductComponent parentProductComponent, User userAssignedTo) throws ExternalSystemException, ComponentVersionException;
-
-	
-	public void modifyComponentVersion(Long idOfComponentVersion, ComponentVersion newComponentVersionData) throws ExternalSystemException, ComponentVersionException;
+	public void addNewComponentVersion(String componentVersionName, String componentVersionDescription, /*ProductComponent parentProductComponent,*/ User userAssignedTo) throws ExternalSystemException, ComponentVersionException ,UserHasNoRightException;
 
 	
-	public void modifyProductComponent(Long idOfProductComponent, ProductComponent newProductComponentData) throws ExternalSystemException, ProductComponentException;
+	public void modifyComponentVersion(Long idOfComponentVersion, ComponentVersion newComponentVersionData) throws ExternalSystemException, ComponentVersionException, UserHasNoRightException;
+
+	
+	public void modifyProductComponent(Long idOfProductComponent, ProductComponent newProductComponentData) throws ExternalSystemException, ProductComponentException, UserHasNoRightException;
 	
 	
 	/**
@@ -346,5 +359,13 @@ public interface DomainFacade {
 	public ComponentVersion getComponentVersion(Long componentVersionId) throws ExternalSystemException;
 	
 	
+	public Quip getQuip(Long quipId) throws ExternalSystemException;
 	
+	public void addQuip(String quipText) throws ExternalSystemException, QuipException;
+	
+	public void editQuip(Long quipId, String newQuipText, boolean visible) throws ExternalSystemException, UserHasNoRightException;
+	
+	public void approveQuip(Long quipId) throws ExternalSystemException, UserHasNoRightException;
+	
+	public void voteComment(Long commentId) throws ExternalSystemException;
 }

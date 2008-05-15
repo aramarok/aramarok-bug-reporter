@@ -2,6 +2,7 @@ package com.drey.aramarok.domain.model;
 
 import java.io.Serializable;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -69,21 +70,23 @@ public class Product implements Serializable {
 		init(name, description, productURL, null, null, closeForBugEntry);
 	}
 	
-	public Product(String name, String description, String productURL, Set<ProductComponent> components, boolean closeForBugEntry){
-		init(name, description, productURL, components, null, closeForBugEntry);
-	}
-	
-	public Product(String name, String description, String productURL, Set<ProductComponent> components, User userAssigned, boolean closeForBugEntry){
+	public Product(String name, String description, String productURL, User userAssigned, List<ProductComponent> components, boolean closeForBugEntry){
 		init(name, description, productURL, components, userAssigned, closeForBugEntry);
 	}
 	
-	private void init(String name, String description, String productURL, Set<ProductComponent> components, User userAssigned, boolean closeForBugEntry){
+	private void init(String name, String description, String productURL, List<ProductComponent> components, User userAssigned, boolean closeForBugEntry){
 		this.name = name;
 		this.description = description;
 		this.productURL = productURL;
-		this.productComponents = components;
 		this.userAssigned = userAssigned;
 		this.closeForBugEntry = closeForBugEntry;
+		Set<ProductComponent> tmp = new HashSet<ProductComponent>();
+		if (components!= null && !components.isEmpty()){
+			for (ProductComponent cv: components){
+				tmp.add(cv);
+			}
+		}
+		this.productComponents = tmp;
 	}
 	
 	public void addComponent(ProductComponent component){

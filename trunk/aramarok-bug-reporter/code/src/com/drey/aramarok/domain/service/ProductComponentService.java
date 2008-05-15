@@ -25,7 +25,7 @@ public interface ProductComponentService {
 	
 	public User getUserAssignedForSubmittingBug(Long productComponentId) throws PersistenceException;
 	
-	public ProductComponent addNewProductComponent(String productComponentName, String productComponentDescription, List<ComponentVersion> componentVersions) throws PersistenceException, ProductComponentException;
+	public ProductComponent addNewProductComponent(String productComponentName, String productComponentDescription, User userAssigned, List<ComponentVersion> componentVersions) throws PersistenceException, ProductComponentException;
 	
 	public void modifyProductComponent(Long idOfProductComponent, ProductComponent newProductComponentData) throws PersistenceException, ProductComponentException;
 	

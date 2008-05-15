@@ -20,12 +20,16 @@ import javax.persistence.Query;
 
 import org.apache.log4j.Logger;
 
+import com.drey.aramarok.domain.exceptions.quip.QuipException;
 import com.drey.aramarok.domain.model.Comment;
 import com.drey.aramarok.domain.model.OperatingSystem;
 import com.drey.aramarok.domain.model.Platform;
 import com.drey.aramarok.domain.model.Priority;
+import com.drey.aramarok.domain.model.Quip;
+import com.drey.aramarok.domain.model.Right;
 import com.drey.aramarok.domain.model.Role;
 import com.drey.aramarok.domain.model.Severity;
+import com.drey.aramarok.domain.model.User;
 import com.drey.aramarok.domain.model.filters.CommentFilter;
 
 
@@ -40,7 +44,7 @@ public class DomainServiceBean implements DomainService, Serializable {
 	@PersistenceContext( name = "Aramarok")
 	private EntityManager entityManager;
 
-	private  static Logger log = Logger.getLogger(DomainServiceBean.class);
+	private static Logger log = Logger.getLogger(DomainServiceBean.class);
 	
 	
 	public String currentDateAndTime() {
@@ -48,8 +52,17 @@ public class DomainServiceBean implements DomainService, Serializable {
 		return formatter.format(new Date());
 	}
 	
+	public synchronized Comment getComment(Long commentId) throws PersistenceException{
+		log.info("Get comment with id:" + commentId);
+		try {
+			return entityManager.find(Comment.class, commentId);
+		} catch (NoResultException e) {
+			return null; 
+		}
+	}
+	
 	@SuppressWarnings("unchecked")
-	public List<Comment> getComments(CommentFilter commentFilter){
+	public synchronized List<Comment> getComments(CommentFilter commentFilter){
 		log.info("Get comments request");
 		
 		List<Comment> results = new ArrayList<Comment>();
@@ -97,7 +110,7 @@ public class DomainServiceBean implements DomainService, Serializable {
 		return results;
 	}
 	
-	public Priority getPriority(String priorityName) {
+	public synchronized Priority getPriority(String priorityName) {
 		log.info("Find priority name: " + priorityName);
 		try {
 			Priority priority = (Priority) entityManager.createNamedQuery("Priority.findPriorityByPriorityName").setParameter("priorityName", priorityName).getSingleResult();
@@ -107,7 +120,7 @@ public class DomainServiceBean implements DomainService, Serializable {
 		}
 	}
 	
-	public Severity getSeverity(String severityName) {
+	public synchronized Severity getSeverity(String severityName) {
 		log.info("Find severity name: " + severityName);
 		try {
 			Severity severity = (Severity) entityManager.createNamedQuery("Severity.findSeverityBySeverityName").setParameter("severityName", severityName).getSingleResult();
@@ -117,7 +130,7 @@ public class DomainServiceBean implements DomainService, Serializable {
 		}
 	}
 	
-	public OperatingSystem getOperatingSystem(String operatingSystemName) {
+	public synchronized OperatingSystem getOperatingSystem(String operatingSystemName) {
 		log.info("Find operating system name: " + operatingSystemName);
 		try {
 			OperatingSystem operatingSystem = (OperatingSystem) entityManager.createNamedQuery("OperatingSystem.findOperatingSystemByOperatingSystemName").setParameter("operatingSystemName", operatingSystemName).getSingleResult();
@@ -127,7 +140,7 @@ public class DomainServiceBean implements DomainService, Serializable {
 		}
 	}
 	
-	public Platform getPlatform(String platformName) {
+	public synchronized Platform getPlatform(String platformName) {
 		log.info("Find platform name: " + platformName);
 		try {
 			Platform platform = (Platform) entityManager.createNamedQuery("Platform.findPlatformByPlatformName").setParameter("platformName", platformName).getSingleResult();
@@ -138,37 +151,90 @@ public class DomainServiceBean implements DomainService, Serializable {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public List<Role> getAllRoles() throws PersistenceException{
+	public synchronized List<Role> getAllRoles() throws PersistenceException{
 		log.info("Get all roles.");
 		Query query = entityManager.createNamedQuery("Role.allRoles");
 		return (List<Role>) query.getResultList();
 	}
 	
 	@SuppressWarnings("unchecked")
-	public List<OperatingSystem> getAllOperatingSystems() throws PersistenceException{
+	public synchronized List<OperatingSystem> getAllOperatingSystems() throws PersistenceException{
 		log.info("Get all operating systems.");
 		Query query = entityManager.createNamedQuery("OperatingSystem.allOSs");
 		return (List<OperatingSystem>) query.getResultList();
 	}
 	
 	@SuppressWarnings("unchecked")
-	public List<Platform> getAllPlatforms() throws PersistenceException{
+	public synchronized List<Platform> getAllPlatforms() throws PersistenceException{
 		log.info("Get all platforms.");
 		Query query = entityManager.createNamedQuery("Platform.allPlatforms");
 		return (List<Platform>) query.getResultList();
 	}
 	
 	@SuppressWarnings("unchecked")
-	public List<Priority> getAllPriorities() throws PersistenceException{
+	public synchronized List<Priority> getAllPriorities() throws PersistenceException{
 		log.info("Get all priorities.");
 		Query query = entityManager.createNamedQuery("Priority.allPriorities");
 		return (List<Priority>) query.getResultList();
 	}
 	
 	@SuppressWarnings("unchecked")
-	public List<Severity> getAllSeverities() throws PersistenceException{
+	public synchronized List<Severity> getAllSeverities() throws PersistenceException{
 		log.info("Get all severities.");
 		Query query = entityManager.createNamedQuery("Severity.allSeverities");
 		return (List<Severity>) query.getResultList();
+	}
+	
+	public synchronized Quip getQuip(Long quipId) throws PersistenceException{
+		log.info("Get quip with id:" + quipId);
+		try {
+			return entityManager.find(Quip.class, quipId);
+		} catch (NoResultException e) {
+			return null; 
+		}
+	}
+	
+	public synchronized void addQuip(String quipText, User userLoggedIn) throws PersistenceException, QuipException {
+		log.info("Add new quip: " + quipText);
+		if (quipText==null || (quipText!=null && quipText.trim().compareTo("")==0) || userLoggedIn==null){
+			throw new QuipException();
+		}
+		Quip quip = new Quip(userLoggedIn, quipText);
+		quip.setAddedDate(new Date());
+		if (userLoggedIn.hasRight(Right.EDIT_QUIPS)){
+			quip.setApproved(true);
+		}
+		
+		entityManager.persist(quip);
+		entityManager.flush();
+	}
+	
+	public synchronized void editQuip(Long quipId, String newQuipText, boolean visible) throws PersistenceException{
+		log.info("Edit quip with id: " + quipId);
+		Quip quip = getQuip(quipId);
+		if (quip!=null){
+			quip.setQuipText(newQuipText);
+			quip.setVisible(visible);
+			entityManager.merge(quip);
+			entityManager.flush();
+		}
+	}
+	
+	public synchronized void approveQuip(Long quipId) throws PersistenceException {
+		log.info("Approve quip with id: " + quipId);
+		Quip quip = getQuip(quipId);
+		if (quip!=null){
+			quip.setApproved(true);
+			entityManager.flush();
+		}
+	}
+	
+	public synchronized void voteComment(Long commentId, User userLoggedIn) throws PersistenceException {
+		log.info("Vote comment with id: " + commentId);
+		Comment comment = getComment(commentId);
+		if (comment!=null){
+			comment.addVote();
+			userLoggedIn.voteComment(comment); //TODO: check if works this way!!!
+		}
 	}
 }

@@ -112,7 +112,7 @@ public class ProductComponentServiceBean implements ProductComponentService, Ser
 		}
 	}
 	
-	public synchronized ProductComponent addNewProductComponent(String productComponentName, String productComponentDescription, List<ComponentVersion> componentVersions) throws PersistenceException, ProductComponentException {
+	public synchronized ProductComponent addNewProductComponent(String productComponentName, String productComponentDescription, User userAssigned, List<ComponentVersion> componentVersions) throws PersistenceException, ProductComponentException {
 		log.info("Trying to add a new product component: " + productComponentName + ".");
 		ProductComponent component = findProductComponent(productComponentName);
 		if (component != null) {
@@ -121,7 +121,7 @@ public class ProductComponentServiceBean implements ProductComponentService, Ser
 		if (productComponentName.trim().compareTo("") == 0) {
 			throw new NoComponentNameSpecifiedException("No product component name was specified!");
 		}
-		ProductComponent newComponent = new ProductComponent(productComponentName, productComponentDescription, componentVersions);
+		ProductComponent newComponent = new ProductComponent(productComponentName, productComponentDescription, componentVersions, userAssigned);
 		
 		entityManager.persist(newComponent);
 		entityManager.flush();
@@ -145,7 +145,7 @@ public class ProductComponentServiceBean implements ProductComponentService, Ser
 			try {
 				listOfComponents = (List<ProductComponent>)entityManager.createNamedQuery("ProductComponent.findComponentByComponentName").setParameter("componentName", newProductComponentData.getName()).getResultList();
 			} catch (NoResultException nre){
-				
+				listOfComponents = null;
 			}
 			if (listOfComponents != null && listOfComponents.size() > 0 ) {
 				for (Iterator<ProductComponent> i=listOfComponents.iterator(); i.hasNext();){
@@ -158,7 +158,8 @@ public class ProductComponentServiceBean implements ProductComponentService, Ser
 			
 			component.setName(newProductComponentData.getName());
 			component.setDescription(newProductComponentData.getDescription());
-			//component.setVersions(newComponentData.getVersions());
+			component.setUserAssigned(newProductComponentData.getUserAssigned());
+			component.setVersions(newProductComponentData.getVersions());
 		} else {
 			throw new ProductComponentException("Specified ID was NULL.");
 		}

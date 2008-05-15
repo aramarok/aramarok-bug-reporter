@@ -5,7 +5,6 @@ package com.drey.aramarok.domain.service;
  */
 
 import java.util.List;
-import java.util.Set;
 
 import javax.persistence.PersistenceException;
 
@@ -28,7 +27,7 @@ public interface ProductService {
 	
 	public User getUserAssignedToProduct(Long productId) throws PersistenceException;
 	
-	public void addNewProduct(String productName, String productDescription, String productURL, boolean closeForBugEntry, User userAssigned, Set<ProductComponent> productComponents) throws PersistenceException, ProductException;
+	public void addNewProduct(String productName, String productDescription, String productURL, boolean closeForBugEntry, User userAssigned , List<ProductComponent> productComponents) throws PersistenceException, ProductException ;
 	
 	public void modifyProduct(Long idOfProduct, Product newProductData) throws PersistenceException, ProductException;
 	

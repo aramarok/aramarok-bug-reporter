@@ -14,7 +14,8 @@ public enum Right {
 	DEFINE_COMPONENTS, //allow user to define the components in the system
 	DEFINE_VERSIONS, //allow user to define the versions in the system
 	DEFINE_ARAMAROK_OPTIONS, //allow user to edit aramarok's options
-	EDIT_OTHER_USERS; //allow user to edit other user's profiles information
+	EDIT_OTHER_USERS, //allow user to edit other user's profiles information
+	EDIT_QUIPS; //allow user to edit all existing quips, approve them and set them visible
 	
 	public static Right getRightByName(String s){
 		if (s != null && !s.isEmpty()){
