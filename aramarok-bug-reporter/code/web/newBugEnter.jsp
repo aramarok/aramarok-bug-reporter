@@ -11,7 +11,11 @@
 			</ui:define>
 			
 			<ui:define name="body">
-			
+				
+				<p class="P-align-center">
+					<h:outputText value="#{general['newBug.title']}" styleClass="title"/>
+				</p>
+				
 				<h:outputText value="#{NewBugEnterBean.loadData}" rendered="true" />
 				
 				<br />

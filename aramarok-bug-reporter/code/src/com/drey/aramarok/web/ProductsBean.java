@@ -1,6 +1,7 @@
 package com.drey.aramarok.web;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -13,15 +14,18 @@ import org.apache.log4j.Logger;
 
 import com.drey.aramarok.domain.exceptions.ExternalSystemException;
 import com.drey.aramarok.domain.exceptions.FatalDomainException;
-import com.drey.aramarok.domain.exceptions.component.ProductComponentException;
-import com.drey.aramarok.domain.exceptions.component.ComponentNameAlreadyExistsException;
-import com.drey.aramarok.domain.exceptions.component.NoComponentNameSpecifiedException;
 import com.drey.aramarok.domain.exceptions.product.NoProductNameSpecifiedException;
 import com.drey.aramarok.domain.exceptions.product.ProductException;
 import com.drey.aramarok.domain.exceptions.product.ProductNameAlreadyExistsException;
 import com.drey.aramarok.domain.exceptions.product.ProductNotFoundException;
+import com.drey.aramarok.domain.exceptions.user.UserException;
 import com.drey.aramarok.domain.model.Product;
 import com.drey.aramarok.domain.model.ProductComponent;
+import com.drey.aramarok.domain.model.Right;
+import com.drey.aramarok.domain.model.User;
+import com.drey.aramarok.domain.model.UserStatus;
+import com.drey.aramarok.domain.model.filters.UserFilter;
+import com.drey.aramarok.domain.model.filters.UserSortingMode;
 import com.drey.aramarok.domain.service.DomainFacade;
 import com.drey.aramarok.web.util.WebUtil;
 
@@ -36,94 +40,219 @@ public class ProductsBean {
 
 	private List<Product> productNameList_in = null;
 	private LinkedList<SelectItem> productNameList_out = new LinkedList<SelectItem>();
+
+	private List<User> userNameList_in = null;
+	private LinkedList<SelectItem> userNameList_out = new LinkedList<SelectItem>();
+	
+	private List<ProductComponent> userRoles = new ArrayList<ProductComponent>();
+	private LinkedList<SelectItem> userList = new LinkedList<SelectItem>();
+	private LinkedList<SelectItem> systemList = new LinkedList<SelectItem>();
+	private String userSelectedRole = "";
+	private String systemSelectedRole = "";
+	private List<ProductComponent> roles = new ArrayList<ProductComponent>();
+	private List<ProductComponent> allProductComponents = new ArrayList<ProductComponent>();
 	
 	private String productNameSelected;
 	private String name = "";
 	private String description = "";
-	private LinkedList<SelectItem> productComponents = new LinkedList<SelectItem>();
-	private String productComponentSelected = "";
-	private String newProductComponentName = "";
-	private String newProductComponentDescription = "";
-	
+	private String productURL = "";
+	private String userAsssignedSelected = "";
+	private boolean closeForBugEntry = false;
 	private Product editedProductObject = null;
 	
 	private boolean editedProductNameAlreadyExists= false;
 	private boolean editedProductNameInvalid = false;
 	private boolean editedProductNameNotFound = false;
 	
+	
 	private boolean newProductNameInvalid = false;
 	
 	private String newName = "";
 	private String newDescription = "";
+	private String newProductURL = "";
+	private String newUserAsssignedSelected = "";
+	private boolean newCloseForBugEntry = false;
+	
+	private List<ProductComponent> newUserRoles = new ArrayList<ProductComponent>();
+	private LinkedList<SelectItem> newUserList = new LinkedList<SelectItem>();
+	private LinkedList<SelectItem> newSystemList = new LinkedList<SelectItem>();
+	private String newUserSelectedRole = "";
+	private String newSystemSelectedRole = "";
 	
 	private boolean editProduct = false;
 	private boolean addAProduct = false;
-	private boolean addAProductComponent = false;
-	private boolean newProductComponentNameIsInvalid = false;
-	private boolean newProductComponentnameAlreadyExists = false;
 	
 	private boolean newProductNameIsInvalid = false;
 	private boolean newProductNameAlreadyExists = false;
-	private boolean editedProductNameIsInvalid = false;
+	
+	public String removeNewRole() {
+		if (newUserSelectedRole != null) {
+			ProductComponent role = getRoleByName(newUserSelectedRole);
+			if (role != null){
+				ProductComponent roleToRemove = null;
+				for (ProductComponent ur : newUserRoles) {
+					if (ur.getId().compareTo(role.getId())==0){
+						roleToRemove = ur;
+					}
+				}
+				if (roleToRemove != null){
+					newUserRoles.remove(roleToRemove);
+					roles.add(roleToRemove);
+					newUserList = returnSelectItemList(newUserRoles);
+					newSystemList = returnSelectItemList(returnDifference(roles, newUserRoles));
+				}
+			}
+		}
+		return null;
+	}
+	public String addNewRole() {
+		if (newSystemSelectedRole != null) {
+			ProductComponent role = getRoleByName(newSystemSelectedRole);
+			if (role != null){
+				for (ProductComponent ur : newUserRoles) {
+					if (ur.getId().compareTo(role.getId())==0){
+						return null;
+					}
+				}
+				newUserRoles.add(role);
+				newUserList.add(new SelectItem(role.getName(), role.getName()));
+				
+				ProductComponent rrr = null;
+				for (ProductComponent rr: roles){
+					if (role.getId().compareTo(rr.getId())==0){
+						rrr = rr;
+					}
+				}
+				if (rrr!=null){
+					roles.remove(rrr);
+				}
+				
+				newSystemList = returnSelectItemList(returnDifference(roles, newUserRoles));
+			}
+		}
+		return null;
+	}
+	public String removeRole() {
+		if (userSelectedRole != null) {
+			ProductComponent role = getRoleByName(userSelectedRole);
+			if (role != null){
+				ProductComponent roleToRemove = null;
+				for (ProductComponent ur : userRoles) {
+					if (ur.getId().compareTo(role.getId())==0){
+						roleToRemove = ur;
+					}
+				}
+				if (roleToRemove != null){
+					userRoles.remove(roleToRemove);
+					roles.add(roleToRemove);
+					userList = returnSelectItemList(userRoles);
+					systemList = returnSelectItemList(returnDifference(roles, userRoles));
+				}
+			}
+		}
+		return null;
+	}
+	public String addRole() {
+		if (systemSelectedRole != null) {
+			ProductComponent role = getRoleByName(systemSelectedRole);
+			if (role != null){
+				for (ProductComponent ur : userRoles) {
+					if (ur.getId().compareTo(role.getId())==0){
+						return null;
+					}
+				}
+				userRoles.add(role);
+				userList.add(new SelectItem(role.getName(), role.getName()));
+				
+				ProductComponent rrr = null;
+				for (ProductComponent rr: roles){
+					if (role.getId().compareTo(rr.getId())==0){
+						rrr = rr;
+					}
+				}
+				if (rrr!=null){
+					roles.remove(rrr);
+				}
+				
+				systemList = returnSelectItemList(returnDifference(roles, userRoles));
+			}
+		}
+		return null;
+	}
+	private ProductComponent getRoleByName(String roleName) {
+		List<ProductComponent> roleList = allProductComponents;
+		for (ProductComponent r : roleList) {
+			//System.out.println(r.getName());
+			if (r.getName().compareTo(roleName) == 0) {
+				return r;
+			}
+		}
+		return null;
+	}
+	private List<ProductComponent> returnDifference(List<ProductComponent> full_list, List<ProductComponent> second_list){
+		if (full_list!=null){
+			List<ProductComponent> tmp_role_list = new ArrayList<ProductComponent>();
+			for (Iterator<ProductComponent> i = full_list.iterator(); i.hasNext();){
+				ProductComponent d1 = i.next();
+				int sw = 0;
+				for (Iterator<ProductComponent> j = second_list.iterator(); j.hasNext();){
+					ProductComponent d2 = j.next();
+					if (d1.getId() == d2.getId()){
+						sw = 1;
+					}
+				}
+				if (sw == 0){
+					tmp_role_list.add(d1);
+				}
+			}
+			return tmp_role_list;
+		}else
+			return null;	
+	}
+	private LinkedList<SelectItem> returnSelectItemList(List<ProductComponent> list){
+		LinkedList<SelectItem> list2 = new LinkedList<SelectItem>();
+		for (ProductComponent r : list) {
+			list2.add(new SelectItem(r.getName(), r.getName()));
+		}
+		return list2;
+	}
+	
+	private void loadAvailableProductComponents() {
+		DomainFacade dom = WebUtil.getDomainFacade();
+		List<ProductComponent> roleList = null;
+		if (dom != null) {
+			try {
+				roleList = dom.getUnusedProductComponents();
+			} catch (ExternalSystemException ex) {
+				log.error("ExternalSystemException.", ex);
+			}
+		}
+		roles = roleList;
+	}
+	
+	private void loadAllProductComponents() {
+		DomainFacade dom = WebUtil.getDomainFacade();
+		List<ProductComponent> roleList = null;
+		if (dom != null) {
+			try {
+				roleList = dom.getAllProductComponents();
+			} catch (ExternalSystemException ex) {
+				log.error("ExternalSystemException.", ex);
+			}
+		}
+		allProductComponents = roleList;
+	}
 	
 	public void addNewProductButton(){
+		resetNewProductFields();
 		addAProduct = !addAProduct;
 	}
 	
 	public void cancelAddNewProduct(){
 		resetNewProductFields();
 		newProductNameIsInvalid = false;
+		newProductNameAlreadyExists = false;
 		addAProduct = false;
-	}
-	
-	public void addAProductComponentToogleButton(){
-		addAProductComponent = true;
-	}
-	
-	public void addAProductComponentToDB(){
-		newProductComponentNameIsInvalid = false;
-		newProductComponentnameAlreadyExists = false;
-		if (isValidDataForNewProductComponent()) {
-			DomainFacade facade = WebUtil.getDomainFacade();
-			if (facade != null) {
-				try {
-					facade.addNewProductComponent(newProductComponentName, newProductComponentDescription, editedProductObject, null);
-					cancelAddOfAProductComponent();
-					reInitializeProductList();
-				} catch (ComponentNameAlreadyExistsException e) {
-					newProductComponentnameAlreadyExists = true;
-					log.error("ComponentNameAlreadyExistsException!");
-				} catch (NoComponentNameSpecifiedException e) {
-					newProductComponentNameIsInvalid = true;
-					log.error("NoComponentNameSpecifiedException!");
-				} catch (ProductComponentException e) {
-					newProductComponentNameIsInvalid = true;
-					log.error("ComponentException!");
-				} catch (FatalDomainException e) {
-					log.error("FatalDomainException. " , e);
-				}
-			} else{
-				log.error("DomainFacade is null.");
-			}
-		} else {
-			log.error("Invalid data!");
-			return; 	
-		}
-	}
-	
-	private boolean isValidDataForNewProductComponent(){
-		boolean validData = true;
-		newProductComponentNameIsInvalid = false;
-		if(	newProductComponentName == null || newProductComponentName.trim().equals("")) {
-			validData = false;
-			newProductComponentNameIsInvalid = true;
-		}		
-		return validData;
-	}
-	
-	public void cancelAddOfAProductComponent(){
-		resetComponentProductFields();
-		addAProductComponent = false;
 	}
 	
 	public void addNewProductToDB(){
@@ -134,8 +263,14 @@ public class ProductsBean {
 			DomainFacade facade = WebUtil.getDomainFacade();
 			if (facade != null) {
 				try {
-					facade.addNewProduct(newName, newDescription, null);
+					User newUserAssignedSelected = null;
+					if (newUserAsssignedSelected!=null && newUserAsssignedSelected.trim().compareTo("")!=0){
+						newUserAssignedSelected = facade.getUser(newUserAsssignedSelected);
+					}
+					
+					facade.addNewProduct(newName, newDescription, newProductURL, newCloseForBugEntry, newUserAssignedSelected, newUserRoles);
 					addAProduct = false;
+					productNameSelected = newName;
 					loadSelectedProductsNameData();
 					resetNewProductFields();
 					initializeProductList();
@@ -149,6 +284,8 @@ public class ProductsBean {
 					log.error("ProductException");
 				} catch (FatalDomainException e) {
 					log.error("FatalDomainException");
+				} catch (UserException e) {
+					log.error("UserException");
 				}
 			} else{
 				log.error("DomainFacade is null.");
@@ -186,19 +323,32 @@ public class ProductsBean {
 				try {
 					editedProductObject.setName(name);
 					editedProductObject.setDescription(description);
-					//editedProductObject.setComponents(components);
+					editedProductObject.setProductURL(productURL);
+					editedProductObject.setCloseForBugEntry(closeForBugEntry);
+					User userSelected = null;
+					if (userAsssignedSelected!=null && userAsssignedSelected.trim().compareTo("")!=0){
+						userSelected = facade.getUser(userAsssignedSelected);
+					}
+					editedProductObject.setUserAssigned(userSelected);
+					editedProductObject.setProductComponents(new HashSet<ProductComponent>(userRoles));
 					
 					try {
 						facade.modifyProduct(editedProductObject.getId(), editedProductObject);
+						productNameSelected = editedProductObject.getName();
 						reInitializeProductList();
 						editProduct = false;
-						loadSelectedProductsNameData();
+						loadAvailableProductComponents();
 					} catch (ProductNotFoundException e) {
 						log.error("ProductNotFoundException!");
 					} catch (NoProductNameSpecifiedException e) {
 						log.error("NoProductNameSpecifiedException!");
+					} catch (ProductNameAlreadyExistsException e){
+						editedProductNameAlreadyExists = true;
+						log.error("ProductNameAlreadyExistsException!");
 					} catch (ProductException e) {
 						log.error("ProductException!");
+					} catch (UserException e) {
+						log.error("UserException!");
 					}
 				} catch (FatalDomainException e) {
 					log.error("FatalDomainException. " , e);
@@ -210,8 +360,6 @@ public class ProductsBean {
 			log.error("Invalid data!");
 			return; 	
 		}
-		
-		editProduct = false;
 	}
 	
 	private boolean isValidDataForEditedProduct(){
@@ -231,8 +379,8 @@ public class ProductsBean {
 		editedProductNameInvalid = false;
 		editedProductNameNotFound = false;
 		
-		cancelAddOfAProductComponent();
 		editProduct = false;
+		loadAvailableProductComponents();
 		loadSelectedProductsNameData();
 	}
 	
@@ -241,32 +389,89 @@ public class ProductsBean {
 	private void loadSelectedProductsNameData(){
 		if (productNameSelected != null){
 			DomainFacade facade = WebUtil.getDomainFacade();
-			editedProductObject = facade.getProduct(productNameSelected);
-			if (editedProductObject != null){
-				name = editedProductObject.getName();
-				description = editedProductObject.getDescription();
-				initializeProductComponentList();
-			} else {
-				log.error("The 'editedProductObject' is NULL.");
+			try {
+				editedProductObject = facade.getProduct(productNameSelected);
+				if (editedProductObject != null){
+					name = editedProductObject.getName();
+					description = editedProductObject.getDescription();
+					productURL = editedProductObject.getProductURL();
+					if (editedProductObject.getUserAssigned()!=null){
+						userAsssignedSelected = editedProductObject.getUserAssigned().getUserName();
+					} else {
+						userAsssignedSelected = "";
+					}
+					closeForBugEntry = editedProductObject.isCloseForBugEntry();
+					initializeProductComponentList();
+				} else {
+					log.error("The 'editedProductObject' is NULL.");
+				}
+			} catch (ExternalSystemException e) {
+				e.printStackTrace();
 			}
+			
 		} else {
 			log.error("The 'productNameSelected' is NULL.");
 		}
 	}
 	
+	private void initializeUserList(){
+		DomainFacade dom = WebUtil.getDomainFacade();
+		if (dom != null) {
+			try {
+				UserFilter uf = new UserFilter();
+				List<Right>rightList = new ArrayList<Right>();
+				rightList.add(Right.CHANGE_BUG_STATUS);
+				List<UserStatus> userStatusList = new ArrayList<UserStatus>();
+				userStatusList.add(UserStatus.ACTIVE);
+				uf.setRightList(rightList);
+				uf.setUserStatusList(userStatusList);
+				uf.setSortingMode(UserSortingMode.USER_NAME_ASC);
+				userNameList_in = dom.getUsers(uf);
+			} catch (ExternalSystemException e) {
+				log.error("ExternalSystemException!");
+			}
+			//Collections.sort(userNameList_in, new LocationListComparatorSortByName());
+			userNameList_out = returnSelectItemLinkedListFromAUserList(userNameList_in, true);			
+		}
+		else {
+			log.error("DomainFacade was NULL.");
+		}
+	}
+	
+	private LinkedList<SelectItem> returnSelectItemLinkedListFromAUserList(List<User> list, boolean addAElement){
+		LinkedList<SelectItem> itemList = new LinkedList<SelectItem>();
+		if (addAElement) {
+			SelectItem item = new SelectItem("" , "");
+			itemList.add(item);
+		}
+		if (list != null) {
+			for(Iterator<User> i=list.iterator(); i.hasNext(); ){
+				User u = i.next();
+				SelectItem item = new SelectItem(u.getUserName(), u.getUserName());
+				itemList.add(item);
+			}
+		}
+		return itemList;
+	}
+	
 	private void resetNewProductFields(){
 		newName = "";
 		newDescription = "";
+		newProductURL = "";
+		newCloseForBugEntry = false;
+		newUserAsssignedSelected = "";
+		loadAvailableProductComponents();
+		resetNewProductComponentList();
 	}
 	
 	private void resetProductFields(){
 		name = "";
 		description = "";
-	}
-
-	private void resetComponentProductFields(){
-		newProductComponentName= "";
-		newProductComponentDescription = "";
+		productURL = "";
+		closeForBugEntry = false;
+		userAsssignedSelected = "";
+		userList = new LinkedList<SelectItem>();
+		systemList = new LinkedList<SelectItem>();
 	}
 	
 	private void initializeProductList(){
@@ -307,43 +512,22 @@ public class ProductsBean {
 		}
 		return itemList;
 	}
-	/*
-	private ProductComponent returnProductComponentObject(String componentName, List<ProductComponent> componentList){
-		if (componentList != null){
-			for (Iterator<ProductComponent> i=componentList.iterator(); i.hasNext();){
-				ProductComponent  c = i.next();
-				if (c.getName().equals(componentName)){
-					return c;
-				}
-			}
-		}
-		return null;
-	}*/
+	
 
 	@SuppressWarnings("unchecked")
 	private void initializeProductComponentList() {
-		List<ProductComponent> componentsT = new ArrayList<ProductComponent>(0);
-		if (editedProductObject.getProductComponents() != null) {
-			for (ProductComponent comp : editedProductObject.getProductComponents())
-				componentsT.add(comp);
+		userRoles = new LinkedList<ProductComponent>();
+		if (editedProductObject.getProductComponents()!=null){
+			userRoles.addAll(editedProductObject.getProductComponents());
 		}
-		productComponents = returnSelectItemLinkedListFromAProductComponentList(componentsT, false);
+		userList = returnSelectItemList(userRoles);
+		systemList = returnSelectItemList(returnDifference(roles, userRoles));
 	}
 	
-	private LinkedList<SelectItem> returnSelectItemLinkedListFromAProductComponentList(List<ProductComponent> list, boolean addAElement){
-		LinkedList<SelectItem> itemList = new LinkedList<SelectItem>();
-		if (addAElement) {
-			SelectItem item = new SelectItem("" , "");
-			itemList.add(item);
-		}
-		if (list != null){
-			for(Iterator<ProductComponent> i=list.iterator(); i.hasNext(); ){
-				ProductComponent pc = i.next();
-				SelectItem item = new SelectItem(pc.getName() , pc.getName());
-				itemList.add(item);
-			}
-		}
-		return itemList;
+	private void resetNewProductComponentList() {
+		newUserRoles = new LinkedList<ProductComponent>();
+		newUserList = returnSelectItemList(newUserRoles);
+		newSystemList = returnSelectItemList(returnDifference(roles, newUserRoles));
 	}
 	
 	private void selectFirstProductName(){
@@ -374,23 +558,17 @@ public class ProductsBean {
 		loadSelectedProductsNameData();
 		
 		initializeProductComponentList();
+		initializeUserList();
+		
+		loadAllProductComponents();
+		loadAvailableProductComponents();
 	}
 	
-	
+	public boolean isEditOrAddProduct(){
+		return isEditProduct() || isAddAProduct();
+	}
 	
 	// Getters and setters
-	public String getLoadData(){
-		loadSelectedProductsNameData();
-		return "";
-	}
-
-	public LinkedList<SelectItem> getUserNameList_out() {
-		return productNameList_out;
-	}
-
-	public void setUserNameList_out(LinkedList<SelectItem> userNameList_out) {
-		this.productNameList_out = userNameList_out;
-	}
 
 	public String getUserNameSelected() {
 		return productNameSelected;
@@ -472,14 +650,6 @@ public class ProductsBean {
 		this.newProductNameIsInvalid = newUserNameIsInvalid;
 	}
 
-	public boolean isEditedUserNameIsInvalid() {
-		return editedProductNameIsInvalid;
-	}
-
-	public void setEditedUserNameIsInvalid(boolean editedUserNameIsInvalid) {
-		this.editedProductNameIsInvalid = editedUserNameIsInvalid;
-	}
-
 	public boolean isEditedUserNameNotFound() {
 		return editedProductNameNotFound;
 	}
@@ -526,14 +696,6 @@ public class ProductsBean {
 
 	public void setDescription(String description) {
 		this.description = description;
-	}
-
-	public LinkedList<SelectItem> getProductComponents() {
-		return productComponents;
-	}
-
-	public void setProductComponents(LinkedList<SelectItem> productComponents) {
-		this.productComponents = productComponents;
 	}
 
 	public Product getEditedProductObject() {
@@ -617,70 +779,109 @@ public class ProductsBean {
 		this.newProductNameIsInvalid = newProductNameIsInvalid;
 	}
 
-	public boolean isEditedProductNameIsInvalid() {
-		return editedProductNameIsInvalid;
-	}
-
-	public void setEditedProductNameIsInvalid(boolean editedProductNameIsInvalid) {
-		this.editedProductNameIsInvalid = editedProductNameIsInvalid;
-	}
-
-	public boolean isAddAProductComponent() {
-		return addAProductComponent;
-	}
-
-	public void setAddAProductComponent(boolean addAProductComponent) {
-		this.addAProductComponent = addAProductComponent;
-	}
-
-	public String getNewProductComponentName() {
-		return newProductComponentName;
-	}
-
-	public void setNewProductComponentName(String newProductComponentName) {
-		this.newProductComponentName = newProductComponentName;
-	}
-
-	public String getNewProductComponentDescription() {
-		return newProductComponentDescription;
-	}
-
-	public void setNewProductComponentDescription(
-			String newProductComponentDescription) {
-		this.newProductComponentDescription = newProductComponentDescription;
-	}
-
-	public boolean isNewProductComponentNameIsInvalid() {
-		return newProductComponentNameIsInvalid;
-	}
-
-	public void setNewProductComponentNameIsInvalid(
-			boolean newProductComponentNameIsInvalid) {
-		this.newProductComponentNameIsInvalid = newProductComponentNameIsInvalid;
-	}
-
-	public boolean isNewProductComponentnameAlreadyExists() {
-		return newProductComponentnameAlreadyExists;
-	}
-
-	public void setNewProductComponentnameAlreadyExists(
-			boolean newProductComponentnameAlreadyExists) {
-		this.newProductComponentnameAlreadyExists = newProductComponentnameAlreadyExists;
-	}
-
-	public String getProductComponentSelected() {
-		return productComponentSelected;
-	}
-
-	public void setProductComponentSelected(String productComponentSelected) {
-		this.productComponentSelected = productComponentSelected;
-	}
-
 	public boolean isNewProductNameAlreadyExists() {
 		return newProductNameAlreadyExists;
 	}
 
 	public void setNewProductNameAlreadyExists(boolean newProductNameAlreadyExists) {
 		this.newProductNameAlreadyExists = newProductNameAlreadyExists;
+	}
+
+	public String getProductURL() {
+		return productURL;
+	}
+
+	public void setProductURL(String productURL) {
+		this.productURL = productURL;
+	}
+
+	public boolean isCloseForBugEntry() {
+		return closeForBugEntry;
+	}
+
+	public void setCloseForBugEntry(boolean closeForBugEntry) {
+		this.closeForBugEntry = closeForBugEntry;
+	}
+
+	public LinkedList<SelectItem> getUserNameList_out() {
+		return userNameList_out;
+	}
+
+	public void setUserNameList_out(LinkedList<SelectItem> userNameList_out) {
+		this.userNameList_out = userNameList_out;
+	}
+
+	public String getUserAsssignedSelected() {
+		return userAsssignedSelected;
+	}
+
+	public void setUserAsssignedSelected(String userAsssignedSelected) {
+		this.userAsssignedSelected = userAsssignedSelected;
+	}
+	public String getNewProductURL() {
+		return newProductURL;
+	}
+	public void setNewProductURL(String newProductURL) {
+		this.newProductURL = newProductURL;
+	}
+	public String getNewUserAsssignedSelected() {
+		return newUserAsssignedSelected;
+	}
+	public void setNewUserAsssignedSelected(String newUserAsssignedSelected) {
+		this.newUserAsssignedSelected = newUserAsssignedSelected;
+	}
+	public boolean isNewCloseForBugEntry() {
+		return newCloseForBugEntry;
+	}
+	public void setNewCloseForBugEntry(boolean newCloseForBugEntry) {
+		this.newCloseForBugEntry = newCloseForBugEntry;
+	}
+	public LinkedList<SelectItem> getUserList() {
+		return userList;
+	}
+	public void setUserList(LinkedList<SelectItem> userList) {
+		this.userList = userList;
+	}
+	public LinkedList<SelectItem> getSystemList() {
+		return systemList;
+	}
+	public void setSystemList(LinkedList<SelectItem> systemList) {
+		this.systemList = systemList;
+	}
+	public String getUserSelectedRole() {
+		return userSelectedRole;
+	}
+	public void setUserSelectedRole(String userSelectedRole) {
+		this.userSelectedRole = userSelectedRole;
+	}
+	public String getSystemSelectedRole() {
+		return systemSelectedRole;
+	}
+	public void setSystemSelectedRole(String systemSelectedRole) {
+		this.systemSelectedRole = systemSelectedRole;
+	}
+	public LinkedList<SelectItem> getNewUserList() {
+		return newUserList;
+	}
+	public void setNewUserList(LinkedList<SelectItem> newUserList) {
+		this.newUserList = newUserList;
+	}
+	public LinkedList<SelectItem> getNewSystemList() {
+		return newSystemList;
+	}
+	public void setNewSystemList(LinkedList<SelectItem> newSystemList) {
+		this.newSystemList = newSystemList;
+	}
+	public String getNewUserSelectedRole() {
+		return newUserSelectedRole;
+	}
+	public void setNewUserSelectedRole(String newUserSelectedRole) {
+		this.newUserSelectedRole = newUserSelectedRole;
+	}
+	public String getNewSystemSelectedRole() {
+		return newSystemSelectedRole;
+	}
+	public void setNewSystemSelectedRole(String newSystemSelectedRole) {
+		this.newSystemSelectedRole = newSystemSelectedRole;
 	}
 }

@@ -12,7 +12,7 @@
 			
 			<ui:define name="body">
 				<h:outputText value="#{ViewBugBean.loadData}" rendered="true" />
-				<f:subview rendered="#{!ViewBugBean.bugIdNullOrNotFound}" >
+				<f:subview rendered="#{!ViewBugBean.bugIdInvalidOrNullOrNotFound}" >
 				<table>
 					<tr>
 						<td>
@@ -225,9 +225,11 @@
 					</tr>
 				</table>
 				</f:subview>
-				<f:subview rendered="#{ViewBugBean.bugIdNullOrNotFound}" >
-					<h:outputText rendered="#{!ViewBugBean.bugNotFoundInTheDataBase}" value="#{general['viewBug.errors.bugIdWasNull']}" styleClass="error"/>
+				<f:subview rendered="#{ViewBugBean.bugIdInvalidOrNullOrNotFound}" >
+					<h:outputText rendered="#{ViewBugBean.bugFromSessionNull}" value="#{general['viewBug.errors.bugIdWasNull']}" styleClass="error"/>
 					<h:outputText rendered="#{ViewBugBean.bugNotFoundInTheDataBase}" value="#{general['viewBug.errors.bugIdWasNotFoundInTheDatabase']}" styleClass="error"/>
+					<h:outputText rendered="#{ViewBugBean.bugIdInvalid}" value="#{general['viewBug.errors.bugIdInvalid']}" styleClass="error"/>
+					
 				</f:subview>
 			</ui:define>
 		</ui:composition>

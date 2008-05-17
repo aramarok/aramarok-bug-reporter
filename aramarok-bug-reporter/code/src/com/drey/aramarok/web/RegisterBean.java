@@ -21,6 +21,7 @@ public class RegisterBean {
 	private String password = "";
 	private String reenterPassword = "";
 	private String emailAddress = "";
+	private String homePage = "";
 	private String firstName = "";
 	private String lastName = "";
 	private String middleName = "";
@@ -40,7 +41,7 @@ public class RegisterBean {
 		if(isValidData()) {
 			DomainFacade facade = WebUtil.getDomainFacade();
 			try {
-				facade.registerNewUser(userName, password, emailAddress, firstName, lastName, middleName);
+				facade.registerNewUser(userName, password, emailAddress, homePage, firstName, lastName, middleName);
 			} catch (UserNameAlreadyExistsException e) {
 				log.info("UserNameAlreadyExistsException for user name: "+userName);
 				userNameAlreadyExists = true;
@@ -62,10 +63,14 @@ public class RegisterBean {
 			}
 			return WebUtilConstants.SUCCESS_REGISTER_NEW_ACCOUNT_OUTCOME;
 		} else {
-			log.info("Invalid data");
+			log.info("Invalid registration data!");
 		}
 		
 		return null;
+	}
+	
+	public String cancelRegistration(){
+		return WebUtilConstants.LOGOUT_OUTCOME;
 	}
 	
 	private boolean isValidData() {
@@ -211,5 +216,13 @@ public class RegisterBean {
 
 	public void setUserNameAlreadyExists(Boolean userNameAlreadyExists) {
 		this.userNameAlreadyExists = userNameAlreadyExists;
+	}
+
+	public String getHomePage() {
+		return homePage;
+	}
+
+	public void setHomePage(String homePage) {
+		this.homePage = homePage;
 	}
 }

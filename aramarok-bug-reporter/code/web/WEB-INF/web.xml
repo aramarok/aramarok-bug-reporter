@@ -58,18 +58,11 @@
 			<param-value>NONE</param-value>
 			<description>
 				Home page.
-				Requires only authentication.
+				Requires authentication.
 			</description>
 		</init-param>
 		
-		<init-param>
-			<param-name>/register.jsf</param-name>
-			<param-value></param-value>
-			<description>
-				Does not require authentication.
-			</description>
-		</init-param>
-		
+				
 		<init-param>
 			<param-name>/newBug.jsf</param-name>
 			<param-value>ENTER_NEW_BUG</param-value>

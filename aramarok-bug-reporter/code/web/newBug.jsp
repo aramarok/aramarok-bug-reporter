@@ -10,6 +10,10 @@
 			</ui:define>
 			
 			<ui:define name="body">
+				<p class="P-align-center">
+					<h:outputText value="#{general['newBug.title']}" styleClass="title"/>
+				</p>
+				
 				<h:outputText value="#{general['newBug.selectProduct']}: " styleClass="label-right"/>
 				
 				<br />
@@ -21,6 +25,22 @@
     						<h:outputText value="#{general['newBug.table.name']}" />
     					</f:facet>
     					<h:commandLink value="#{product.productName}" action="#{product.enterNewBug}" />
+    				</h:column>
+    				
+    				<h:column rendered="#{product.URLLink}">
+    					<f:facet name="header">
+    						<h:outputText value="#{general['newBug.table.URL']}" />
+    					</f:facet>
+    					<a href="#{product.productURL}" target="_blank">
+    						<h:outputText value="#{product.productURL}" styleClass="label-right" />
+    					</a>
+    				</h:column>
+    				
+    				<h:column rendered="#{!product.URLLink}">
+    					<f:facet name="header">
+    						<h:outputText value="#{general['newBug.table.URL']}" />
+    					</f:facet>
+    					<h:outputText value="#{product.productURL}" styleClass="label-right" />
     				</h:column>
     				
     				<h:column>

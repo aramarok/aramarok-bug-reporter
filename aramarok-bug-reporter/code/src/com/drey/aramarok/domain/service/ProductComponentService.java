@@ -29,4 +29,5 @@ public interface ProductComponentService {
 	
 	public void modifyProductComponent(Long idOfProductComponent, ProductComponent newProductComponentData) throws PersistenceException, ProductComponentException;
 	
+	public List<ProductComponent> getUnusedProductComponents() throws PersistenceException;
 }

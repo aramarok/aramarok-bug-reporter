@@ -25,6 +25,22 @@ public class ProductsWrapperBean {
 		return product.getName();
 	}
 	
+	public String getProductURL(){
+		if (product.getProductURL()==null || (product.getProductURL()!=null && product.getProductURL().trim().compareTo("")==0)){
+			return "-";
+		} else {
+			return product.getProductURL();
+		}
+	}
+	
+	public boolean isURLLink(){
+		if (getProductURL().compareTo("-")==0){
+			return false;
+		} else {
+			return true;
+		}
+	}
+	
 	public String getProductDescription(){
 		return product.getDescription();
 	}

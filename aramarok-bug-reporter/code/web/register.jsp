@@ -94,6 +94,15 @@
 					
 					<tr>
 						<td class="align-right">
+							<h:outputLabel value="#{general['register.homePage']}" styleClass="label-right" for="inputHomePage"/>
+						</td>
+						<td>
+							<h:inputText value="#{RegisterBean.homePage}" styleClass="input" id="inputHomePage"/>
+						</td>
+					</tr>
+					
+					<tr>
+						<td class="align-right">
 							<h:outputLabel value="#{general['register.lastName']}" styleClass="label-right" for="intpuLastName"/>
 						</td>
 						<td>
@@ -118,12 +127,19 @@
 							<h:inputText value="#{RegisterBean.middleName}" styleClass="input" id="inputMiddleName"/>
 						</td>
 					</tr>
+					<tr>
+						<td colspan="2" align="right">
+							<h:commandButton value="#{general['register.registerUser']}" action="#{RegisterBean.registerUser}" styleClass="normal-button" onmouseover="this.className='normal-button2'" onmouseout="this.className='normal-button'" id="registerUserButton"/>
+							<h:outputText value=" "/>
+							<h:commandButton rendered="false" value="#{general['register.cancel']}" action="#{RegisterBean.cancelRegistration}" styleClass="normal-button" onmouseover="this.className='normal-button2'" onmouseout="this.className='normal-button'" id="registerUserButton"/>
+						</td>
+					</tr>
 				</table>
 				
 				<br />
 				
 				<center>
-				<h:commandButton value="#{general['register.registerUser']}" action="#{RegisterBean.registerUser}" styleClass="normal-button" onmouseover="this.className='normal-button2'" onmouseout="this.className='normal-button'" id="registerUserButton"/>
+				
 				</center>
 					
 					

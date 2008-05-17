@@ -168,7 +168,7 @@ public class UserServiceBean  implements UserService, Serializable {
 		}
 	}
 	
-	public synchronized void registerNewUser(String userName, String password, String emailAddress, String firstName, String lastName, String middleName, Role selectedRole) throws PersistenceException, RegisterException {
+	public synchronized void registerNewUser(String userName, String password, String emailAddress, String homePage, String firstName, String lastName, String middleName, Role selectedRole) throws PersistenceException, RegisterException {
 		log.info("Trying to register user name: " + userName);
 		User user = findUser(userName);
 		if (user != null) {
@@ -182,6 +182,7 @@ public class UserServiceBean  implements UserService, Serializable {
 		}
 		
 		User newUser = new User(userName, UserStatus.ACTIVE, firstName, lastName, middleName, emailAddress, new Date());
+		newUser.setHomePage(homePage);
 		newUser.setPassword(generateMD5Password(password));
 		newUser.setRole(selectedRole);
 		

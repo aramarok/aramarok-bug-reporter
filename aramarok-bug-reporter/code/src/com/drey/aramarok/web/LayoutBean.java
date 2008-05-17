@@ -14,7 +14,7 @@ import com.drey.aramarok.web.util.WebUtil;
 
 public class LayoutBean {
 	
-	private Long bugId = null;
+	private String bugId = null;
 	
 	public boolean isLoggedIn(){
 		return (WebUtil.getUser()!=null);
@@ -36,11 +36,11 @@ public class LayoutBean {
 
 	
 	// Getters and Setters
-	public Long getBugId() {
+	public String getBugId() {
 		return bugId;
 	}
 
-	public void setBugId(Long bugId) {
+	public void setBugId(String bugId) {
 		this.bugId = bugId;
 	}
 }

@@ -27,7 +27,7 @@ public class NewBugBean {
 		
 		DomainFacade facade = WebUtil.getDomainFacade();
 		try {
-			List<Product> prod = facade.getAllProducts();
+			List<Product> prod = facade.getProductsForCommittingABug();//.getAllProducts();
 			if (prod != null){
 				for (Product p : prod) {
 					productsList.add(new ProductsWrapperBean(p));

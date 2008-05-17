@@ -212,19 +212,27 @@ public class SearchBugsBean {
 		BugFilter bugFilter = buildFilter();
 		
 		DomainFacade facade = WebUtil.getDomainFacade();
-		List<Bug> returnedBugs = facade.getBugs(bugFilter);
-		
-		ArrayList<BugsWrapperBean> wb = new ArrayList<BugsWrapperBean>();
-		for (Bug b : returnedBugs){
-			wb.add(new BugsWrapperBean(b));
+		List<Bug> returnedBugs;
+		try {
+			returnedBugs = facade.getBugs(bugFilter);
+
+			ArrayList<BugsWrapperBean> wb = new ArrayList<BugsWrapperBean>();
+			for (Bug b : returnedBugs){
+				wb.add(new BugsWrapperBean(b));
+			}
+			filteredBugs = wb;
+			if (wb.isEmpty())
+				filteredBugListEmpty = true;
+			else 
+				filteredBugListEmpty = false;
+			
+			return null;
+		} catch (ExternalSystemException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
 		}
-		filteredBugs = wb;
-		if (wb.isEmpty())
-			filteredBugListEmpty = true;
-		else 
-			filteredBugListEmpty = false;
 		
-		return null;
 	}
 	
 	private void initializeBugStatuses(){

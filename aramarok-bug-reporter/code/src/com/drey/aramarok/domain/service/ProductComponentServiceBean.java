@@ -5,6 +5,7 @@ package com.drey.aramarok.domain.service;
  */
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -159,9 +160,49 @@ public class ProductComponentServiceBean implements ProductComponentService, Ser
 			component.setName(newProductComponentData.getName());
 			component.setDescription(newProductComponentData.getDescription());
 			component.setUserAssigned(newProductComponentData.getUserAssigned());
-			component.setVersions(newProductComponentData.getVersions());
+			
+			component.setVersions(null);
+			if (newProductComponentData.getVersions()!=null && !newProductComponentData.getVersions().isEmpty()){
+				for (ComponentVersion cv :newProductComponentData.getVersions()){
+					ComponentVersion v = entityManager.find(ComponentVersion.class, cv.getId());
+					component.addVersion(v);
+				}
+			}
+			
+			entityManager.flush();
 		} else {
 			throw new ProductComponentException("Specified ID was NULL.");
 		}
+	}
+	
+	public synchronized List<ProductComponent> getUnusedProductComponents() throws PersistenceException {
+		log.info("Get unused product components.");
+		
+		List<ProductComponent> returnList = new ArrayList<ProductComponent>();
+		List<Product> allProducts = productService.getAllProducts();
+		List<ProductComponent> allProductComponents = this.getAllProductComponents();
+		
+		if (allProductComponents==null){
+			return null;
+		}
+		if (allProducts==null){
+			return allProductComponents;
+		}
+		
+		returnList.addAll(allProductComponents);
+		
+		for (ProductComponent pc: allProductComponents){
+			for (Product p: allProducts){
+				if (p.getProductComponents()!=null && !p.getProductComponents().isEmpty()){
+					for (ProductComponent ppc: p.getProductComponents()){
+						if (ppc.getId().compareTo(pc.getId())==0){
+							returnList.remove(pc);
+						}
+					}
+				}
+			}
+		}
+		
+		return returnList;
 	}
 }

@@ -115,7 +115,7 @@ public class DomainFacadeBean implements DomainFacade, Serializable {
 		}
 	}
 	
-	public synchronized void registerNewUser(String userName, String password, String emailAddress, String firstName, String lastName, String middleName) throws ExternalSystemException, RegisterException {
+	public synchronized void registerNewUser(String userName, String password, String emailAddress, String homePage, String firstName, String lastName, String middleName) throws ExternalSystemException, RegisterException {
 		try {
 			String roleName = "Guest";
 			List<Role> roleList = getAllRoles();
@@ -124,7 +124,7 @@ public class DomainFacadeBean implements DomainFacade, Serializable {
 				if (r.getName().compareTo(roleName) == 0)
 					selectedRole = r;
 			}
-			userService.registerNewUser(userName, password, emailAddress, firstName, lastName, middleName, selectedRole);
+			userService.registerNewUser(userName, password, emailAddress, homePage, firstName, lastName, middleName, selectedRole);
 			aramarokLog.info("User name '" + userName + "' was registered.");
 		} catch (PersistenceException ex) {
 			throw new ExternalSystemException(DB_ERROR_MSG, ex);
@@ -585,4 +585,21 @@ public class DomainFacadeBean implements DomainFacade, Serializable {
 			throw new ExternalSystemException(DB_ERROR_MSG, ex);
 		}
 	}
+	
+	public List<ProductComponent> getUnusedProductComponents() throws ExternalSystemException {
+		try {
+			return componentService.getUnusedProductComponents();
+		} catch (PersistenceException ex) {
+			throw new ExternalSystemException(DB_ERROR_MSG, ex);
+		}
+	}
+	
+	public List<ComponentVersion> getUnusedComponentVersions() throws ExternalSystemException {
+		try {
+			return versionService.getUnusedComponentVersions();
+		} catch (PersistenceException ex) {
+			throw new ExternalSystemException(DB_ERROR_MSG, ex);
+		}
+	}
+	
 }
