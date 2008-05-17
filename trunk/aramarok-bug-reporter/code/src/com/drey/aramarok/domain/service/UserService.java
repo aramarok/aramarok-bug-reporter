@@ -64,6 +64,7 @@ public interface UserService {
 	 * @param userName
 	 * @param password
 	 * @param emailAddress
+	 * @param homePage
 	 * @param firstName
 	 * @param lastName
 	 * @param middleName
@@ -71,7 +72,7 @@ public interface UserService {
 	 * @throws FatalDomainException
 	 * @throws RegisterException
 	 */
-	public void registerNewUser(String userName, String password, String emailAddress, String firstName, String lastName, String middleName, Role selectedRole) throws PersistenceException, RegisterException ;
+	public void registerNewUser(String userName, String password, String emailAddress, String homePage, String firstName, String lastName, String middleName, Role selectedRole) throws PersistenceException, RegisterException ;
 	
 	
 	/**

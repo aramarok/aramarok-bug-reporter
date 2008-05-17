@@ -78,6 +78,7 @@ public class ViewBugBean {
 	
 	private boolean commentsListEmpty = false;
 	
+	private boolean bugIdInvalid = false;
 	private boolean bugIdNullOrNotFound = false;
 	private boolean bugFromSessionNull = false;
 	private boolean bugNotFoundInTheDataBase = false;
@@ -191,24 +192,43 @@ public class ViewBugBean {
 		/* 0 - bug id from session was not null; bug id found in the database 
 		 * 1 - bug id from session was not null; bug id was not found in the database
 		 * 2 - bug id from session was null
+		 * 3 - bug id from session was invalid
 		*/
+		bugIdInvalid = false;
 		bugIdNullOrNotFound = false;
 		bugFromSessionNull = false;
 		bugNotFoundInTheDataBase = false;
 		
 		HttpSession session = WebUtil.getHttpSession();
 		Object o = session.getAttribute(WebUtil.BUG_ID_SELECTED_FOR_VIEWING);
-		if (o!=null && o instanceof Long){
-			Long bugId = (Long)o;
-			DomainFacade facade = WebUtil.getDomainFacade();
-			bug = facade.getBug(bugId);
-			bugFromSessionNull = false;
-			if (bug == null){
-				bugIdNullOrNotFound = true;
-				bugNotFoundInTheDataBase = true;
-				return 1;
+		if (o!=null && o instanceof String){
+			String bugId = (String)o;
+			Long bugIdL = null;
+			try {
+				bugIdL = Long.parseLong(bugId);
+				
+				DomainFacade facade = WebUtil.getDomainFacade();
+				try {
+					bug = facade.getBug(bugIdL);
+				} catch (ExternalSystemException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				bugFromSessionNull = false;
+				if (bug == null){
+					bugIdNullOrNotFound = true;
+					bugNotFoundInTheDataBase = true;
+					return 1;
+				}
+				return 0;
+				
+			} catch (NumberFormatException nfe){
+				bugIdInvalid = true;
+				return 3;
+			} catch (IllegalArgumentException iar){
+				bugIdInvalid = true;
+				return 3;
 			}
-			return 0;
 		} else {
 			log.error("Bug from session could not be retrieved!");
 			bugFromSessionNull = true;
@@ -424,6 +444,9 @@ public class ViewBugBean {
 		return dateFormat.toPattern();
 	}
 	
+	public boolean isBugIdInvalidOrNullOrNotFound(){
+		return bugIdInvalid || bugIdNullOrNotFound;
+	}
 	// Getters and Setters
 	public Long getBugId() {
 		return bugId;
@@ -665,6 +688,14 @@ public class ViewBugBean {
 
 	public void setBugIdNullOrNotFound(boolean bugIdNullOrNotFound) {
 		this.bugIdNullOrNotFound = bugIdNullOrNotFound;
+	}
+
+	public boolean isBugIdInvalid() {
+		return bugIdInvalid;
+	}
+
+	public void setBugIdInvalid(boolean bugIdInvalid) {
+		this.bugIdInvalid = bugIdInvalid;
 	}
 }
 

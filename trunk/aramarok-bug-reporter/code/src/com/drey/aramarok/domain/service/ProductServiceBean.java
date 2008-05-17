@@ -37,7 +37,7 @@ public class ProductServiceBean implements ProductService, Serializable{
 	
 	@PersistenceContext( name = "Aramarok")
 	private EntityManager entityManager;
-
+	
 	private static Logger log = Logger.getLogger(ProductServiceBean.class);
 
 	public synchronized Product findProduct(String productName) throws PersistenceException {
@@ -100,26 +100,31 @@ public class ProductServiceBean implements ProductService, Serializable{
 	 * @throws PersistenceException
 	 */
 	public synchronized List<Product> getProductsForCommittingABug() throws PersistenceException{
+		log.info("Get products for committing a bug.");
 		List<Product> results = new ArrayList<Product>();
 		List<Product> allProducts = getAllProducts();
 		
 		for (Product p : allProducts){
-			if (p.getUserAssigned()!=null){
-				results.add(p);
-			} else {
-				if (p.getProductComponents()!=null){
-					boolean aPcHasAUserAssigned = false;
-					for (ProductComponent pc: p.getProductComponents()){
-						if (aPcHasAUserAssigned==false){
-							if (pc.getUserAssigned()!=null){
-								results.add(p);
-							} else {
-								if (pc.getVersions()!=null){
-									boolean aCvHasAUserAssigned = false;
-									for (ComponentVersion cv: pc.getVersions()){
-										if (aCvHasAUserAssigned==false){
-											if (cv.getUserAssigned()!=null){
-												results.add(p);
+			if (!p.isCloseForBugEntry()){
+				if (p.getUserAssigned()!=null){
+					results.add(p);
+				} else {
+					if (p.getProductComponents()!=null){
+						boolean aPcHasAUserAssigned = false;
+						for (ProductComponent pc: p.getProductComponents()){
+							if (aPcHasAUserAssigned==false){
+								if (pc.getUserAssigned()!=null){
+									results.add(p);
+									aPcHasAUserAssigned = true;
+								} else {
+									if (pc.getVersions()!=null){
+										boolean aCvHasAUserAssigned = false;
+										for (ComponentVersion cv: pc.getVersions()){
+											if (aCvHasAUserAssigned==false){
+												if (cv.getUserAssigned()!=null){
+													results.add(p);
+													aCvHasAUserAssigned = true;
+												}
 											}
 										}
 									}
@@ -155,7 +160,13 @@ public class ProductServiceBean implements ProductService, Serializable{
 			throw new NoProductNameSpecifiedException("No product name was specified!");
 		}
 		
-		Product newProduct = new Product(productName, productDescription, productURL, userAssigned, productComponents, closeForBugEntry);
+		Product newProduct = new Product(productName, productDescription, productURL, userAssigned, null, closeForBugEntry);
+		if (productComponents!=null && !productComponents.isEmpty()){
+			for (ProductComponent pc :productComponents){
+				ProductComponent c = entityManager.find(ProductComponent.class, pc.getId());
+				newProduct.addComponent(c);
+			}
+		}
 		
 		entityManager.persist(newProduct);
 		entityManager.flush();
@@ -194,7 +205,15 @@ public class ProductServiceBean implements ProductService, Serializable{
 			product.setProductURL(newProductData.getProductURL());
 			product.setUserAssigned(newProductData.getUserAssigned());
 			product.setCloseForBugEntry(newProductData.isCloseForBugEntry());
-			product.setProductComponents(newProductData.getProductComponents());
+			
+			product.setProductComponents(null);
+			if (newProductData.getProductComponents()!=null && !newProductData.getProductComponents().isEmpty()){
+				for (ProductComponent pc :newProductData.getProductComponents()){
+					ProductComponent c = entityManager.find(ProductComponent.class, pc.getId());
+					product.addComponent(c);
+				}
+			}
+			
 			entityManager.flush();
 		} else {
 			throw new ProductException("Specified ID was NULL.");

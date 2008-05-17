@@ -196,14 +196,45 @@
 	color: black;
 }
 
+.inputDefaultSizeLeft
+{
+	font-family: Verdana, Arial, Helvetica, sans-serif; 
+	font-size: 11px;
+	height: 20px;
+	border-width: 1px;
+	border-color: #004b82;
+	color: black;
+}
+
+.inputDefaultSizeLeft:hover
+{
+	font-family: Verdana, Arial, Helvetica, sans-serif; 
+	font-size: 11px;
+	height: 20px;
+	border-width: 1px;
+	border-color: white;
+	color: black;
+}
+
 .inputTextArea
 {
 	font-family: Verdana, Arial, Helvetica, sans-serif; 
 	font-size: 11px;
 	width: 200px;
-	height: 100px;
+	height: 70px;
 	border-width: 1px;
 	border-color: #004b82;
+	color: black;
+}
+
+.inputTextArea:hover
+{
+	font-family: Verdana, Arial, Helvetica, sans-serif; 
+	font-size: 11px;
+	width: 200px;
+	height: 70px;
+	border-width: 1px;
+	border-color: white;
 	color: black;
 }
 
@@ -328,6 +359,27 @@
 	width: 200px
 }
 
+.selectManyListBox180
+{
+	font-family: Verdana, Arial, Helvetica, sans-serif; 
+	font-size: 11px;
+	border-width: 1px;
+	border-color: #004b82;
+	color: black;
+	text-align: left;
+	width: 180px
+}
+
+.selectManyListBox180:hover
+{
+	font-family: Verdana, Arial, Helvetica, sans-serif; 
+	font-size: 11px;
+	border-width: 1px;
+	border-color: white;
+	color: black;
+	text-align: left;
+	width: 180px
+}
 
 .table
 {

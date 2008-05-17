@@ -5,6 +5,7 @@ package com.drey.aramarok.domain.service;
  */
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -144,6 +145,37 @@ public class ComponentVersionServiceBean implements ComponentVersionService, Ser
 		} else {
 			throw new ComponentVersionException("Specified ID was NULL.");
 		}
+	}
+	
+	public synchronized List<ComponentVersion> getUnusedComponentVersions() throws PersistenceException {
+		log.info("Get unused component versions.");
+		
+		List<ComponentVersion> returnList = new ArrayList<ComponentVersion>();
+		List<ProductComponent> allProductComponents = productComponentService.getAllProductComponents();
+		List<ComponentVersion> allComponentVersions = this.getAllComponentVersions();
+		
+		if (allComponentVersions==null){
+			return null;
+		}
+		if (allProductComponents==null){
+			return allComponentVersions;
+		}
+		
+		returnList.addAll(allComponentVersions);
+		
+		for (ComponentVersion cv: allComponentVersions){
+			for (ProductComponent pc: allProductComponents){
+				if (pc.getVersions()!=null && !pc.getVersions().isEmpty()){
+					for (ComponentVersion pcv: pc.getVersions()){
+						if (pcv.getId().compareTo(cv.getId())==0){
+							returnList.remove(cv);
+						}
+					}
+				}
+			}
+		}
+		
+		return returnList;
 	}
 
 }

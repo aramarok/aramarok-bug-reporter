@@ -85,13 +85,14 @@ public interface DomainFacade {
 	 * @param userName
 	 * @param password
 	 * @param emailAddress
+	 * @param homePage
 	 * @param firstName
 	 * @param lastName
 	 * @param middleName
 	 * @throws FatalDomainException
 	 * @throws RegisterException
 	 */
-	public void registerNewUser(String userName, String password, String emailAddress, String firstName, String lastName, String middleName) throws ExternalSystemException, RegisterException;
+	public void registerNewUser(String userName, String password, String emailAddress, String homePage, String firstName, String lastName, String middleName) throws ExternalSystemException, RegisterException;
 	
 	
 	/**
@@ -368,4 +369,9 @@ public interface DomainFacade {
 	public void approveQuip(Long quipId) throws ExternalSystemException, UserHasNoRightException;
 	
 	public void voteComment(Long commentId) throws ExternalSystemException;
+	
+	public List<ProductComponent> getUnusedProductComponents() throws ExternalSystemException;
+	
+	public List<ComponentVersion> getUnusedComponentVersions() throws ExternalSystemException;
+	
 }

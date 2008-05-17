@@ -18,6 +18,7 @@ import com.drey.aramarok.domain.exceptions.register.NoUserNameException;
 import com.drey.aramarok.domain.exceptions.register.RegisterException;
 import com.drey.aramarok.domain.exceptions.register.UserNameAlreadyExistsException;
 import com.drey.aramarok.domain.exceptions.register.UserNotFoundException;
+import com.drey.aramarok.domain.exceptions.user.UserException;
 import com.drey.aramarok.domain.model.Role;
 import com.drey.aramarok.domain.model.User;
 import com.drey.aramarok.domain.model.UserStatus;
@@ -161,6 +162,8 @@ public class UsersBean {
 					} catch (RegisterException e) {
 						log.error("RegisterException!");
 						editedUserNameNotFound = true;
+					} catch (UserException e) {
+						log.error("UserException!");
 					}
 				} catch (FatalDomainException e) {
 					log.error("FatalDomainException. " , e);
