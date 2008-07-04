@@ -9,6 +9,7 @@ import java.util.List;
 import javax.faces.event.PhaseId;
 import javax.faces.event.ValueChangeEvent;
 import javax.faces.model.SelectItem;
+import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
 
@@ -81,6 +82,35 @@ public class ComponentsBean {
 	
 	private boolean newProductNameIsInvalid = false;
 	private boolean newProductNameAlreadyExists = false;
+	
+	private void componentListWasModified(){
+		HttpSession session = WebUtil.getHttpSession();
+		session.setAttribute(WebUtil.COMPONENT_LIST_MODIFIED, new Boolean(true));
+	}
+	
+	private boolean versionListWasModified(){
+		HttpSession session = WebUtil.getHttpSession();
+		Object o = session.getAttribute(WebUtil.VERSION_LIST_MODIFIED);
+		
+		if (o!=null && o instanceof Boolean){
+			Boolean modified = (Boolean)o;
+			return modified;
+		} else {
+			return false;
+		}
+	}
+	
+	public String getLoadData(){
+		if (versionListWasModified()) {
+			loadAllProductComponents();
+			loadAvailableProductComponents();
+			loadSelectedProductsNameData();
+			
+			HttpSession session = WebUtil.getHttpSession();
+			session.setAttribute(WebUtil.VERSION_LIST_MODIFIED, new Boolean(false));
+		}
+		return null;
+	}
 	
 	public String removeNewRole() {
 		if (newUserSelectedRole != null) {
@@ -262,7 +292,7 @@ public class ComponentsBean {
 				try {
 					User newUserAssignedSelected = null;
 					if (newUserAsssignedSelected!=null && newUserAsssignedSelected.trim().compareTo("")!=0){
-						newUserAssignedSelected = facade.getUser(newUserAsssignedSelected);
+						newUserAssignedSelected = facade.getUser(newUserAsssignedSelected, false);
 					}
 					
 					facade.addNewProductComponent(newName, newDescription, newUserAssignedSelected, newUserRoles);
@@ -271,6 +301,7 @@ public class ComponentsBean {
 					loadSelectedProductsNameData();
 					resetNewProductFields();
 					initializeProductList();
+					componentListWasModified();
 				} catch (ComponentNameAlreadyExistsException e){
 					log.error("ComponentNameAlreadyExistsException");
 					newProductNameAlreadyExists = true;
@@ -322,7 +353,7 @@ public class ComponentsBean {
 					editedProductObject.setDescription(description);
 					User userSelected = null;
 					if (userAsssignedSelected!=null && userAsssignedSelected.trim().compareTo("")!=0){
-						userSelected = facade.getUser(userAsssignedSelected);
+						userSelected = facade.getUser(userAsssignedSelected, false);
 					}
 					editedProductObject.setUserAssigned(userSelected);
 					editedProductObject.setVersions(new HashSet<ComponentVersion>(userRoles));
@@ -333,6 +364,7 @@ public class ComponentsBean {
 						reInitializeProductList();
 						editProduct = false;
 						loadAvailableProductComponents();
+						componentListWasModified();
 					} catch (ComponentNotFoundException e) {
 						log.error("ComponentNotFoundException!");
 					} catch (NoComponentNameSpecifiedException e) {

@@ -34,6 +34,9 @@ public class LayoutBean {
 		return WebUtil.VIEW_BUG_OUTCOME;
 	}
 
+	public String helpPage(){
+		return WebUtil.HELP_PAGE_OUTCOME;
+	}
 	
 	// Getters and Setters
 	public String getBugId() {

@@ -234,7 +234,9 @@ public class DomainServiceBean implements DomainService, Serializable {
 		Comment comment = getComment(commentId);
 		if (comment!=null){
 			comment.addVote();
-			userLoggedIn.voteComment(comment); //TODO: check if works this way!!!
+			User u = entityManager.find(User.class, userLoggedIn.getId());
+			u.voteComment(comment);
+			entityManager.flush();
 		}
 	}
 }

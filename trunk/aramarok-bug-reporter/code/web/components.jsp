@@ -14,6 +14,8 @@
 					<h:outputText value="#{general['components.title']}" styleClass="title"/>
 				</p>
     			
+    			<h:outputText value="#{ComponentsBean.loadData}" />
+    			
     	    	<center>
     	    	<table>
     	    		<tr>
@@ -90,7 +92,7 @@
 								<h:outputText value="#{general['components.parentProductOfComponent']}: " styleClass="label-right"/>
 							</td>
 							<td>
-								<h:outputText value="#{ComponentsBean.parentProductOfComponent}" />
+								<h:outputText value="#{ComponentsBean.parentProductOfComponent}" styleClass="label-right" />
 							</td>
 						</tr>
 						

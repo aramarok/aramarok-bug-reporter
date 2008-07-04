@@ -216,26 +216,31 @@ public class UsersBean {
 	private void loadSelectedUserNamesData(){
 		if (userNameSelected != null){
 			DomainFacade facade = WebUtil.getDomainFacade();
-			editedUserObject = facade.getUser(userNameSelected);
-			if (editedUserObject != null){
-				userName = editedUserObject.getUserName();
-				password = editedUserObject.getPassword();
-				emailAddress = editedUserObject.getEmailAddress();
-				firstName = editedUserObject.getFirstName();
-				lastName = editedUserObject.getLastName();
-				middleName = editedUserObject.getMiddleName();
-				
-				SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy-HH:mm:ss ");
-				registerDate = formatter.format(editedUserObject.getRegisterDate());
-				
-				if (editedUserObject.getRole() != null){
-					roleSelected = editedUserObject.getRole().getName();
+			try {
+				editedUserObject = facade.getUser(userNameSelected, false);
+				if (editedUserObject != null){
+					userName = editedUserObject.getUserName();
+					password = editedUserObject.getPassword();
+					emailAddress = editedUserObject.getEmailAddress();
+					firstName = editedUserObject.getFirstName();
+					lastName = editedUserObject.getLastName();
+					middleName = editedUserObject.getMiddleName();
+					
+					SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy-HH:mm:ss ");
+					registerDate = formatter.format(editedUserObject.getRegisterDate());
+					
+					if (editedUserObject.getRole() != null){
+						roleSelected = editedUserObject.getRole().getName();
+					} else {
+						roleSelected = "";
+					}
+					userStatusSelected = editedUserObject.getStatus().name();
 				} else {
-					roleSelected = "";
+					log.error("The 'userSelected' is NULL");
 				}
-				userStatusSelected = editedUserObject.getStatus().name();
-			} else {
-				log.error("The 'userSelected' is NULL");
+			} catch (ExternalSystemException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 		} else {
 			log.error("The 'userNameSelected' is NULL.");

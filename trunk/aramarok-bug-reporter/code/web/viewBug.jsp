@@ -82,7 +82,7 @@
 										<h:outputText value="#{general['viewBug.operatingSystem']}: " styleClass="label2"/>
 									</td>
 									<td>
-										<h:selectOneMenu disabled="#{!ViewBugBean.canEditBug}" id="operatingSystemList" value="#{ViewBugBean.operatingSystem}" styleClass="input">
+										<h:selectOneMenu disabled="#{!ViewBugBean.canEditBug}" id="operatingSystemList" value="#{ViewBugBean.operatingSystem}" styleClass="inputDefaultSizeLeft">
 					    					<f:selectItems value="#{ViewBugBean.operatingSystemList_out}"/> 
 					    				</h:selectOneMenu>
 					    			</td>
@@ -92,7 +92,7 @@
 					    				<h:outputText value="#{general['viewBug.platform']}: " styleClass="label2"/>
 					    			</td>
 					    			<td>
-					    				<h:selectOneMenu disabled="#{!ViewBugBean.canEditBug}" id="inputPlatformList" value="#{ViewBugBean.platform}" styleClass="input">
+					    				<h:selectOneMenu disabled="#{!ViewBugBean.canEditBug}" id="inputPlatformList" value="#{ViewBugBean.platform}" styleClass="inputDefaultSizeLeft">
 					    					<f:selectItems value="#{ViewBugBean.platformList_out}"/> 
 					    				</h:selectOneMenu>
 					    			</td>
@@ -102,7 +102,7 @@
 					    				<h:outputText value="#{general['viewBug.priority']}: " styleClass="label2"/>
 					    			</td>
 					    			<td>
-					    				<h:selectOneMenu disabled="#{!ViewBugBean.canEditBug}" id="inputPriorityList" value="#{ViewBugBean.priority}" styleClass="input">
+					    				<h:selectOneMenu disabled="#{!ViewBugBean.canEditBug}" id="inputPriorityList" value="#{ViewBugBean.priority}" styleClass="inputDefaultSizeLeft">
 					    					<f:selectItems value="#{ViewBugBean.priorityList_out}"/> 
 					    				</h:selectOneMenu>
 					    			</td>
@@ -112,7 +112,7 @@
 					    				<h:outputText value="#{general['viewBug.severity']}: " styleClass="label2"/>
 					    			</td>
 					    			<td>
-					    				<h:selectOneMenu disabled="#{!ViewBugBean.canEditBug}" id="inputSeverityList" value="#{ViewBugBean.severity}" styleClass="input">
+					    				<h:selectOneMenu disabled="#{!ViewBugBean.canEditBug}" id="inputSeverityList" value="#{ViewBugBean.severity}" styleClass="inputDefaultSizeLeft">
 					    					<f:selectItems value="#{ViewBugBean.severityList_out}"/> 
 					    				</h:selectOneMenu>
 					    			</td>
@@ -133,6 +133,14 @@
 										<h:inputText disabled="#{!ViewBugBean.canEditBug}" value="#{ViewBugBean.summary}" styleClass="input"/>
 									</td>
 								</tr>
+								<tr>
+									<td align="right">
+										<h:outputText value="#{general['viewBug.ccUsers']}: " styleClass="label2"/>
+									</td>
+									<td>
+										<h:inputText disabled="#{!ViewBugBean.canEditBug}" value="#{ViewBugBean.ccUsers}" styleClass="input"/>
+									</td>
+								</tr>
 							</table>
 						</td>
 					</tr>
@@ -145,7 +153,7 @@
 										<h:outputText value="#{general['viewBug.bugStatus']}: " styleClass="label2"/>
 									</td>
 									<td>
-					    				<h:selectOneMenu disabled="#{!ViewBugBean.canChangeStatus}" id="bugStatus" value="#{ViewBugBean.bugState}" styleClass="input">
+					    				<h:selectOneMenu disabled="#{!ViewBugBean.canChangeStatus}" id="bugStatus" value="#{ViewBugBean.bugState}" styleClass="inputDefaultSizeLeft">
 					    					<f:selectItems value="#{ViewBugBean.bugGeneralStatusList_out}"/> 
 					    				</h:selectOneMenu>
 					    			</td>
@@ -155,7 +163,7 @@
 										<h:outputText value="#{general['viewBug.additionalComment']}: " styleClass="label2"/>
 									</td>
 									<td>
-										<h:inputTextarea disabled="#{!ViewBugBean.canAddComment}" value="#{ViewBugBean.additionalComment}" styleClass="inputTextArea"/>
+										<h:inputTextarea disabled="#{!ViewBugBean.canAddComment}" value="#{ViewBugBean.additionalComment}" styleClass="inputTextArea250100"/>
 									</td>
 								</tr>
 								<tr>
@@ -184,6 +192,22 @@
 					    					<h:outputText value="#{general['viewBug.errors.cannotChangeBugStatus']}" styleClass="error"/>
 					    					<br />
 					    				</f:subview>
+					    				<f:subview rendered="#{ViewBugBean.ccUsersNotValid}" >
+					    					<h:outputText value="#{general['viewBug.errors.ccUsersNotValid']}: " styleClass="error"/>
+					    					<h:outputText value="#{ViewBugBean.invalidUserNames}" styleClass="error"/>
+					    					<br />
+					    				</f:subview>
+					    				<f:subview rendered="#{ViewBugBean.assignedUserSameAsCCUser}" >
+					    					<h:outputText value="#{general['viewBug.errors.assignedUserSameAsCCUser']}: " styleClass="error"/>
+					    					<h:outputText value="#{ViewBugBean.userNameAssignedSameAsCCUser}" styleClass="error"/>
+					    					<br />
+					    				</f:subview>
+									</td>
+								</tr>
+								<tr>
+									<td colspan="2">
+										<h:commandLink value="#{general['viewBug.viewBugActivity']}" action="#{ViewBugBean.viewBugActivity}" styleClass="label-link"/> | 
+										<h:commandLink value="#{general['viewBug.formatForPrinting']}" action="#{ViewBugBean.formatBugForPrinting}" styleClass="label-link" />
 									</td>
 								</tr>
 								<tr>
@@ -191,7 +215,7 @@
 										<h:outputText value="#{general['viewBug.bugDescription']}: " styleClass="label2"/>
 									</td>
 									<td>
-										<h:outputText value="#{ViewBugBean.description}" styleClass="label-right"/>
+										<h:inputTextarea readonly="true" value="#{ViewBugBean.description}" styleClass="inputTextArea250100"/>
 									</td>
 								</tr>
 								<tr>
@@ -202,6 +226,13 @@
 								<tr>
 									<td colspan="2">
 										<h:dataTable rendered="#{!ViewBugBean.commentsListEmpty}" value="#{ViewBugBean.comments}" var="comm" border="0"  columnClasses="output" rowClasses="table-light-row,table-dark-row" headerClass="table-th">
+											<h:column>
+						    					<f:facet name="header">
+						    						<h:outputText value="#{general['viewBug.additionalComments.table.userName']}" />
+						    					</f:facet>
+						    					<h:outputText value="#{comm.commentOwner}" styleClass="label-right"  />
+						    				</h:column>
+						    				
 						    				<h:column>
 						    					<f:facet name="header">
 						    						<h:outputText value="#{general['viewBug.additionalComments.table.datePosted']}" />
@@ -215,8 +246,18 @@
 						    					</f:facet>
 						    					<h:outputText value="#{comm.commentText}" styleClass="label-right" />
 						    				</h:column>
+						    				
+						    				<h:column>
+						    					<f:facet name="header">
+						    						<h:outputText value="#{general['viewBug.additionalComments.table.votes']}" />
+						    					</f:facet>
+						    					<h:outputText value="#{comm.votes}" styleClass="label-right" />
+						    					
+						    					<h:commandLink rendered="#{comm.canUserVote}" value="(#{general['viewBug.additionalComments.table.vote']}) " action="#{comm.vote}" styleClass="label-link" />
+						    					
+						    				</h:column>
 										</h:dataTable>
-										<h:outputText rendered="#{ViewBugBean.commentsListEmpty}" value="#{general['viewBug.additionalComments.noAdditionalComments']}" />
+										<h:outputText rendered="#{ViewBugBean.commentsListEmpty}" value="#{general['viewBug.additionalComments.noAdditionalComments']}" styleClass="label-right" />
 									</td>
 								</tr>
 							</table>

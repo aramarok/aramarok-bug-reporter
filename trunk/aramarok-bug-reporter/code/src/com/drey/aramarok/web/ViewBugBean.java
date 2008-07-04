@@ -29,6 +29,7 @@ import com.drey.aramarok.domain.model.Platform;
 import com.drey.aramarok.domain.model.Priority;
 import com.drey.aramarok.domain.model.Right;
 import com.drey.aramarok.domain.model.Severity;
+import com.drey.aramarok.domain.model.User;
 import com.drey.aramarok.domain.service.DomainFacade;
 import com.drey.aramarok.web.util.WebUtil;
 
@@ -53,6 +54,8 @@ public class ViewBugBean {
 	private String summary = "";
 	private String description = "";
 	private String additionalComment = "";
+	private String ccUsers = "";
+	private List<User> ccBugUsers = null;
 	
 	private List<OperatingSystem> operatingSystemList = null;
 	private LinkedList<SelectItem> operatingSystemList_out = new LinkedList<SelectItem>();
@@ -83,8 +86,21 @@ public class ViewBugBean {
 	private boolean bugFromSessionNull = false;
 	private boolean bugNotFoundInTheDataBase = false;
 	
+	private boolean ccUsersNotValid = false;
+	private String invalidUserNames = "";
+	private boolean assignedUserSameAsCCUser = false;
+	private String userNameAssignedSameAsCCUser = ""; 
+	
 	public ViewBugBean(){
 		
+	}
+	
+	public String viewBugActivity(){
+		return WebUtil.VIEW_BUG_ACTIVITY_OUTCOME;
+	}
+	
+	public String formatBugForPrinting(){
+		return null;
 	}
 	
 	public String commitBug(){
@@ -123,7 +139,7 @@ public class ViewBugBean {
 			if (bug.getComments() != null)
 				c.addAll(bug.getComments());
 			if (additionalComment.trim().compareTo("") != 0){
-				c.add(new Comment(additionalComment, new Date()));
+				c.add(new Comment(WebUtil.getUser(), new Date(), additionalComment));
 			}
 			
 			DomainFacade facade = WebUtil.getDomainFacade();
@@ -143,9 +159,19 @@ public class ViewBugBean {
 				severityList.get(severityIndex),
 				c);
 			bugToCommit.setId(bug.getId());
+			//bugToCommit.setStatus(bug.getStatus());
+			bugToCommit.setStatus(bugGeneralStatusList.get(bugStatusIndex));
+			bugToCommit.setUserAssignedTo(bug.getUserAssignedTo());
+			bugToCommit.setOpenDate(bug.getOpenDate());
+			Set<User> ccUsers = new HashSet<User>();
+			ccUsers.addAll(ccBugUsers);
+			bugToCommit.setCcUsers(ccUsers);
+			
 			try {
 				facade.commitBug(bugToCommit);
-				return WebUtil.HOME_OUTCOME;
+				additionalComment = "";
+				return null;
+				//return WebUtil.HOME_OUTCOME;
 			} catch (UserHasNoRightException e){
 				userHasNoRight = true;
 				log.error("UserHasNoRightException");
@@ -168,6 +194,10 @@ public class ViewBugBean {
 		
 		summaryNotEntered = false;
 		observedDateNotEnterd = false;
+		ccUsersNotValid = false;
+		invalidUserNames = "";
+		assignedUserSameAsCCUser = false;
+		userNameAssignedSameAsCCUser = "";
 		
 		if (summary.trim().equals("")){
 			validData = false;
@@ -177,9 +207,56 @@ public class ViewBugBean {
 			validData = false;
 			observedDateNotEnterd = true;
 		}
+		if (usersAreValid() == false){
+			validData = false;
+			ccUsersNotValid = true;
+		}
+		if (assignedUserSameAsCCUser==true){
+			validData = false;
+		}
 		return validData;
 	}
 	
+	private boolean usersAreValid(){
+		
+		boolean validUsers = true;
+		
+		if (ccUsers!= null && ccUsers.trim().compareTo("")!=0){
+			String[] tokens = ccUsers.split(",");
+			int length = tokens.length;
+			if (length>0){
+				this.ccBugUsers = new ArrayList<User>();
+				DomainFacade facade= WebUtil.getDomainFacade();
+				for (int i=0; i<length; i++){
+					String userName = tokens[i].trim();
+					try {
+						User u = facade.getUser(userName, false);
+						if (u==null){
+							validUsers = false;
+							if (this.invalidUserNames.trim().compareTo("")==0){
+								this.invalidUserNames +=userName;
+							} else {
+								this.invalidUserNames += ", " +userName;
+							}
+						} else {
+							if (assignedTo.compareTo(u.getUserName())==0){
+								this.assignedUserSameAsCCUser = true;
+								this.userNameAssignedSameAsCCUser = u.getUserName();
+							} else {
+								this.ccBugUsers.add(u);
+							}
+						}
+					} catch (ExternalSystemException e){
+						log.error("ExternalSystemException");
+						validUsers = false;
+					}
+				}
+			}
+		}
+		
+		return validUsers;
+	}
+
 	public String getLoadData(){
 		if (getBugForViewingFormSession()== 0){
 			loadSomeDataFromDb();
@@ -252,8 +329,16 @@ public class ViewBugBean {
 			dateReported = bug.getOpenDate(); 
 			reporterUserName = bug.getOwner().getUserName();
 			productName = bug.getProduct().getName();
-			componentName = bug.getProductComponent().getName();
-			versionName = bug.getComponentVersion().getName();
+			if (bug.getProductComponent()!=null) {
+				componentName = bug.getProductComponent().getName();
+			} else {
+				componentName = "-";
+			}
+			if (bug.getComponentVersion()!=null) {
+				versionName = bug.getComponentVersion().getName();
+			} else {
+				versionName = "-";
+			}
 			
 			operatingSystem = bug.getOperatingSystem().getName();
 			platform = bug.getPlatform().getName();
@@ -261,23 +346,59 @@ public class ViewBugBean {
 			severity = bug.getSeverity().getName();
 			dateObserved = bug.getObservedDate();
 			bugState = bug.getStatus().name();
-			//assignedTo = bug.getUserAssignedTo().getUserName();
+			assignedTo = bug.getUserAssignedTo().getUserName();
 			summary = bug.getSummary();
 			description = bug.getDescription();
+			
+			ccBugUsers = new ArrayList<User>();
+			ccUsers = "";
+			if (bug.getCcUsers()!=null && !bug.getCcUsers().isEmpty()){
+				ccBugUsers = new ArrayList<User>();
+				ccBugUsers.addAll(bug.getCcUsers());
+				for (User us: ccBugUsers){
+					if (ccUsers==null || ccUsers.trim().compareTo("")==0){
+						ccUsers = us.getUserName();
+					} else {
+						ccUsers += ","+us.getUserName();
+					}
+				}
+			}
 		}
 	}
 	
 	public boolean isCanChangeStatus(){
+		if (WebUtil.getUser().hasRight(Right.EDIT_BUGS)) //has the right to edit anything
+			return true;
+		
+		if (WebUtil.getUser().getId().compareTo(this.bug.getOwner().getId())==0) //is the owner
+			return true;
+		
+		if (WebUtil.getUser().getId().compareTo(this.bug.getUserAssignedTo().getId())==0) //is the user assigned to the bug
+			return true;
+		/*
 		if (WebUtil.getUser().hasRight(Right.CHANGE_BUG_STATUS))
 			return true;
-		else 
-			return false;
+		else
+		*/
+		
+		return false;
 	}
 	public boolean isCanEditBug(){
+		if (WebUtil.getUser().hasRight(Right.EDIT_BUGS)) //has the right to edit anything
+			return true;
+		
+		if (WebUtil.getUser().getId().compareTo(this.bug.getOwner().getId())==0) //is the owner
+			return true;
+		
+		if (WebUtil.getUser().getId().compareTo(this.bug.getUserAssignedTo().getId())==0 && WebUtil.getUser().hasRight(Right.EDIT_BUG)) //is the user assigned to the bug and has EDIT_BUG right
+			return true;
+		/*
 		if (WebUtil.getUser().hasRight(Right.EDIT_BUG))
 			return true;
-		else 
-			return false;
+		else
+		 */
+		
+		return false;
 	}
 	public boolean isCanAddComment(){
 		if (WebUtil.getUser().hasRight(Right.ADD_BUG_COMMENT))
@@ -696,6 +817,46 @@ public class ViewBugBean {
 
 	public void setBugIdInvalid(boolean bugIdInvalid) {
 		this.bugIdInvalid = bugIdInvalid;
+	}
+
+	public String getCcUsers() {
+		return ccUsers;
+	}
+
+	public void setCcUsers(String ccUsers) {
+		this.ccUsers = ccUsers;
+	}
+
+	public boolean isCcUsersNotValid() {
+		return ccUsersNotValid;
+	}
+
+	public void setCcUsersNotValid(boolean ccUsersNotValid) {
+		this.ccUsersNotValid = ccUsersNotValid;
+	}
+
+	public String getInvalidUserNames() {
+		return invalidUserNames;
+	}
+
+	public void setInvalidUserNames(String invalidUserNames) {
+		this.invalidUserNames = invalidUserNames;
+	}
+
+	public boolean isAssignedUserSameAsCCUser() {
+		return assignedUserSameAsCCUser;
+	}
+
+	public void setAssignedUserSameAsCCUser(boolean assignedUserSameAsCCUser) {
+		this.assignedUserSameAsCCUser = assignedUserSameAsCCUser;
+	}
+
+	public String getUserNameAssignedSameAsCCUser() {
+		return userNameAssignedSameAsCCUser;
+	}
+
+	public void setUserNameAssignedSameAsCCUser(String userNameAssignedSameAsCCUser) {
+		this.userNameAssignedSameAsCCUser = userNameAssignedSameAsCCUser;
 	}
 }
 

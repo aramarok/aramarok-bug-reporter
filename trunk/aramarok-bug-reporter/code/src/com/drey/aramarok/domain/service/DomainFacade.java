@@ -64,9 +64,11 @@ public interface DomainFacade {
 	 * Gets User by userName
 	 * 
 	 * @param userName
+	 * @param noLog
 	 * @return
+	 * @throws ExternalSystemException
 	 */
-	public User getUser(String userName);
+	public User getUser(String userName, boolean noLog) throws ExternalSystemException;
 	
 	
 	/**
@@ -261,9 +263,11 @@ public interface DomainFacade {
 	 * @param savedSearch
 	 * @throws UserNotFoundException
 	 * @throws ExternalSystemException
+	 * @throws SearchException 
 	 */
-	public void addASavedBugFilterToUser(Long idOfUser, SavedSearch savedSearch) throws UserNotFoundException, ExternalSystemException;
+	public void addASavedBugFilterToUser(Long idOfUser, SavedSearch savedSearch) throws UserNotFoundException, ExternalSystemException, SearchException;
 	
+	public SavedSearch getSavedSearch(Long savedSearchId) throws ExternalSystemException;
 	
 	public void addNewComponentVersion(String componentVersionName, String componentVersionDescription, /*ProductComponent parentProductComponent,*/ User userAssignedTo) throws ExternalSystemException, ComponentVersionException ,UserHasNoRightException;
 
@@ -359,6 +363,8 @@ public interface DomainFacade {
 	
 	public ComponentVersion getComponentVersion(Long componentVersionId) throws ExternalSystemException;
 	
+	
+	public Comment getComment(Long commentId) throws ExternalSystemException;
 	
 	public Quip getQuip(Long quipId) throws ExternalSystemException;
 	

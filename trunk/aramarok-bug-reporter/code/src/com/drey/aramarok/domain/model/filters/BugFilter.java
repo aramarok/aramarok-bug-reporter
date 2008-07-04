@@ -3,6 +3,7 @@ package com.drey.aramarok.domain.model.filters;
 import java.util.List;
 
 import com.drey.aramarok.domain.model.BugGeneralStatus;
+import com.drey.aramarok.domain.model.BugSortingMode;
 import com.drey.aramarok.domain.model.OperatingSystem;
 import com.drey.aramarok.domain.model.Platform;
 import com.drey.aramarok.domain.model.Priority;

@@ -39,6 +39,12 @@ public interface WebUtilConstants {
 	public static final String ERROR_PAGE_OUTCOME="ERROR_PAGE_OUTCOME";
 	
 	/**
+	 * Constant for the help page
+	 * Used in navigation 
+	 */
+	public static final String HELP_PAGE_OUTCOME="HELP_PAGE_OUTCOME";
+	
+	/**
 	 * Constant for home page.
 	 * Used in navigation
 	 */
@@ -68,10 +74,34 @@ public interface WebUtilConstants {
 	public static final String VIEW_BUG_OUTCOME = "VIEW_BUG_OUTCOME";
 	
 	/**
+	 * 
+	 * Used in navigation
+	 */
+	public static final String VIEW_BUG_ACTIVITY_OUTCOME = "VIEW_BUG_ACTIVITY_OUTCOME";
+	
+	/**
+	 * 
+	 * Used in navigation
+	 */
+	public static final String FORMAT_BUG_FOR_PRINTING_OUTCOME = "FORMAT_BUG_FOR_PRINTING_OUTCOME";
+	
+	/**
 	 * Constant for searching bugs page.
 	 * Used in navigation
 	 */
 	public static final String SEARCH_BUGS_OUTCOME = "SEARCH_BUGS_OUTCOME";
+	
+	/**
+	 * 
+	 * Used in navigation
+	 */
+	public static final String SAVED_FILTERS_OUTCOME = "SAVED_FILTERS_OUTCOME";
+	
+	/**
+	 * 
+	 * Used in navigation
+	 */
+	public static final String VIEW_SAVED_FILTER_OUTCOME = "VIEW_SAVED_FILTER_OUTCOME";
 	
 	/**
 	 * Constant for my bugs page.
@@ -118,6 +148,8 @@ public interface WebUtilConstants {
 	
 	
 	
+	
+	
 	/**
 	 * Constant used to save Syncronization Object
 	 */	
@@ -143,10 +175,19 @@ public interface WebUtilConstants {
 	 */
 	public static final String LOCALE = "LOCALE";
 	
+	/**
+	 * Constant used for getting the aramarok properties file location
+	 */
+	public static final String ARAMAROK_PROPERTIES_FILE="com.drey.aramarok.web.resources.aramarok";
 	
 	public static final String ProductToEnterNewBug = "PRODUCT_TO_ENTER_BUG";
 	public static final String ENTER_NEW_BUG_FOR_PRODUCT = "ENTER_NEW_BUG_FOR_PRODUCT";
 	public static final String NEW_INSERED_BUG_ID = "NEW_INSERED_BUG_ID"; 
 
 	public static final String BUG_ID_SELECTED_FOR_VIEWING = "BUG_ID_SELECTED_FOR_VIEWING";
+	public static final String SAVED_FILTER_ID_SELECTED_FOR_VIEWING = "SAVED_FILTER_ID_SELECTED_FOR_VIEWING";
+	
+	
+	public static final String COMPONENT_LIST_MODIFIED = "COMPONENT_LIST_MODIFIED";
+	public static final String VERSION_LIST_MODIFIED = "VERSION_LIST_MODIFIED";
 }

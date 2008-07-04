@@ -18,86 +18,101 @@
 				
 				<h:outputText value="#{NewBugEnterBean.loadData}" rendered="true" />
 				
-				<br />
-				<br />
-				
 				<table>
 					<tr>
-						<td align="right">
-							<h:outputText value="#{general['newBugEnter.reporter']}: " styleClass="label2"/>
-						</td>
-						<td>
-							<h:outputText value="#{NewBugEnterBean.reporterUserName}" styleClass="label-right"/>
-						</td>
+						<td width="300px">
+							<table>
+								<tr>
+									<td align="right">
+										<h:outputText value="#{general['newBugEnter.reporter']}: " styleClass="label2"/>
+									</td>
+									<td>
+										<h:outputText value="#{NewBugEnterBean.reporterUserName}" styleClass="label-right"/>
+									</td>
+								</tr>
+								<tr>
+									<td align="right">
+										<h:outputText value="#{general['newBugEnter.product']}: " styleClass="label2"/>
+									</td>
+									<td>
+										<h:outputText value="#{NewBugEnterBean.productName}" styleClass="label-right"/>
+									</td>
+								</tr>
+								<tr>
+									<td align="right">
+										<h:outputText value="#{general['newBugEnter.component']}: " styleClass="label2"/>
+									</td>
+									<td>
+										<h:selectOneMenu id="inputProductComponentList" value="#{NewBugEnterBean.productComponent}" onchange="submit();" styleClass="inputDefaultSizeLeft">
+					    					<f:selectItems value="#{NewBugEnterBean.productComponentList_out}"/> 
+					    				</h:selectOneMenu>
+					    			</td>
+					    		</tr>
+					    		<tr>
+					    			<td align="right">
+										<h:outputText value="#{general['newBugEnter.version']}: " styleClass="label2"/>
+									</td>
+									<td>
+										<h:selectOneMenu id="inputComponentVersionList" value="#{NewBugEnterBean.componentVersion}" onchange="submit();" styleClass="inputDefaultSizeLeft">
+					    					<f:selectItems value="#{NewBugEnterBean.componentVersionList_out}"/> 
+					    				</h:selectOneMenu>
+					    			</td>
+					    		</tr>
+					    	</table>
+					    </td>
+					    <td width="300px">
+					    	<table>
+					    		<tr>
+					    			<td align="right">
+										<h:outputText value="#{general['newBugEnter.operatingSystem']}: " styleClass="label2"/>
+									</td>
+									<td>
+										<h:selectOneMenu id="inputOperatingSystemList" value="#{NewBugEnterBean.operatingSystem}" styleClass="inputDefaultSizeLeft">
+					    					<f:selectItems value="#{NewBugEnterBean.operatingSystemList_out}"/> 
+					    				</h:selectOneMenu>
+					    			</td>
+					    		</tr>
+					    		<tr>
+					    			<td align="right">
+					    				<h:outputText value="#{general['newBugEnter.platform']}: " styleClass="label2"/>
+					    			</td>
+					    			<td>
+					    				<h:selectOneMenu id="inputPlatformList" value="#{NewBugEnterBean.platform}" styleClass="inputDefaultSizeLeft">
+					    					<f:selectItems value="#{NewBugEnterBean.platformList_out}"/> 
+					    				</h:selectOneMenu>
+					    			</td>
+					    		</tr>
+					    		<tr>
+					    			<td align="right">
+					    				<h:outputText value="#{general['newBugEnter.priority']}: " styleClass="label2"/>
+					    			</td>
+					    			<td>
+					    				<h:selectOneMenu id="inputPriorityList" value="#{NewBugEnterBean.priority}" styleClass="inputDefaultSizeLeft">
+					    					<f:selectItems value="#{NewBugEnterBean.priorityList_out}"/> 
+					    				</h:selectOneMenu>
+					    			</td>
+					    		</tr>
+					    		<tr>
+					    			<td align="right">
+					    				<h:outputText value="#{general['newBugEnter.severity']}: " styleClass="label2"/>
+					    			</td>
+					    			<td>
+					    				<h:selectOneMenu id="inputSeverityList" value="#{NewBugEnterBean.severity}" styleClass="inputDefaultSizeLeft">
+					    					<f:selectItems value="#{NewBugEnterBean.severityList_out}"/> 
+					    				</h:selectOneMenu>
+					    			</td>
+					    		</tr>
+					    	</table>
+					    </td>
 					</tr>
 					<tr>
 						<td align="right">
-							<h:outputText value="#{general['newBugEnter.product']}: " styleClass="label2"/>
+							<h:outputText value="#{general['newBugEnter.ccUsers']}: " styleClass="label2"/>
 						</td>
 						<td>
-							<h:outputText value="#{NewBugEnterBean.productName}" styleClass="label-right"/>
+							<h:inputText value="#{NewBugEnterBean.ccUsers}" styleClass="input"/>
 						</td>
 					</tr>
-					<tr>
-						<td align="right">
-							<h:outputText value="#{general['newBugEnter.component']}: " styleClass="label2"/>
-						</td>
-						<td>
-							<h:selectOneMenu id="inputProductComponentList" value="#{NewBugEnterBean.productComponent}" onchange="submit();" styleClass="input">
-		    					<f:selectItems value="#{NewBugEnterBean.productComponentList_out}"/> 
-		    				</h:selectOneMenu>
-		    			</td>
-		    		</tr>
-		    		<tr>
-		    			<td align="right">
-							<h:outputText value="#{general['newBugEnter.version']}: " styleClass="label2"/>
-						</td>
-						<td>
-							<h:selectOneMenu id="inputComponentVersionList" value="#{NewBugEnterBean.componentVersion}" onchange="submit();" styleClass="input">
-		    					<f:selectItems value="#{NewBugEnterBean.componentVersionList_out}"/> 
-		    				</h:selectOneMenu>
-		    			</td>
-		    		</tr>
-		    		<tr>
-		    			<td align="right">
-							<h:outputText value="#{general['newBugEnter.operatingSystem']}: " styleClass="label2"/>
-						</td>
-						<td>
-							<h:selectOneMenu id="inputOperatingSystemList" value="#{NewBugEnterBean.operatingSystem}" styleClass="input">
-		    					<f:selectItems value="#{NewBugEnterBean.operatingSystemList_out}"/> 
-		    				</h:selectOneMenu>
-		    			</td>
-		    		</tr>
-		    		<tr>
-		    			<td align="right">
-		    				<h:outputText value="#{general['newBugEnter.platform']}: " styleClass="label2"/>
-		    			</td>
-		    			<td>
-		    				<h:selectOneMenu id="inputPlatformList" value="#{NewBugEnterBean.platform}" styleClass="input">
-		    					<f:selectItems value="#{NewBugEnterBean.platformList_out}"/> 
-		    				</h:selectOneMenu>
-		    			</td>
-		    		</tr>
-		    		<tr>
-		    			<td align="right">
-		    				<h:outputText value="#{general['newBugEnter.priority']}: " styleClass="label2"/>
-		    			</td>
-		    			<td>
-		    				<h:selectOneMenu id="inputPriorityList" value="#{NewBugEnterBean.priority}" styleClass="input">
-		    					<f:selectItems value="#{NewBugEnterBean.priorityList_out}"/> 
-		    				</h:selectOneMenu>
-		    			</td>
-		    		</tr>
-		    		<tr>
-		    			<td align="right">
-		    				<h:outputText value="#{general['newBugEnter.severity']}: " styleClass="label2"/>
-		    			</td>
-		    			<td>
-		    				<h:selectOneMenu id="inputSeverityList" value="#{NewBugEnterBean.severity}" styleClass="input">
-		    					<f:selectItems value="#{NewBugEnterBean.severityList_out}"/> 
-		    				</h:selectOneMenu>
-		    			</td>
-		    		</tr>
 		    		<tr>
 						<td align="right">
 							<h:outputText value="#{general['newBugEnter.dateObserved']}: " styleClass="label2"/>
@@ -135,10 +150,15 @@
 							<h:outputText value="#{general['newBugEnter.bugDescription']}: " styleClass="label2"/>
 						</td>
 						<td>
-							<h:inputTextarea value="#{NewBugEnterBean.description}" styleClass="inputTextArea"/>
+							<h:inputTextarea value="#{NewBugEnterBean.description}" styleClass="inputTextArea250100"/>
 						</td>
 					</tr>
 				</table>				
+				
+				<p align="right">
+					<h:commandButton id="commitButton" value="#{general['newBugEnter.commitBug']}" action="#{NewBugEnterBean.commitBug}" styleClass="normal-button" onmouseover="this.className='normal-button2'" onmouseout="this.className='normal-button'"/>
+				</p>
+				
 				<p class="P-align-center">
     				<f:subview rendered="#{NewBugEnterBean.componentNotSelected}" >
     					<h:outputText value="#{general['newBugEnter.errors.componentNotSelected']}" styleClass="error"/>
@@ -184,9 +204,17 @@
     					<h:outputText value="#{general['newBugEnter.errors.componentVersionHasNoSolverAssigned']}" styleClass="error"/>
     					<br />
     				</f:subview>
+    				<f:subview rendered="#{NewBugEnterBean.ccUsersNotValid}" >
+    					<h:outputText value="#{general['newBugEnter.errors.ccUsersNotValid']}: " styleClass="error"/>
+    					<h:outputText value="#{NewBugEnterBean.invalidUserNames}" styleClass="error"/>
+    					<br />
+    				</f:subview>
+    				<f:subview rendered="#{NewBugEnterBean.assignedUserSameAsCCUser}" >
+    					<h:outputText value="#{general['newBugEnter.errors.assignedUserSameAsCCUser']}: " styleClass="error"/>
+    					<h:outputText value="#{NewBugEnterBean.userNameAssignedSameAsCCUser}" styleClass="error"/>
+    					<br />
+    				</f:subview>
     			</p>
-				
-				<h:commandButton id="commitButton" value="#{general['newBugEnter.commitBug']}" action="#{NewBugEnterBean.commitBug}" styleClass="normal-button" onmouseover="this.className='normal-button2'" onmouseout="this.className='normal-button'"/>
 								
 			</ui:define>
 		</ui:composition>

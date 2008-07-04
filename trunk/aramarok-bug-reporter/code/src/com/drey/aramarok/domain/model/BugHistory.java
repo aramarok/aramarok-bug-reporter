@@ -42,9 +42,16 @@ public class BugHistory implements Serializable {
 	@Column(name = "ACTION_DATE", nullable=false)
 	private Date actionDate;
 	
-	@Column(name ="BUG_ACTIONS" )
+	@Column(name ="BUG_ACTIONS", length = 1255)
 	private EnumSet<BugAction> bugActions;
-	
+	/*
+	@ManyToMany(cascade={CascadeType.ALL}, fetch=FetchType.EAGER)
+	@JoinTable(	name ="BUG_ACTIONS",
+				joinColumns = {@JoinColumn(name="bug_hist_key", referencedColumnName="BUG_HISTORY_ID", unique=false)},
+				inverseJoinColumns={@JoinColumn(name="bug_action_key", referencedColumnName="COMMENT_ID", unique=true)}
+				)
+	private Set<BugAction> bugActions;
+	*/
 	@Column(name = "BUG_STATUS")
 	private BugGeneralStatus bugStatus;
 	
@@ -60,6 +67,14 @@ public class BugHistory implements Serializable {
 		this.user = user;
 		this.actionDate = actionDate;
 		this.bugActions = bugActions;
+		this.bugStatus = bugStatus;
+		/*
+		if (bugActions!=null && !bugActions.isEmpty()){
+			this.bugActions = new HashSet<BugAction>();
+			this.bugActions.addAll(bugActions);
+		} else {
+			bugActions = null;
+		}*/
 	}
 
 	public Long getId() {
@@ -86,19 +101,19 @@ public class BugHistory implements Serializable {
 		this.actionDate = actionDate;
 	}
 
-	public EnumSet<BugAction> getBugActions() {
-		return bugActions;
-	}
-
-	public void setBugActions(EnumSet<BugAction> bugActions) {
-		this.bugActions = bugActions;
-	}
-
 	public BugGeneralStatus getBugStatus() {
 		return bugStatus;
 	}
 
 	public void setBugStatus(BugGeneralStatus bugStatus) {
 		this.bugStatus = bugStatus;
+	}
+
+	public EnumSet<BugAction> getBugActions() {
+		return bugActions;
+	}
+
+	public void setBugActions(EnumSet<BugAction> bugActions) {
+		this.bugActions = bugActions;
 	}
 }

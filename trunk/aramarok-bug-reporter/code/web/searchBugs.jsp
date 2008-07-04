@@ -11,6 +11,10 @@
 			</ui:define>
 			
 			<ui:define name="body">
+				<p class="P-align-center">
+					<h:outputText value="#{general['searchBugs.title']}" styleClass="title"/>
+				</p>
+				
 				<h:outputText value="#{SearchBugsBean.loadData}" rendered="true" />
 					<table>
 						<tr>
@@ -88,17 +92,23 @@
 								<h:commandButton id="searchButton" value="#{general['searchBugs.searchButton']}" action="#{SearchBugsBean.searchBugs}" styleClass="normal-button" onmouseover="this.className='normal-button2'" onmouseout="this.className='normal-button'"/>
 							</td>
 							<td>
-								<f:subview rendered ="false">
+								<f:subview rendered ="true">
 									<h:commandButton id="saveFilterButton" value="#{general['searchBugs.saveFilter']}" action="#{SearchBugsBean.saveSearchBugFilter}" styleClass="normal-button" onmouseover="this.className='normal-button2'" onmouseout="this.className='normal-button'"/>
 									<h:inputText value="#{SearchBugsBean.filterName}" styleClass="input"/>
 									<br />
 									<f:subview rendered="#{SearchBugsBean.filterNameEmpty}" >
 				    					<h:outputText value="#{general['searchBugs.error.specifyANameForFilter']}" styleClass="error"/>
 				    				</f:subview>
+				    				<f:subview rendered="#{SearchBugsBean.nameOfTheSearchAlreadyExists}" >
+				    					<h:outputText value="#{general['searchBugs.error.nameOfTheSearchAlreadyExists']}" styleClass="error"/>
+				    				</f:subview>
 				    			</f:subview>
 							</td>
 						</tr>
 					</table>
+					
+					<br />
+					<br />
 					
 					<h:dataTable rendered="#{!SearchBugsBean.filteredBugListEmpty}" value="#{SearchBugsBean.filteredBugs}" var="bug" border="0"  columnClasses="output" rowClasses="table-light-row,table-dark-row" headerClass="table-th">
 	    				<h:column>

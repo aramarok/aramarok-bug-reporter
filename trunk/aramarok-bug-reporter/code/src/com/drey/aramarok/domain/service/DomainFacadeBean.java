@@ -5,7 +5,9 @@ package com.drey.aramarok.domain.service;
  */
 
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.ejb.EJB;
 import javax.ejb.Local;
@@ -13,6 +15,8 @@ import javax.ejb.Remote;
 import javax.ejb.Remove;
 import javax.ejb.Stateful;
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
+import javax.persistence.NonUniqueResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
 import javax.persistence.PersistenceException;
@@ -103,8 +107,12 @@ public class DomainFacadeBean implements DomainFacade, Serializable {
 		return user;
 	}
 	
-	public synchronized User getUser(String userName){
-		return userService.findUser(userName);
+	public synchronized User getUser(String userName, boolean noLog) throws ExternalSystemException{
+		try {
+			return userService.findUser(userName, noLog);
+		} catch (PersistenceException ex) {
+			throw new ExternalSystemException(DB_ERROR_MSG, ex);
+		}
 	}
 	
 	public synchronized List<User> getUsers(UserFilter userFilter) throws ExternalSystemException{
@@ -324,7 +332,13 @@ public class DomainFacadeBean implements DomainFacade, Serializable {
 					log.error("User does not have the 'ENTER_NEW_BUG' right");
 					throw new UserHasNoRightException();
 				}
-				Long newBugId = bugService.commitNewBug(bug, this.user);
+				Set<User> ccUsers = new HashSet<User>();
+				if (bug.getCcUsers()!=null && !bug.getCcUsers().isEmpty()){
+					for (User u: bug.getCcUsers()){
+						ccUsers.add(getUser(u.getUserName(), false));
+					}
+				}
+				Long newBugId = bugService.commitNewBug(bug, this.user, ccUsers);
 				aramarokLog.info("New bug committed by user '" + this.user.getUserName() + "'.");
 				return newBugId;
 			}
@@ -369,19 +383,79 @@ public class DomainFacadeBean implements DomainFacade, Serializable {
 		return domainService.getPlatform(platformName);
 	}
 	
-	public synchronized void addASavedBugFilterToUser(Long idOfUser, SavedSearch savedSearch) throws UserNotFoundException, ExternalSystemException{
+	public synchronized void addASavedBugFilterToUser(Long idOfUser, SavedSearch savedSearch) throws UserNotFoundException, ExternalSystemException, SearchException{
 		log.info("Trying to add a saved bug filter to user with ID: " + idOfUser);
 		if (idOfUser != null) {
 			try {
+				try {
+					SavedSearch exists = (SavedSearch)entityManager.createNamedQuery("SavedSearch.findSavedSearchByName").setParameter("name", savedSearch.getName()).getSingleResult();
+					if (exists!=null){
+						throw new SearchException();
+					}
+				} catch (NoResultException nre){
+					
+				} catch (NonUniqueResultException nure){
+					throw new SearchException();
+				}
+			    
 				User user = entityManager.find(User.class, idOfUser);
 				
 				if (user == null) {
 					throw new UserNotFoundException("User with id " + idOfUser.toString() + " does not exist in the DB!");
 				}
+				
+				Set<User> ownerList = new HashSet<User>();
+				Set<User> userAssignedToList = new HashSet<User>();
+				Set<Priority> priorityList = new HashSet<Priority>();
+				Set<Severity> severityList = new HashSet<Severity>();
+				Set<OperatingSystem> operatingSystemList =  new HashSet<OperatingSystem>();
+				Set<Platform> platformList =  new HashSet<Platform>();
+				
+				if (savedSearch.getOperatingSystemList()!=null)
+					for (OperatingSystem os: savedSearch.getOperatingSystemList()){
+						operatingSystemList.add(getOperatingSystem(os.getName()));
+					}
+				if (savedSearch.getOwnerList()!=null)
+					for (User o: savedSearch.getOwnerList()){
+						ownerList.add(getUser(o.getUserName(), true));
+					}
+				if (savedSearch.getUserAssignedToList()!=null)
+					for (User o: savedSearch.getUserAssignedToList()){
+						userAssignedToList.add(getUser(o.getUserName(), true));
+					}
+				if (savedSearch.getPlatformList()!=null)
+					for (Platform p: savedSearch.getPlatformList()){
+						platformList.add(getPlatform(p.getName()));
+					}
+				if (savedSearch.getPriorityList()!=null)
+					for (Priority p: savedSearch.getPriorityList()){
+						priorityList.add(getPriority(p.getName()));
+					}
+				if (savedSearch.getSeverityList()!=null)
+					for (Severity s: savedSearch.getSeverityList()){
+						severityList.add(getSeverity(s.getName()));
+					}
+				
+				/*if (savedSearch.getBugIdList()!=null)
+					for (OperatingSystem os: savedSearch.getOperatingSystemList()){
+						operatingSystemList.add(getOperatingSystem(os.getName()));
+					}
+				*/
+				
+				savedSearch.setOwnerList(ownerList);
+				savedSearch.setUserAssignedToList(userAssignedToList);
+				savedSearch.setPriorityList(priorityList);
+				savedSearch.setSeverityList(severityList);
+				savedSearch.setOperatingSystemList(operatingSystemList);
+				savedSearch.setPlatformList(platformList);
+				
+				
 				entityManager.persist(savedSearch);
 				SavedSearch ssFromDb = (SavedSearch)entityManager.createNamedQuery("SavedSearch.findSavedSearchByDate").setParameter("savedDate", savedSearch.getSavedDate()).getSingleResult();
 				user.addASearch(ssFromDb);
+				entityManager.flush();
 			} catch (PersistenceException ex) {
+				ex.printStackTrace();
 				throw new ExternalSystemException(DB_ERROR_MSG, ex);
 			}
 		} 
@@ -474,6 +548,14 @@ public class DomainFacadeBean implements DomainFacade, Serializable {
 			throw new ExternalSystemException(DB_ERROR_MSG, ex);
 		}
 	}
+	
+	public synchronized SavedSearch getSavedSearch(Long savedSearchId) throws ExternalSystemException {
+		try {
+			return entityManager.find(SavedSearch.class, savedSearchId);
+		} catch (PersistenceException pe){
+			throw new ExternalSystemException(DB_ERROR_MSG, pe);
+		}
+	}
 
 	public ComponentVersion getComponentVersion(Long componentVersionId) throws ExternalSystemException {
 		try {
@@ -536,6 +618,14 @@ public class DomainFacadeBean implements DomainFacade, Serializable {
 		return null;
 	}
 	
+	public Comment getComment(Long commentId) throws ExternalSystemException {
+		try {
+			return domainService.getComment(commentId);
+		} catch (PersistenceException ex) {
+			throw new ExternalSystemException(DB_ERROR_MSG, ex);
+		}
+	}
+	
 	public Quip getQuip(Long quipId) throws ExternalSystemException {
 		try {
 			return domainService.getQuip(quipId);
@@ -579,6 +669,7 @@ public class DomainFacadeBean implements DomainFacade, Serializable {
 	}
 	
 	public void voteComment(Long commentId) throws ExternalSystemException {
+		log.info("Votting comment with id: "+ commentId);
 		try {
 			domainService.voteComment(commentId, this.user);
 		} catch (PersistenceException ex) {

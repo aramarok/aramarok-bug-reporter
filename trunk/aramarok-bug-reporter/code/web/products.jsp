@@ -14,6 +14,8 @@
 					<h:outputText value="#{general['products.title']}" styleClass="title"/>
 				</p>
     			
+    			<h:outputText value="#{ProductsBean.loadData}" />
+    			
     	    	<center>
     	    	<table>
     	    		<tr>

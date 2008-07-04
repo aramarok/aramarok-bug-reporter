@@ -16,7 +16,7 @@ private Bug bug = null;
 	
 	public String viewBug(){
 		HttpSession session = WebUtil.getHttpSession();
-		session.setAttribute(WebUtil.BUG_ID_SELECTED_FOR_VIEWING, bug.getId());
+		session.setAttribute(WebUtil.BUG_ID_SELECTED_FOR_VIEWING, String.valueOf(bug.getId()));
 		return WebUtil.VIEW_BUG_OUTCOME;
 	}
 	
@@ -56,8 +56,8 @@ private Bug bug = null;
 	public String getReporter(){
 		return bug.getOwner().getUserName();
 	}
-	/*
+	
 	public String getAssignedTo(){
 		return bug.getUserAssignedTo().getUserName();
-	}*/
+	}
 }

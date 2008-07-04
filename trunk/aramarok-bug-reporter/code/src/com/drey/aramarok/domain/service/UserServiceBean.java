@@ -10,6 +10,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
@@ -35,9 +36,13 @@ import com.drey.aramarok.domain.exceptions.register.UserNotFoundException;
 import com.drey.aramarok.domain.exceptions.search.NoSearchNameException;
 import com.drey.aramarok.domain.exceptions.search.SearchException;
 import com.drey.aramarok.domain.exceptions.user.UserException;
+import com.drey.aramarok.domain.model.OperatingSystem;
+import com.drey.aramarok.domain.model.Platform;
+import com.drey.aramarok.domain.model.Priority;
 import com.drey.aramarok.domain.model.Right;
 import com.drey.aramarok.domain.model.Role;
 import com.drey.aramarok.domain.model.SavedSearch;
+import com.drey.aramarok.domain.model.Severity;
 import com.drey.aramarok.domain.model.User;
 import com.drey.aramarok.domain.model.UserPreference;
 import com.drey.aramarok.domain.model.UserStatus;
@@ -54,8 +59,10 @@ public class UserServiceBean  implements UserService, Serializable {
 
 	private static Logger log = Logger.getLogger(UserServiceBean.class);
 	
-	public synchronized User getUser(Long userId) throws PersistenceException {
-		log.info("Get user with id:" + userId);
+	public synchronized User getUser(Long userId, boolean noLog) throws PersistenceException {
+		if (!noLog){
+			log.info("Get user with id:" + userId);
+		}
 		try {
 			return entityManager.find(User.class, userId);
 		} catch (NoResultException e) {
@@ -63,8 +70,10 @@ public class UserServiceBean  implements UserService, Serializable {
 		}
 	}
 	
-	public synchronized User findUser(String userName) {
-		log.info("Find userName: " + userName);
+	public synchronized User findUser(String userName, boolean noLog) throws PersistenceException{
+		if (!noLog){
+			log.info("Find userName: " + userName);
+		}
 		try {
 			User user = (User) entityManager.createNamedQuery("User.findUserByUserName").setParameter("userName", userName).getSingleResult();
 			return user;
@@ -86,7 +95,7 @@ public class UserServiceBean  implements UserService, Serializable {
 	
 	public synchronized User login(String username, String password) throws LoginException {
 		log.info("Trying to login user.");
-		User user = findUser(username);
+		User user = findUser(username, false);
 		if (user == null) {
 			throw new InvalidUserNameException("Invalid userName!");
 		}
@@ -156,7 +165,7 @@ public class UserServiceBean  implements UserService, Serializable {
 	public synchronized void modifyUserPreference(Long idOfUser, UserPreference newUserPreference)throws PersistenceException, UserException {
 		log.info("Trying to modify users preference of user with id: " + idOfUser);
 		if (idOfUser != null) {
-			User user = getUser(idOfUser);
+			User user = getUser(idOfUser, false);
 			if (user!=null){
 				user.setUserPreference(newUserPreference);
 				entityManager.flush();
@@ -170,7 +179,7 @@ public class UserServiceBean  implements UserService, Serializable {
 	
 	public synchronized void registerNewUser(String userName, String password, String emailAddress, String homePage, String firstName, String lastName, String middleName, Role selectedRole) throws PersistenceException, RegisterException {
 		log.info("Trying to register user name: " + userName);
-		User user = findUser(userName);
+		User user = findUser(userName, false);
 		if (user != null) {
 			throw new UserNameAlreadyExistsException("User with specified user name already exists!");
 		}
@@ -212,7 +221,7 @@ public class UserServiceBean  implements UserService, Serializable {
 		boolean toReturn = false;
 		
 		if (search!=null && user!=null){
-			user = findUser(user.getUserName());
+			user = findUser(user.getUserName(), false);
 			if (user == null){
 				throw new UserException();
 			}
@@ -233,7 +242,7 @@ public class UserServiceBean  implements UserService, Serializable {
 		boolean toReturn = false;
 		
 		if (search!=null && user!=null){
-			user = findUser(user.getUserName());
+			user = findUser(user.getUserName(), false);
 			if (user == null){
 				throw new UserException();
 			}
@@ -241,9 +250,19 @@ public class UserServiceBean  implements UserService, Serializable {
 			if (search == null){
 				throw new SearchException();
 			}
+			
 			user.removeASearch(search);
 			entityManager.flush();
+			
+			search.setOperatingSystemList(new HashSet<OperatingSystem>());
+			search.setOwnerList(new HashSet<User>());
+			search.setPlatformList(new HashSet<Platform>());
+			search.setPriorityList(new HashSet<Priority>());
+			search.setSeverityList(new HashSet<Severity>());
+			search.setUserAssignedToList(new HashSet<User>());
+			
 			entityManager.remove(search);
+			
 			toReturn = true;
 		}
 		

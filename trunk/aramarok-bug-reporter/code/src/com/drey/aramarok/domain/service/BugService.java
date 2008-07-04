@@ -1,6 +1,7 @@
 package com.drey.aramarok.domain.service;
 
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.PersistenceException;
 
@@ -16,7 +17,7 @@ public interface BugService {
 	
 	public List<Bug> getBugs(BugFilter bugFilter) throws PersistenceException ;
 	
-	public Long commitNewBug(Bug bug, User owner) throws PersistenceException, BugException;
+	public Long commitNewBug(Bug bug, User owner, Set<User> ccUsers) throws PersistenceException, BugException;
 	
 	public Long commitBug(Bug bug, User logedInUser) throws PersistenceException, BugException, UserException;
 }

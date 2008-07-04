@@ -90,7 +90,7 @@
 								<h:outputText value="#{general['versions.parentComponentOfVersion']}: " styleClass="label-right"/>
 							</td>
 							<td>
-								<h:outputText value="#{VersionsBean.parentComponentOfVersion}" />
+								<h:outputText value="#{VersionsBean.parentComponentOfVersion}" styleClass="label-right"/>
 							</td>
 						</tr>
 						<tr>
