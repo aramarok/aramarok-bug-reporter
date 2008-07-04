@@ -93,12 +93,40 @@
 			</description>
 		</init-param>
 		<init-param>
+			<param-name>/savedFilters.jsf</param-name>
+			<param-value>SEARCH_BUGS</param-value>
+			<description>
+				Saved filters page.
+			</description>
+		</init-param>
+		<init-param>
+			<param-name>/viewSavedFilters.jsf</param-name>
+			<param-value>SEARCH_BUGS</param-value>
+			<description>
+				View saved filters page.
+			</description>
+		</init-param>
+		<init-param>
 			<param-name>/viewBug.jsf</param-name>
 			<param-value>SEARCH_BUGS</param-value>
 			<description>
 				View a bug details.
 			</description>
-		</init-param>		
+		</init-param>
+		<init-param>
+			<param-name>/viewBugActivity.jsf</param-name>
+			<param-value>SEARCH_BUGS</param-value>
+			<description>
+				View a bugs activity details.
+			</description>
+		</init-param>
+		<init-param>
+			<param-name>/formatBugForPrinting.jsf</param-name>
+			<param-value>SEARCH_BUGS</param-value>
+			<description>
+				
+			</description>
+		</init-param>
 		
 		<init-param>
 			<param-name>/myBugs.jsf</param-name>

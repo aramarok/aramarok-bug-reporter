@@ -93,9 +93,32 @@
 	</managed-bean>
 	
 	<managed-bean>
+		<managed-bean-name>FormatBugForPrintingBean</managed-bean-name>
+		<managed-bean-class>com.drey.aramarok.web.FormatBugForPrintingBean</managed-bean-class>
+		<managed-bean-scope>request</managed-bean-scope>
+	</managed-bean>
+	
+	<managed-bean>
+		<managed-bean-name>ViewBugActivityBean</managed-bean-name>
+		<managed-bean-class>com.drey.aramarok.web.ViewBugActivityBean</managed-bean-class>
+		<managed-bean-scope>request</managed-bean-scope>
+	</managed-bean>
+	
+	<managed-bean>
 		<managed-bean-name>SearchBugsBean</managed-bean-name>
 		<managed-bean-class>com.drey.aramarok.web.SearchBugsBean</managed-bean-class>
 		<managed-bean-scope>session</managed-bean-scope>
+	</managed-bean>
+	
+	<managed-bean>
+		<managed-bean-name>SavedFiltersBean</managed-bean-name>
+		<managed-bean-class>com.drey.aramarok.web.SavedFiltersBean</managed-bean-class>
+		<managed-bean-scope>request</managed-bean-scope>
+	</managed-bean>
+	<managed-bean>
+		<managed-bean-name>ViewSavedFiltersBean</managed-bean-name>
+		<managed-bean-class>com.drey.aramarok.web.ViewSavedFiltersBean</managed-bean-class>
+		<managed-bean-scope>request</managed-bean-scope>
 	</managed-bean>
 	
 	<managed-bean>
@@ -140,6 +163,11 @@
 	<navigation-rule>
 		<from-view-id>/*</from-view-id>
 		<navigation-case>
+			<from-outcome>HELP_PAGE_OUTCOME</from-outcome>
+			<to-view-id>/help.jsp</to-view-id>
+			<redirect/>
+		</navigation-case>
+		<navigation-case>
 			<from-outcome>ERROR_PAGE_OUTCOME</from-outcome>
 			<to-view-id>/error.jsp</to-view-id>
 			<redirect/>
@@ -157,6 +185,16 @@
 		<navigation-case>
 			<from-outcome>SEARCH_BUGS_OUTCOME</from-outcome>
 			<to-view-id>/searchBugs.jsp</to-view-id>
+			<redirect/>
+		</navigation-case>
+		<navigation-case>
+			<from-outcome>SAVED_FILTERS_OUTCOME</from-outcome>
+			<to-view-id>/savedFilters.jsp</to-view-id>
+			<redirect/>
+		</navigation-case>
+		<navigation-case>
+			<from-outcome>VIEW_SAVED_FILTER_OUTCOME</from-outcome>
+			<to-view-id>/viewSavedFilters.jsp</to-view-id>
 			<redirect/>
 		</navigation-case>
 		<navigation-case>
@@ -202,6 +240,16 @@
 		<navigation-case>
 			<from-outcome>VIEW_BUG_OUTCOME</from-outcome>
 			<to-view-id>/viewBug.jsp</to-view-id>
+			<redirect/>
+		</navigation-case>
+		<navigation-case>
+			<from-outcome>VIEW_BUG_ACTIVITY_OUTCOME</from-outcome>
+			<to-view-id>/viewBugActivity.jsp</to-view-id>
+			<redirect/>
+		</navigation-case>
+		<navigation-case>
+			<from-outcome>FORMAT_BUG_FOR_PRINTING_OUTCOME</from-outcome>
+			<to-view-id>/formatBugForPrinting.jsp</to-view-id>
 			<redirect/>
 		</navigation-case>
 	</navigation-rule>

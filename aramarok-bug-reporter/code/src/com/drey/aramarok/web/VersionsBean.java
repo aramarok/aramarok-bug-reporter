@@ -8,6 +8,7 @@ import java.util.List;
 import javax.faces.event.PhaseId;
 import javax.faces.event.ValueChangeEvent;
 import javax.faces.model.SelectItem;
+import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
 
@@ -65,7 +66,13 @@ public class VersionsBean {
 	
 	private boolean newProductNameIsInvalid = false;
 	private boolean newProductNameAlreadyExists = false;
-		
+	
+	
+	private void versionListWasModified(){
+		HttpSession session = WebUtil.getHttpSession();
+		session.setAttribute(WebUtil.VERSION_LIST_MODIFIED, new Boolean(true));
+	}
+	
 	public void addNewProductButton(){
 		resetNewProductFields();
 		addAProduct = !addAProduct;
@@ -88,7 +95,7 @@ public class VersionsBean {
 				try {
 					User newUserAssignedSelected = null;
 					if (newUserAsssignedSelected!=null && newUserAsssignedSelected.trim().compareTo("")!=0){
-						newUserAssignedSelected = facade.getUser(newUserAsssignedSelected);
+						newUserAssignedSelected = facade.getUser(newUserAsssignedSelected, false);
 					}
 					
 					facade.addNewComponentVersion(newName, newDescription, newUserAssignedSelected);
@@ -97,6 +104,7 @@ public class VersionsBean {
 					loadSelectedProductsNameData();
 					resetNewProductFields();
 					initializeProductList();
+					versionListWasModified();
 				} catch (VersionNameAlreadyExistsException e){
 					log.error("VersionNameAlreadyExistsException");
 					newProductNameAlreadyExists = true;
@@ -148,7 +156,7 @@ public class VersionsBean {
 					editedProductObject.setDescription(description);
 					User userSelected = null;
 					if (userAsssignedSelected!=null && userAsssignedSelected.trim().compareTo("")!=0){
-						userSelected = facade.getUser(userAsssignedSelected);
+						userSelected = facade.getUser(userAsssignedSelected, false);
 					}
 					editedProductObject.setUserAssigned(userSelected);
 					
@@ -157,6 +165,7 @@ public class VersionsBean {
 						productNameSelected = editedProductObject.getName();
 						reInitializeProductList();
 						editProduct = false;
+						versionListWasModified();
 					} catch (VersionNotFoundException e) {
 						log.error("VersionNotFoundException!");
 					} catch (NoVersionNameSpecifiedException e) {

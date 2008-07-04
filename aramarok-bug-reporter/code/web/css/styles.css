@@ -143,6 +143,12 @@
 	text-align: right;
 }
 
+.label-link
+{
+	font-family: Verdana, Arial, Helvetica, sans-serif; 
+	font-size: 11px;
+}
+
 .label2
 {
 	font-family: Verdana, Arial, Helvetica, sans-serif; 
@@ -233,6 +239,28 @@
 	font-size: 11px;
 	width: 200px;
 	height: 70px;
+	border-width: 1px;
+	border-color: white;
+	color: black;
+}
+
+.inputTextArea250100
+{
+	font-family: Verdana, Arial, Helvetica, sans-serif; 
+	font-size: 11px;
+	width: 250px;
+	height: 100px;
+	border-width: 1px;
+	border-color: #004b82;
+	color: black;
+}
+
+.inputTextArea250100:hover
+{
+	font-family: Verdana, Arial, Helvetica, sans-serif; 
+	font-size: 11px;
+	width: 250px;
+	height: 100px;
 	border-width: 1px;
 	border-color: white;
 	color: black;
@@ -330,6 +358,14 @@
 	font-size: 11px;
 	color: black;
 	text-align: right;
+}
+
+.label-center
+{
+	font-family: Verdana, Arial, Helvetica, sans-serif; 
+	font-size: 11px;
+	color: black;
+	text-align: center;
 }
 
 .title

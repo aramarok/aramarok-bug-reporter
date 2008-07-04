@@ -9,6 +9,7 @@ import java.util.List;
 import javax.faces.event.PhaseId;
 import javax.faces.event.ValueChangeEvent;
 import javax.faces.model.SelectItem;
+import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
 
@@ -84,6 +85,30 @@ public class ProductsBean {
 	
 	private boolean newProductNameIsInvalid = false;
 	private boolean newProductNameAlreadyExists = false;
+	
+	private boolean componentListWasModified(){
+		HttpSession session = WebUtil.getHttpSession();
+		Object o = session.getAttribute(WebUtil.COMPONENT_LIST_MODIFIED);
+		
+		if (o!=null && o instanceof Boolean){
+			Boolean modified = (Boolean)o;
+			return modified;
+		} else {
+			return false;
+		}
+	}
+	
+	public String getLoadData(){
+		if (componentListWasModified()) {
+			loadAllProductComponents();
+			loadAvailableProductComponents();
+			loadSelectedProductsNameData();
+			
+			HttpSession session = WebUtil.getHttpSession();
+			session.setAttribute(WebUtil.COMPONENT_LIST_MODIFIED, new Boolean(false));
+		}
+		return null;
+	}
 	
 	public String removeNewRole() {
 		if (newUserSelectedRole != null) {
@@ -265,7 +290,7 @@ public class ProductsBean {
 				try {
 					User newUserAssignedSelected = null;
 					if (newUserAsssignedSelected!=null && newUserAsssignedSelected.trim().compareTo("")!=0){
-						newUserAssignedSelected = facade.getUser(newUserAsssignedSelected);
+						newUserAssignedSelected = facade.getUser(newUserAsssignedSelected, false);
 					}
 					
 					facade.addNewProduct(newName, newDescription, newProductURL, newCloseForBugEntry, newUserAssignedSelected, newUserRoles);
@@ -327,7 +352,7 @@ public class ProductsBean {
 					editedProductObject.setCloseForBugEntry(closeForBugEntry);
 					User userSelected = null;
 					if (userAsssignedSelected!=null && userAsssignedSelected.trim().compareTo("")!=0){
-						userSelected = facade.getUser(userAsssignedSelected);
+						userSelected = facade.getUser(userAsssignedSelected, false);
 					}
 					editedProductObject.setUserAssigned(userSelected);
 					editedProductObject.setProductComponents(new HashSet<ProductComponent>(userRoles));
@@ -338,6 +363,7 @@ public class ProductsBean {
 						reInitializeProductList();
 						editProduct = false;
 						loadAvailableProductComponents();
+						loadAllProductComponents();
 					} catch (ProductNotFoundException e) {
 						log.error("ProductNotFoundException!");
 					} catch (NoProductNameSpecifiedException e) {
@@ -381,6 +407,7 @@ public class ProductsBean {
 		
 		editProduct = false;
 		loadAvailableProductComponents();
+		loadAllProductComponents();
 		loadSelectedProductsNameData();
 	}
 	
@@ -461,6 +488,7 @@ public class ProductsBean {
 		newCloseForBugEntry = false;
 		newUserAsssignedSelected = "";
 		loadAvailableProductComponents();
+		loadAllProductComponents();
 		resetNewProductComponentList();
 	}
 	

@@ -104,21 +104,22 @@ public class ProductServiceBean implements ProductService, Serializable{
 		List<Product> results = new ArrayList<Product>();
 		List<Product> allProducts = getAllProducts();
 		
+		
 		for (Product p : allProducts){
+			boolean aPcHasAUserAssigned = false;
 			if (!p.isCloseForBugEntry()){
 				if (p.getUserAssigned()!=null){
 					results.add(p);
-				} else {
+				} else if (aPcHasAUserAssigned==false){
 					if (p.getProductComponents()!=null){
-						boolean aPcHasAUserAssigned = false;
+						boolean aCvHasAUserAssigned = false;
 						for (ProductComponent pc: p.getProductComponents()){
 							if (aPcHasAUserAssigned==false){
 								if (pc.getUserAssigned()!=null){
 									results.add(p);
 									aPcHasAUserAssigned = true;
-								} else {
+								} else if (aCvHasAUserAssigned==false){
 									if (pc.getVersions()!=null){
-										boolean aCvHasAUserAssigned = false;
 										for (ComponentVersion cv: pc.getVersions()){
 											if (aCvHasAUserAssigned==false){
 												if (cv.getUserAssigned()!=null){
@@ -135,7 +136,7 @@ public class ProductServiceBean implements ProductService, Serializable{
 				}
 			}
 		}
-			
+		
 		return results;
 	}
 	

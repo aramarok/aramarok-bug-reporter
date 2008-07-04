@@ -1,6 +1,8 @@
 package com.drey.aramarok.web.util;
 
 import java.util.Locale;
+import java.util.MissingResourceException;
+import java.util.ResourceBundle;
 
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
@@ -130,6 +132,26 @@ public class WebUtil implements WebUtilConstants{
 		return locale;
 	}
 	
+	/**
+	 * Used to get a specific value from a resource
+	 * @param resource
+	 * @param key
+	 * @return returns the value coresponding for given key in specified resource
+	 */
+	public static String getResource(String resource, String key)
+	{
+		ResourceBundle rb = ResourceBundle.getBundle(resource); 		
+		try
+		{
+			rb = ResourceBundle.getBundle(resource, getLocale()); 		
+			return rb.getString(key);
+		}
+		catch(MissingResourceException mre)
+		{
+			log.error("MissingResourceException in getResource. Message: "+mre.getMessage());
+		}
+		return "";
+	}
 	
 	/**
 	 * Create synchronization object

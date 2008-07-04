@@ -12,7 +12,7 @@
 				<table width="100%" height="100%" align="center" style="vertical-align:middle;">
 					<tr height="100%" align="center" style="vertical-align:middle;">
 						<td width="100%" height="100%" align="center" style="vertical-align:middle;">
-							<h:outputText value="WELCOME!" />
+							<h:outputText value="" />
 						</td>
 					</tr>
 				</table>

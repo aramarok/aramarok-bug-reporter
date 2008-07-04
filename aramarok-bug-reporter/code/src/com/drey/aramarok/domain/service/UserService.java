@@ -26,18 +26,21 @@ public interface UserService {
 	/**
 	 * 
 	 * @param userId
+	 * @param noLog
 	 * @return
 	 * @throws PersistenceException
 	 */
-	public User getUser(Long userId) throws PersistenceException;
+	public User getUser(Long userId, boolean noLog) throws PersistenceException;
 	
 	
 	/**
 	 * 
 	 * @param userName
+	 * @param noLog
 	 * @return
+	 * @throws ExternalSystemException
 	 */
-	public User findUser(String userName);
+	public User findUser(String userName, boolean noLog) throws PersistenceException;
 	
 	
 	/**

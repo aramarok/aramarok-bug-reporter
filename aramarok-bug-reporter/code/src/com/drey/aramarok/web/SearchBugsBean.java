@@ -2,6 +2,8 @@ package com.drey.aramarok.web;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -11,6 +13,7 @@ import org.apache.log4j.Logger;
 
 import com.drey.aramarok.domain.exceptions.ExternalSystemException;
 import com.drey.aramarok.domain.exceptions.register.UserNotFoundException;
+import com.drey.aramarok.domain.exceptions.search.SearchException;
 import com.drey.aramarok.domain.model.Bug;
 import com.drey.aramarok.domain.model.BugGeneralStatus;
 import com.drey.aramarok.domain.model.OperatingSystem;
@@ -56,6 +59,8 @@ public class SearchBugsBean {
 	
 	private boolean filterNameEmpty = false;
 	private String filterName = "";
+		
+	private boolean nameOfTheSearchAlreadyExists = false;
 	
 	public SearchBugsBean(){
 		log.info("Search bug page");
@@ -74,14 +79,46 @@ public class SearchBugsBean {
 	
 	public String saveSearchBugFilter(){
 		filterNameEmpty = false;
+		nameOfTheSearchAlreadyExists = false;
 		if (!(filterName.trim().compareTo("") == 0)){ 
 			SavedSearch ss = new SavedSearch();
 			ss.setSavedDate(new Date());
 			ss.setName(filterName);
 			
+			BugFilter filter = buildFilter();
+			
+			if (filter==null){
+				filter = new BugFilter();
+			}
+			EnumSet<BugGeneralStatus> bugGeneralStatus = EnumSet.noneOf(BugGeneralStatus.class);
+			if (filter.getBugStatusList()!=null){
+				for (BugGeneralStatus bgs : filter.getBugStatusList()){
+					bugGeneralStatus.add(bgs);
+				}
+			}
+			ss.setBugStatusList(bugGeneralStatus);
+			//ss.setBugIdList(new HashSet(filter.getBugIdList()));
+			if (filter.getOperatingSystemList()!=null)
+				ss.setOperatingSystemList(new HashSet(filter.getOperatingSystemList()));
+			if (filter.getOwnerList()!=null)
+				ss.setOwnerList(new HashSet(filter.getOwnerList()));
+			if (filter.getPlatformList()!=null)
+				ss.setPlatformList(new HashSet(filter.getPlatformList()));
+			if (filter.getPriorityList()!=null)
+				ss.setPriorityList(new HashSet(filter.getPriorityList()));
+			if (filter.getSeverityList()!=null)
+				ss.setSeverityList(new HashSet(filter.getSeverityList()));
+			if (filter.getSortingMode()!=null)
+				ss.setSortingMode(filter.getSortingMode());
+			/*if (filter.getBugIdList()!=null)
+				ss.setUserAssignedToList(new HashSet(filter.getBugIdList()));
+			*/
 			DomainFacade facade = WebUtil.getDomainFacade();
 			try {
 				facade.addASavedBugFilterToUser(WebUtil.getUser().getId(), ss);
+			} catch (SearchException se){
+				log.error("SearchException");
+				nameOfTheSearchAlreadyExists = true;
 			} catch (UserNotFoundException e) {
 				log.error("UserNotFoundException");
 			} catch (ExternalSystemException e) {
@@ -134,8 +171,13 @@ public class SearchBugsBean {
 		if (assignedToSelected!=null){
 			if (assignedToSelected.compareTo("") != 0){
 				List<User> assignedTo = new ArrayList<User>();
-				assignedTo.add(facade.getUser(assignedToSelected));
-				bugFilter.setUserAssignedToList(assignedTo);
+				try {
+					assignedTo.add(facade.getUser(assignedToSelected, false));
+					bugFilter.setUserAssignedToList(assignedTo);
+				} catch (ExternalSystemException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			} else {
 				assignedToNull = true;
 			}
@@ -145,8 +187,13 @@ public class SearchBugsBean {
 		if (reportedBySelected!=null){
 			if (reportedBySelected.compareTo("") != 0){
 				List<User> reportedBy = new ArrayList<User>();
-				reportedBy.add(facade.getUser(reportedBySelected));
-				bugFilter.setOwnerList(reportedBy);
+				try {
+					reportedBy.add(facade.getUser(reportedBySelected, false));
+					bugFilter.setOwnerList(reportedBy);
+				} catch (ExternalSystemException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			} else {
 				reportedByNull = true;
 			}
@@ -468,5 +515,13 @@ public class SearchBugsBean {
 
 	public void setFilterNameEmpty(boolean filterNameEmpty) {
 		this.filterNameEmpty = filterNameEmpty;
+	}
+
+	public boolean isNameOfTheSearchAlreadyExists() {
+		return nameOfTheSearchAlreadyExists;
+	}
+
+	public void setNameOfTheSearchAlreadyExists(boolean nameOfTheSearchAlreadyExists) {
+		this.nameOfTheSearchAlreadyExists = nameOfTheSearchAlreadyExists;
 	}
 }

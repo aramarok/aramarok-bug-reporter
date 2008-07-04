@@ -26,9 +26,11 @@
 							<table width="100%" border="0">
 								<tr>
 									<td>
-										<img src="./images/logo.bmp"/>
+										<h:commandLink id="helpPage" action="#{LayoutBean.helpPage}">
+											<img src="./images/logo.bmp" border="0" alt="Pagina de ajutor"/>
+										</h:commandLink>
 									</td>
-									<td width="30%" align="left" valign="bottom">
+									<td align="left" valign="bottom">
 										#{general['header.main.label']}
 									</td>
 									<td width="50%" align="right" valign="bottom">
@@ -58,6 +60,9 @@
 									<td class="align-center">
 										<h:commandLink rendered="#{RightsBean.searchBugsRight}" id="searchBugsButton" action="SEARCH_BUGS_OUTCOME" value="#{general['horizontal.menu.search']}" styleClass="menu-link"/>
 									</td>
+									<td class="align-center">
+										<h:commandLink rendered="#{RightsBean.searchBugsRight}" id="savedFiltersButton" action="SAVED_FILTERS_OUTCOME" value="#{general['horizontal.menu.savedFilters']}" styleClass="menu-link"/>
+									</td>
 									<f:subview rendered="false">
 										<td class="align-center">
 											<h:commandLink rendered="#{RightsBean.enterNewBugRight}" id="myBugsButton" action="MY_BUGS_OUTCOME" value="#{general['horizontal.menu.myBugs']}" styleClass="menu-link"/>
@@ -75,9 +80,11 @@
 									<td class="align-center">
 										<h:commandLink rendered="#{RightsBean.defineVersionsRight}" id="versionsButton" action="VERSIONS_OUTCOME" value="#{general['horizontal.menu.versions']}" styleClass="menu-link"/>
 									</td>
-									<td class="align-center">
-										<h:commandLink rendered="#{RightsBean.defineAramarokOptionsRight}" id="sysOptionsButton" action="SYS_OPTIONS_OUTCOME" value="#{general['horizontal.menu.sysOptions']}" styleClass="menu-link"/>
-									</td>
+									<f:subview rendered="false">
+										<td class="align-center">
+											<h:commandLink rendered="#{RightsBean.defineAramarokOptionsRight}" id="sysOptionsButton" action="SYS_OPTIONS_OUTCOME" value="#{general['horizontal.menu.sysOptions']}" styleClass="menu-link"/>
+										</td>
+									</f:subview>
 									<td class="align-center">
 										<h:commandLink rendered="#{RightsBean.editOtherUsersRight}" id="usersButton" action="USERS_OUTCOME" value="#{general['horizontal.menu.users']}" styleClass="menu-link"/>
 									</td>

@@ -8,7 +8,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.ejb.Local;
 import javax.ejb.Stateless;
@@ -54,13 +56,13 @@ public class BugServiceBean implements BugService, Serializable {
 
 	private  static Logger log = Logger.getLogger(BugServiceBean.class);
 
-	public synchronized Long commitNewBug(Bug bug, User owner) throws PersistenceException, BugException {
+	public synchronized Long commitNewBug(Bug bug, User owner, Set<User> ccUsers) throws PersistenceException, BugException {
 		if (bug.getProduct() == null){
 			throw new BugProductException();
-		}
+		}/*
 		if (bug.getProductComponent() == null){
 			throw new BugComponentException();
-		}
+		}*/
 		if (bug.getSeverity() == null){
 			throw new BugSeverityException();
 		}
@@ -73,10 +75,12 @@ public class BugServiceBean implements BugService, Serializable {
 		
 		bug.setOpenDate(new Date());
 		bug.setOwner(owner);
+		bug.setCcUsers(ccUsers);
 		
 		EnumSet<BugAction> bugActions = EnumSet.noneOf(BugAction.class);
 		bugActions.add(BugAction.CREATE_NEW_BUG);
 		BugHistory bugHistory = new BugHistory(owner, bug.getOpenDate(), bugActions, BugGeneralStatus.NEW);
+		entityManager.persist(bugHistory);
 		bug.addBugHistory(bugHistory);
 		
 		entityManager.persist(bug);
@@ -94,13 +98,15 @@ public class BugServiceBean implements BugService, Serializable {
 		
 		EnumSet<BugAction> bugActions = EnumSet.noneOf(BugAction.class);
 		
-		if (bugDb.getStatus() != bug.getStatus()){ //status changed
-			if (	!logedInUser.hasRight(Right.EDIT_BUGS) ||
-					!(bug.getOwner().getId().compareTo(logedInUser.getId())==0) || 
+		if (bugDb.getStatus().name().compareTo(bug.getStatus().name())!=0){ //status changed
+			if (!logedInUser.hasRight(Right.EDIT_BUGS)){
+				if (!(bug.getOwner().getId().compareTo(logedInUser.getId())==0) || 
 					!(bug.getUserAssignedTo().getId().compareTo(logedInUser.getId())==0) || 
 					( (bug.getUserAssignedTo().getId().compareTo(logedInUser.getId())==0) && !logedInUser.hasRight(Right.CHANGE_BUG_STATUS))){
-				log.error("User does cannot change status of the bug. No enought rights.");
-				throw new UserHasNoRightException();
+					log.error("User does cannot change status of the bug. No enought rights.");
+					throw new UserHasNoRightException();
+				}
+				
 			}
 			
 			if (bugDb.getStatus() == BugGeneralStatus.NEW && bug.getStatus() == BugGeneralStatus.REOPENED){
@@ -188,6 +194,8 @@ public class BugServiceBean implements BugService, Serializable {
 			}
 		}
 		
+		System.out.println("addedToCC " + addedToCC+ "              removedFromCC " +removedFromCC);
+		
 		/*
 		if (bugDb.getCcUsers()==null && (bug.getCcUsers()!=null && bug.getCcUsers().size()>0)){
 			ccWasEdited = true;
@@ -198,10 +206,35 @@ public class BugServiceBean implements BugService, Serializable {
 		}
 		*/
 		
+		boolean componentChanged = false;
+		boolean versionChanged = false;
+		
+		if (bugDb.getProductComponent()!=null && bug.getProductComponent()!=null){
+			if (bugDb.getProductComponent().getId().compareTo(bug.getProductComponent().getId()) !=0){
+				componentChanged = true;
+			}
+		} else if (bugDb.getProductComponent()==null && bug.getProductComponent()!=null){
+			componentChanged = true;
+		} else if (bugDb.getProductComponent()!=null && bug.getProductComponent()==null){
+			componentChanged = true;
+		}
+		
+		if (bugDb.getComponentVersion()!=null && bug.getComponentVersion()!=null){
+			if (bugDb.getComponentVersion().getId().compareTo(bug.getComponentVersion().getId()) !=0){
+				versionChanged = true;
+			}
+		} else if (bugDb.getComponentVersion()==null && bug.getComponentVersion()!=null){
+			versionChanged = true;
+		} else if (bugDb.getComponentVersion()!=null && bug.getComponentVersion()==null){
+			versionChanged = true;
+		}
+		
 		if ( //bug edited
 				addedToCC || removedFromCC ||
-				bugDb.getProductComponent().getId().compareTo(bug.getProductComponent().getId()) !=0 ||
-				bugDb.getComponentVersion().getId().compareTo(bug.getComponentVersion().getId()) !=0 ||
+				//bugDb.getProductComponent().getId().compareTo(bug.getProductComponent().getId()) !=0 ||
+				componentChanged ||
+				//bugDb.getComponentVersion().getId().compareTo(bug.getComponentVersion().getId()) !=0 ||
+				versionChanged ||
 				bugDb.getOperatingSystem().getId().compareTo(bug.getOperatingSystem().getId()) !=0 ||
 				bugDb.getPlatform().getId().compareTo(bug.getPlatform().getId()) !=0 ||
 				bugDb.getPriority().getId().compareTo(bug.getPriority().getId()) !=0 ||
@@ -209,13 +242,14 @@ public class BugServiceBean implements BugService, Serializable {
 				bugDb.getObservedDate().compareTo(bug.getObservedDate()) != 0 ||
 				bugDb.getSummary().compareTo(bug.getSummary()) != 0 ||
 				bugDb.getDescription().compareTo(bug.getDescription()) != 0 ) {
-			if (	!logedInUser.hasRight(Right.EDIT_BUGS) ||
-					!(bug.getOwner().getId().compareTo(logedInUser.getId())==0) ||
+			if (!logedInUser.hasRight(Right.EDIT_BUGS)){
+				if(!(bug.getOwner().getId().compareTo(logedInUser.getId())==0) ||
 					( (bug.getOwner().getId().compareTo(logedInUser.getId())==0) && !logedInUser.hasRight(Right.EDIT_BUG) ) ||
 					!(bug.getUserAssignedTo().getId().compareTo(logedInUser.getId())==0) || 
 					( (bug.getUserAssignedTo().getId().compareTo(logedInUser.getId())==0) && !logedInUser.hasRight(Right.EDIT_BUG))){
-				log.error("User does cannot change status of the bug. No enought rights.");
-				throw new UserHasNoRightException();
+					log.error("User cannot edit the bug. No enought rights.");
+					throw new UserHasNoRightException();
+				}
 			}
 			
 			if (bug.getProductComponent() == null){
@@ -231,17 +265,29 @@ public class BugServiceBean implements BugService, Serializable {
 				throw new BugDescriptionException();
 			}
 			
-			bugDb.setCcUsers(bug.getCcUsers());
+			//bugDb.setCcUsers(bug.getCcUsers());
+			Set<User> ccUserForBugToSave = new HashSet<User>();
+			if (bug.getCcUsers()!=null){
+				for (User u :bug.getCcUsers()){
+					User uu = entityManager.find(User.class, u.getId());
+					ccUserForBugToSave.add(uu);
+				}
+				bugDb.setCcUsers(ccUserForBugToSave);
+			} else {
+				bugDb.setCcUsers(bug.getCcUsers());
+			}
+			
 			if (addedToCC){
 				bugActions.add(BugAction.ADD_USER_TO_CC);
 			} else if (removedFromCC){
 				bugActions.add(BugAction.REMOVE_USER_FROM_CC);
 			}
-			if (bugDb.getProductComponent().getId().compareTo(bug.getProductComponent().getId()) !=0){
+			
+			if (componentChanged){//bugDb.getProductComponent().getId().compareTo(bug.getProductComponent().getId()) !=0){
 				bugDb.setProductComponent(bug.getProductComponent());
 				bugActions.add(BugAction.CHANGE_PRODUCT_COMPONENT);
 			}
-			if (bugDb.getComponentVersion().getId().compareTo(bug.getComponentVersion().getId()) !=0){
+			if (versionChanged){//bugDb.getComponentVersion().getId().compareTo(bug.getComponentVersion().getId()) !=0){
 				bugDb.setComponentVersion(bug.getComponentVersion());
 				bugActions.add(BugAction.CHANGE_COMPONENT_VERSION);
 			}
@@ -306,9 +352,14 @@ public class BugServiceBean implements BugService, Serializable {
 		}
 		
 		BugHistory bugHistory = new BugHistory(logedInUser, new Date(), bugActions, bug.getStatus());
-		bug.addBugHistory(bugHistory);
+		entityManager.persist(bugHistory);
+		bugDb.addBugHistory(bugHistory);
 		
 		entityManager.flush();
+		
+		for (User u :bugDb.getCcUsers()){
+			System.out.println("+++++++++++"+u.getUserName());
+		}
 		
 		return bugDb.getId();
 	}
@@ -435,6 +486,7 @@ public class BugServiceBean implements BugService, Serializable {
 					case VOTES_DESC:queryStr.append(" order by b.votes desc");
 									break;
 					default: queryStr.append(" order by b.id asc");
+							break;
 				}
 			}
 		

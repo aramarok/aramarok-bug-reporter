@@ -32,7 +32,7 @@ public class NewBugSuccessfullyEnteredBean {
 	
 	public String viewBug(){
 		HttpSession session = WebUtil.getHttpSession();
-		session.setAttribute(WebUtil.BUG_ID_SELECTED_FOR_VIEWING, newBugEnteredId);
+		session.setAttribute(WebUtil.BUG_ID_SELECTED_FOR_VIEWING, String.valueOf(newBugEnteredId));
 		return WebUtil.VIEW_BUG_OUTCOME;
 	}
 }

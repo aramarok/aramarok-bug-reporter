@@ -3,8 +3,10 @@ package com.drey.aramarok.web;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import javax.faces.model.SelectItem;
 import javax.servlet.http.HttpSession;
@@ -48,6 +50,8 @@ public class NewBugEnterBean {
 	private String severity = "";
 	private String bugState = "";
 	private String assignedTo = "";
+	private String ccUsers = "";
+	private List<User> ccBugUsers = new ArrayList<User>();
 	private String summary = "";
 	private String description = "";
 	private Date dateObserved = new Date();
@@ -83,6 +87,10 @@ public class NewBugEnterBean {
 	private boolean userHasNoRight = false;
 	private boolean cannotChangeBugStatus = false;
 	private boolean componentVersionHasNoSolverAssigned = false;
+	private boolean ccUsersNotValid = false;
+	private String invalidUserNames = "";
+	private boolean assignedUserSameAsCCUser = false;
+	private String userNameAssignedSameAsCCUser = ""; 
 	
 	
 	public NewBugEnterBean(){
@@ -94,11 +102,11 @@ public class NewBugEnterBean {
 		
 		if (isValidData()){
 			
-			int componentVersionIndex = -1;
+			/*int componentVersionIndex = -1;
 			for (SelectItem s : componentVersionList_out){
 				if (s.getLabel().compareTo(componentVersion) == 0)
 					componentVersionIndex = componentVersionList_out.indexOf(s);
-			}
+			}*/
 			int platformIndex = -1;
 			for (SelectItem s : platformList_out){
 				if (s.getLabel().compareTo(platform) == 0)
@@ -130,13 +138,17 @@ public class NewBugEnterBean {
 					BugGeneralStatus.NEW,
 					productObject,
 					productComponentObject,
-					componentVersionList.get(componentVersionIndex-1),
+					componentVersionObject,
+					//componentVersionIndex!=-1?componentVersionList.get(componentVersionIndex-1):null,
 					platformList.get(platformIndex-1),
 					operatingSystemList.get(operatingSystemIndex-1),
 					priorityList.get(priorityIndex-1),
 					severityList.get(severityIndex-1),
 					null);
 			try {
+				Set<User> ccUsers = new HashSet<User>();
+				ccUsers.addAll(ccBugUsers);
+				bug.setCcUsers(ccUsers);
 				Long idBug = facade.commitBug(bug);
 				
 				HttpSession session = WebUtil.getHttpSession();
@@ -173,15 +185,19 @@ public class NewBugEnterBean {
 		summaryNotEntered = false;
 		descriptionNotEntered = false;
 		componentVersionHasNoSolverAssigned = false;
+		ccUsersNotValid = false;
+		invalidUserNames = "";
+		assignedUserSameAsCCUser = false;
+		userNameAssignedSameAsCCUser = "";
 		
-		if(	productComponent.trim().equals("")) {
+		/*if(	productComponent.trim().equals("")) {
 			validData = false;
 			componentNotSelected = true;
 		}
 		if(	componentVersion.trim().equals("")) {
 			validData = false;
 			versionNotSelected = true;
-		}
+		}*/
 		if(	operatingSystem.trim().equals("")) {
 			validData = false;
 			operatingSystemNotSelected = true;
@@ -210,8 +226,55 @@ public class NewBugEnterBean {
 			validData = false;
 			componentVersionHasNoSolverAssigned = true;
 		}
+		if (usersAreValid() == false){
+			validData = false;
+			ccUsersNotValid = true;
+		}
+		if (assignedUserSameAsCCUser==true){
+			validData = false;
+		}
 		
 		return validData;
+	}
+	
+	private boolean usersAreValid(){
+		
+		boolean validUsers = true;
+		
+		if (ccUsers!= null && ccUsers.trim().compareTo("")!=0){
+			String[] tokens = ccUsers.split(",");
+			int length = tokens.length;
+			if (length>0){
+				this.ccBugUsers = new ArrayList<User>();
+				DomainFacade facade= WebUtil.getDomainFacade();
+				for (int i=0; i<length; i++){
+					String userName = tokens[i].trim();
+					try {
+						User u = facade.getUser(userName, false);
+						if (u==null){
+							validUsers = false;
+							if (this.invalidUserNames.trim().compareTo("")==0){
+								this.invalidUserNames +=userName;
+							} else {
+								this.invalidUserNames += ", " +userName;
+							}
+						} else {
+							if (userAssignedToObject.getUserName().compareTo(u.getUserName())==0){
+								this.assignedUserSameAsCCUser = true;
+								this.userNameAssignedSameAsCCUser = u.getUserName();
+							} else {
+								this.ccBugUsers.add(u);
+							}
+						}
+					} catch (ExternalSystemException e){
+						log.error("ExternalSystemException");
+						validUsers = false;
+					}
+				}
+			}
+		}
+		
+		return validUsers;
 	}
 	
 	public String getLoadData(){
@@ -446,31 +509,46 @@ public class NewBugEnterBean {
 	}
 	
 	private void initialize(){
+		DomainFacade facade = WebUtil.getDomainFacade();
 		reporterUserName = WebUtil.getUser().getUserName();
 		productName = productObject.getName();
-		for (ProductComponent pc: productObject.getProductComponents()){
-			if (pc.getName().compareTo(productComponent) == 0)
-				productComponentObject = pc;
-		}
-		createComponentVersionLists();
-		if (productComponentObject != null) {
-			for (ComponentVersion cv: productComponentObject.getVersions()){
-				if (cv.getName().compareTo(componentVersion) == 0)
-					componentVersionObject = cv;
-			}
-		}
-		if (componentVersionObject!=null) {
-			if (componentVersionObject.getUserAssigned()!=null){
-				userAssignedToObject = componentVersionObject.getUserAssigned();
-				assignedTo = userAssignedToObject.getUserName();
-			} else {
-				userAssignedToObject = null;
-				assignedTo = "";
+		
+		if (productComponent!=null && productComponent.trim()!=""){
+			try {
+				productComponentObject = facade.getProductComponent(productComponent);
+			} catch (ExternalSystemException e) {
+				log.error("ExternalSystemException");
+				productComponentObject = null;
 			}
 		} else {
-			userAssignedToObject = null;
+			productComponentObject = null;
+		}
+		
+		createComponentVersionLists();
+		
+		if (componentVersion!=null && componentVersion.trim()!=""){
+			try {
+				componentVersionObject = facade.getComponentVersion(componentVersion);
+			} catch (ExternalSystemException e) {
+				log.error("ExternalSystemException");
+				componentVersionObject = null;
+			}
+		} else {
+			componentVersionObject = null;
+		}
+				
+		try {
+			userAssignedToObject = facade.getUserAssignedForSubmittingBug(componentVersionObject!=null?componentVersionObject.getId():null, productComponentObject!=null?productComponentObject.getId():null, productObject!=null?productObject.getId():null);
+			if (userAssignedToObject!=null){
+				assignedTo = userAssignedToObject.getUserName();
+			} else {
+				assignedTo = "";
+			}
+		} catch (ExternalSystemException e) {
+			log.error("ExternalSystemException");
 			assignedTo = "";
 		}
+		
 		
 		bugState = BugGeneralStatus.NEW.name();
 	}
@@ -724,4 +802,41 @@ public class NewBugEnterBean {
 			boolean componentVersionHasNoSolverAssigned) {
 		this.componentVersionHasNoSolverAssigned = componentVersionHasNoSolverAssigned;
 	}
+
+	public String getCcUsers() {
+		return ccUsers;
+	}
+
+	public void setCcUsers(String ccUsers) {
+		this.ccUsers = ccUsers;
+	}
+
+	public boolean isCcUsersNotValid() {
+		return ccUsersNotValid;
+	}
+
+	public void setCcUsersNotValid(boolean ccUsersNotValid) {
+		this.ccUsersNotValid = ccUsersNotValid;
+	}
+
+	public String getInvalidUserNames() {
+		return invalidUserNames;
+	}
+
+	public boolean isAssignedUserSameAsCCUser() {
+		return assignedUserSameAsCCUser;
+	}
+
+	public void setAssignedUserSameAsCCUser(boolean assignedUserSameAsCCUser) {
+		this.assignedUserSameAsCCUser = assignedUserSameAsCCUser;
+	}
+
+	public String getUserNameAssignedSameAsCCUser() {
+		return userNameAssignedSameAsCCUser;
+	}
+
+	public void setUserNameAssignedSameAsCCUser(String userNameAssignedSameAsCCUser) {
+		this.userNameAssignedSameAsCCUser = userNameAssignedSameAsCCUser;
+	}
+
 }
